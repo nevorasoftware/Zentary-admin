@@ -212,13 +212,24 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditingUser(null);
   };
 
+  // Email Delivery Feedback Banner State
+  const [emailStatus, setEmailStatus] = useState<{
+    state: 'IDLE' | 'SENDING' | 'SUCCESS' | 'ERROR';
+    message?: string;
+    details?: string;
+  }>({ state: 'IDLE' });
+
   const handleSendGmailApi = async (targetEmail: string, targetName: string) => {
     setIsSendingEmail(true);
+    setEmailStatus({ state: 'SENDING', message: 'Conectando con la API de Gmail en Railway...' });
 
     try {
       const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/resend-credentials', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
         body: JSON.stringify({
           email: targetEmail,
           fullName: targetName,
@@ -230,13 +241,28 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       setIsSendingEmail(false);
 
       if (data.success) {
-        showToast(`✉️ Correo enviado exitosamente vía Gmail API a ${targetEmail}`, 'success');
+        setEmailStatus({
+          state: 'SUCCESS',
+          message: '¡CORREO ENVIADO CON ÉXITO!',
+          details: `El mensaje fue entregado a ${targetEmail} a través de la API de Gmail.`,
+        });
+        showToast(`✉️ Correo enviado exitosamente a ${targetEmail}`, 'success');
       } else {
-        showToast(`⚠️ Estado: Correo generado. ${data.message}`, 'info');
+        setEmailStatus({
+          state: 'ERROR',
+          message: 'NO SE PUDO ENVIAR EL CORREO POR GMAIL',
+          details: data.message || 'Por favor verifica que la variable GMAIL_APP_PASSWORD esté configurada en Railway.',
+        });
+        showToast(`❌ ${data.message || 'Falló el envío de correo por Gmail.'}`, 'error');
       }
-    } catch (error) {
+    } catch (error: any) {
       setIsSendingEmail(false);
-      showToast(`✉️ Intento de envío enviado a ${targetEmail}. (Verifica que GMAIL_APP_PASSWORD esté configurado en Railway)`, 'info');
+      setEmailStatus({
+        state: 'ERROR',
+        message: 'ERROR DE CONEXIÓN CON EL SERVIDOR',
+        details: 'No se pudo contactar la API del Backend en Railway.',
+      });
+      showToast('❌ Error de conexión al intentar enviar correo.', 'error');
     }
   };
 
@@ -722,6 +748,27 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </button>
               </div>
             </div>
+
+            {/* Visual Status Indicator for Email Dispatch */}
+            {emailStatus.state !== 'IDLE' && (
+              <div
+                className={`p-3.5 rounded-2xl border text-xs space-y-1 transition-all ${
+                  emailStatus.state === 'SENDING'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                    : emailStatus.state === 'SUCCESS'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                    : 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                }`}
+              >
+                <div className="font-bold flex items-center gap-2">
+                  {emailStatus.state === 'SENDING' && <Sparkles className="w-4 h-4 text-blue-400 animate-spin" />}
+                  {emailStatus.state === 'SUCCESS' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                  {emailStatus.state === 'ERROR' && <AlertCircle className="w-4 h-4 text-rose-400" />}
+                  <span>{emailStatus.message}</span>
+                </div>
+                {emailStatus.details && <p className="opacity-90">{emailStatus.details}</p>}
+              </div>
+            )}
 
             <p className="text-xs text-slate-400">
               Utiliza los botones a continuación para transmitir automáticamente las credenciales al inquilino:
