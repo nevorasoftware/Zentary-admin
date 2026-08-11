@@ -186,7 +186,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditPhone(user.phone || '');
   };
 
-  const handleSaveEditedTenant = (e: React.FormEvent) => {
+  const handleSaveEditedTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser || !editFullName || !editUnitNumber || !editEmail) return;
 
@@ -195,18 +195,37 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         if (u.id === editingUser.id) {
           return {
             ...u,
-            fullName: editFullName,
-            email: editEmail,
-            phone: editPhone,
+            fullName: editFullName || u.fullName,
+            email: editEmail || u.email,
+            phone: editPhone !== undefined ? editPhone : u.phone,
             property: {
-              unitNumber: editUnitNumber,
-              block: editBlock || undefined,
+              unitNumber: editUnitNumber || u.property?.unitNumber || '119D',
+              block: editBlock !== undefined ? editBlock : u.property?.block,
             },
           };
         }
         return u;
       })
     );
+
+    try {
+      await fetch(`https://zentary-backend-production.up.railway.app/api/admin/tenants/${editingUser.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
+        body: JSON.stringify({
+          fullName: editFullName,
+          email: editEmail,
+          phone: editPhone,
+          unitNumber: editUnitNumber,
+          block: editBlock,
+        }),
+      });
+    } catch (err) {
+      console.warn('Backend update failed:', err);
+    }
 
     showToast(`Información del inquilino ${editFullName} actualizada correctamente.`, 'success');
     setEditingUser(null);
@@ -219,7 +238,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     details?: string;
   }>({ state: 'IDLE' });
 
-  const handleSendGmailApi = async (targetEmail: string, targetName: string) => {
+  const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string) => {
     setIsSendingEmail(true);
     setEmailStatus({ state: 'SENDING', message: 'Conectando con la API de Gmail en Railway...' });
 
@@ -233,6 +252,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         body: JSON.stringify({
           email: targetEmail,
           fullName: targetName,
+          unitNumber: targetUnit || '119D',
           communityName,
         }),
       });
@@ -244,7 +264,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         setEmailStatus({
           state: 'SUCCESS',
           message: '¡CORREO ENVIADO CON ÉXITO!',
-          details: `El mensaje fue entregado a ${targetEmail} a través de la API de Gmail.`,
+          details: `El mensaje fue entregado a ${targetEmail}`,
         });
         showToast(`✉️ Correo enviado exitosamente a ${targetEmail}`, 'success');
       } else {
@@ -785,7 +805,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </a>
 
               <button
-                onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName)}
+                onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName, createdTenantInfo.unitNumber)}
                 disabled={isSendingEmail}
                 className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
