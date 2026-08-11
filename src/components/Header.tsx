@@ -19,9 +19,23 @@ export const Header: React.FC<HeaderProps> = ({
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(communityName);
 
-  const handleSaveName = () => {
+  const handleSaveName = async () => {
     if (tempName.trim() && onUpdateCommunityName) {
-      onUpdateCommunityName(tempName.trim());
+      const updatedName = tempName.trim();
+      onUpdateCommunityName(updatedName);
+
+      try {
+        await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer admin_demo_token',
+          },
+          body: JSON.stringify({ name: updatedName }),
+        });
+      } catch (err) {
+        console.warn('Failed to update community name in backend:', err);
+      }
     }
     setIsEditingName(false);
   };

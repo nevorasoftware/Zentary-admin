@@ -14,6 +14,24 @@ export default function App() {
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  React.useEffect(() => {
+    fetchCommunityConfig();
+  }, []);
+
+  const fetchCommunityConfig = async () => {
+    try {
+      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+        headers: { 'Authorization': 'Bearer admin_demo_token' },
+      });
+      const data = await res.json();
+      if (data.success && data.community?.name) {
+        setCommunityName(data.community.name);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch community config from DB:', err);
+    }
+  };
+
   const getViewMetadata = () => {
     switch (currentView) {
       case 'dashboard':

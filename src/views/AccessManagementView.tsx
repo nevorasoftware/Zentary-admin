@@ -160,10 +160,34 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
   };
 
+  const formatPhoneElSalvador = (val: string) => {
+    const digits = val.replace(/\D/g, '');
+    if (digits.length === 0) return '';
+    let mainDigits = digits;
+    if (digits.startsWith('503') && digits.length > 3) {
+      mainDigits = digits.slice(3);
+    }
+    if (mainDigits.length <= 4) {
+      return `+503 ${mainDigits}`;
+    }
+    return `+503 ${mainDigits.slice(0, 4)}-${mainDigits.slice(4, 8)}`;
+  };
+
+  const isValidEmail = (emailStr: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr.trim());
+  };
+
   const handleRegisterTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !unitNumber || !email) return;
 
+    if (!isValidEmail(email)) {
+      showToast('⚠️ Por favor ingresa un correo electrónico válido (ej. correo@ejemplo.com).', 'error');
+      return;
+    }
+
+    const finalBlock = block.trim() !== '' ? block : communityName;
+    const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '+503 6148-9595';
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
@@ -178,9 +202,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         body: JSON.stringify({
           fullName,
           unitNumber,
-          block: block || undefined,
+          block: finalBlock,
           email,
-          phone: phone || '61489595',
+          phone: finalPhone,
           communityName,
         }),
       });
@@ -199,15 +223,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       console.warn('DB register error:', err);
     }
 
-    const cleanPhone = phone.replace(/[^\d]/g, '');
-    const messageText = `Hola ${fullName}, bienvenido a ${communityName}. Se ha creado tu acceso a la aplicación móvil Zentary.\n\n` +
-      `📌 Unidad: ${unitNumber} ${block ? `(${block})` : ''}\n` +
+    const cleanPhoneDigits = finalPhone.replace(/[^\d]/g, '');
+    const messageText = `Hola ${fullName}, bienvenido a ${communityName}.\n\n` +
+      `📌 Unidad: ${unitNumber} (${finalBlock})\n` +
       `📧 Correo: ${email}\n` +
       `🔑 Contraseña inicial: ${genericPassword}\n\n` +
       `Por tu seguridad, al iniciar sesión la app te solicitará actualizar tu contraseña.`;
 
-    const whatsappLink = cleanPhone
-      ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`
+    const whatsappLink = cleanPhoneDigits
+      ? `https://api.whatsapp.com/send?phone=${cleanPhoneDigits}&text=${encodeURIComponent(messageText)}`
       : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
 
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
@@ -215,7 +239,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setCreatedTenantInfo({
       fullName,
       email,
-      phone: phone || '61489595',
+      phone: finalPhone,
       unitNumber,
       genericPassword,
       whatsappLink,
@@ -243,6 +267,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const handleSaveEditedTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser || !editFullName || !editUnitNumber || !editEmail) return;
+
+    if (!isValidEmail(editEmail)) {
+      showToast('⚠️ Por favor ingresa un correo electrónico válido (ej. correo@ejemplo.com).', 'error');
+      return;
+    }
 
     setUsers((prev) =>
       prev.map((u) => {
@@ -587,7 +616,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. Jonathan Giron"
+                  placeholder="Ej. Juan Pérez"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -602,7 +631,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. 119D"
+                    placeholder="Ej. 101-A"
                     value={unitNumber}
                     onChange={(e) => setUnitNumber(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -615,7 +644,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. Residencia Zentary"
+                    placeholder={`Ej. ${communityName}`}
                     value={block}
                     onChange={(e) => setBlock(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -629,7 +658,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="email"
-                  placeholder="misaelgrande@gmail.com"
+                  placeholder="correo@ejemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -643,9 +672,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. 61489595"
+                  placeholder="Ej. +503 6198-9999"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => setPhone(formatPhoneElSalvador(e.target.value))}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 font-mono"
                   required
                 />
@@ -740,6 +769,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="email"
+                  placeholder="correo@ejemplo.com"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -753,8 +783,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="text"
+                  placeholder="Ej. +503 6198-9999"
                   value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
+                  onChange={(e) => setEditPhone(formatPhoneElSalvador(e.target.value))}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 font-mono"
                   required
                 />
