@@ -14,6 +14,9 @@ import {
   Copy,
   RotateCcw,
   Sparkles,
+  Edit3,
+  AlertCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { ResidentUser } from '../services/adminApi';
 
@@ -71,7 +74,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
 
-  // Tenant Modal States
+  // Tenant Register Modal States
   const [showAddModal, setShowAddModal] = useState(false);
   const [fullName, setFullName] = useState('');
   const [unitNumber, setUnitNumber] = useState('');
@@ -79,7 +82,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  // Tenant Edit Modal States
+  const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
+  const [editFullName, setEditFullName] = useState('');
+  const [editUnitNumber, setEditUnitNumber] = useState('');
+  const [editBlock, setEditBlock] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
 
   // Credentials Success Modal State
   const [createdTenantInfo, setCreatedTenantInfo] = useState<{
@@ -93,9 +104,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     mailtoLink: string;
   } | null>(null);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4000);
+  const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 5000);
   };
 
   const handleToggleAccess = (userId: string) => {
@@ -114,7 +125,6 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     e.preventDefault();
     if (!fullName || !unitNumber || !email) return;
 
-    // Generate generic initial password based on unit
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
@@ -122,7 +132,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       id: `u-${Date.now()}`,
       fullName,
       email,
-      phone: phone || '+503 6148-9595',
+      phone: phone || '61489595',
       role: 'RESIDENT',
       isActive: true,
       mustChangePassword: true,
@@ -132,7 +142,6 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
     setUsers([newUser, ...users]);
 
-    // Build notification message text
     const cleanPhone = phone.replace(/[^\d]/g, '');
     const messageText = `Hola ${fullName}, bienvenido a ${communityName}. Se ha creado tu acceso a la aplicación móvil Zentary.\n\n` +
       `📌 Unidad: ${unitNumber} ${block ? `(${block})` : ''}\n` +
@@ -157,7 +166,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       mailtoLink,
     });
 
-    showToast(`✉️ Correo de bienvenido preparado para ${email} mediante la API de Gmail.`);
+    showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
 
     // Reset Form
     setFullName('');
@@ -168,12 +177,67 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setShowAddModal(false);
   };
 
-  const handleSendGmailApi = (targetEmail: string, targetName: string) => {
+  const handleOpenEditModal = (user: ExtendedUser) => {
+    setEditingUser(user);
+    setEditFullName(user.fullName);
+    setEditUnitNumber(user.property?.unitNumber || '');
+    setEditBlock(user.property?.block || '');
+    setEditEmail(user.email);
+    setEditPhone(user.phone || '');
+  };
+
+  const handleSaveEditedTenant = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser || !editFullName || !editUnitNumber || !editEmail) return;
+
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === editingUser.id) {
+          return {
+            ...u,
+            fullName: editFullName,
+            email: editEmail,
+            phone: editPhone,
+            property: {
+              unitNumber: editUnitNumber,
+              block: editBlock || undefined,
+            },
+          };
+        }
+        return u;
+      })
+    );
+
+    showToast(`Información del inquilino ${editFullName} actualizada correctamente.`, 'success');
+    setEditingUser(null);
+  };
+
+  const handleSendGmailApi = async (targetEmail: string, targetName: string) => {
     setIsSendingEmail(true);
-    setTimeout(() => {
+
+    try {
+      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/resend-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: targetEmail,
+          fullName: targetName,
+          communityName,
+        }),
+      });
+
+      const data = await response.json();
       setIsSendingEmail(false);
-      showToast(`✉️ Correo enviado exitosamente vía Gmail API a ${targetEmail}`);
-    }, 1200);
+
+      if (data.success) {
+        showToast(`✉️ Correo enviado exitosamente vía Gmail API a ${targetEmail}`, 'success');
+      } else {
+        showToast(`⚠️ Estado: Correo generado. ${data.message}`, 'info');
+      }
+    } catch (error) {
+      setIsSendingEmail(false);
+      showToast(`✉️ Intento de envío enviado a ${targetEmail}. (Verifica que GMAIL_APP_PASSWORD esté configurado en Railway)`, 'info');
+    }
   };
 
   const handleResendCredentialsForUser = (user: ExtendedUser) => {
@@ -204,7 +268,6 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       mailtoLink,
     });
 
-    // Mark mustChangePassword true
     setUsers((prev) =>
       prev.map((u) => (u.id === user.id ? { ...u, mustChangePassword: true } : u))
     );
@@ -223,11 +286,23 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Toast Notification */}
+      {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed top-24 right-8 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400 animate-bounce">
-          <Sparkles className="w-5 h-5 text-amber-300" />
-          <span className="text-xs font-bold">{toastMessage}</span>
+        <div
+          className={`fixed top-24 right-8 z-50 px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border transition-all animate-bounce ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-600 text-white border-emerald-400'
+              : toastMessage.type === 'error'
+              ? 'bg-rose-600 text-white border-rose-400'
+              : 'bg-amber-600 text-white border-amber-400'
+          }`}
+        >
+          {toastMessage.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 text-white" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-white" />
+          )}
+          <span className="text-xs font-bold">{toastMessage.text}</span>
         </div>
       )}
 
@@ -239,7 +314,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             Habilitación y Control de Inquilinos en {communityName}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Registra nuevos inquilinos, reenvía accesos por Gmail API o WhatsApp y administra el estado de sus cuentas.
+            Registra nuevos inquilinos, edita su información, reenvía accesos por Gmail API o WhatsApp y administra el estado de sus cuentas.
           </p>
         </div>
 
@@ -304,8 +379,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <th className="px-6 py-4">Unidad</th>
                 <th className="px-6 py-4">Teléfono / WhatsApp</th>
                 <th className="px-6 py-4">Estado Clave</th>
-                <th className="px-6 py-4">Reenviar Credenciales</th>
-                <th className="px-6 py-4 text-right">Acción Control</th>
+                <th className="px-6 py-4">Acciones Credenciales</th>
+                <th className="px-6 py-4 text-right">Opciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
@@ -361,16 +436,28 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
 
                   <td className="px-6 py-4 text-right">
-                    <button
-                      onClick={() => handleToggleAccess(user.id)}
-                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
-                        user.isActive
-                          ? 'bg-slate-800 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30'
-                          : 'bg-emerald-600 text-white hover:bg-emerald-500'
-                      }`}
-                    >
-                      {user.isActive ? 'Bloquear Acceso' : 'Permitir Acceso'}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Editar Inquilino Button */}
+                      <button
+                        onClick={() => handleOpenEditModal(user)}
+                        className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-all"
+                        title="Editar información del inquilino"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+
+                      {/* Bloquear / Habilitar Acceso Button */}
+                      <button
+                        onClick={() => handleToggleAccess(user.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+                          user.isActive
+                            ? 'bg-slate-800 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                        }`}
+                      >
+                        {user.isActive ? 'Bloquear' : 'Permitir'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -428,7 +515,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. Torre B o Manzana A"
+                    placeholder="Ej. Residencia Zentary"
                     value={block}
                     onChange={(e) => setBlock(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -493,6 +580,106 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         </div>
       )}
 
+      {/* Modal: Editar Inquilino */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-blue-500" />
+                Editar Información de Inquilino
+              </h3>
+              <button onClick={() => setEditingUser(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditedTenant} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Nombre Completo *
+                </label>
+                <input
+                  type="text"
+                  value={editFullName}
+                  onChange={(e) => setEditFullName(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Número de Unidad *
+                  </label>
+                  <input
+                    type="text"
+                    value={editUnitNumber}
+                    onChange={(e) => setEditUnitNumber(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Bloque / Manzana / Torre
+                  </label>
+                  <input
+                    type="text"
+                    value={editBlock}
+                    onChange={(e) => setEditBlock(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Correo Electrónico *
+                </label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Teléfono / WhatsApp *
+                </label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 font-mono"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingUser(null)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal: Confirmación Éxito & Envío por WhatsApp / Gmail API */}
       {createdTenantInfo && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
@@ -526,7 +713,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(createdTenantInfo.genericPassword);
-                    showToast('📋 Contraseña copiada al portapapeles.');
+                    showToast('📋 Contraseña copiada al portapapeles.', 'info');
                   }}
                   className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
                   title="Copiar contraseña"
@@ -556,7 +743,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <Mail className="w-4 h-4" />
-                {isSendingEmail ? 'Enviando vía Gmail...' : 'Enviar por Correo (Gmail)'}
+                {isSendingEmail ? 'Enviando correo...' : 'Enviar por Correo (Gmail)'}
               </button>
             </div>
 
