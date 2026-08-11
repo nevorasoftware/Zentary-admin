@@ -12,42 +12,43 @@ import PaymentsView from './views/PaymentsView';
 export default function App() {
   const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getViewMetadata = () => {
     switch (currentView) {
       case 'dashboard':
         return {
-          title: 'Panel de Control Principal',
-          subtitle: `Resumen en tiempo real de operaciones y accesos en ${communityName}`,
+          title: 'Panel Principal',
+          subtitle: `Resumen en tiempo real de operaciones en ${communityName}`,
         };
       case 'access':
         return {
-          title: 'Habilitación de Inquilinos y Accesos',
-          subtitle: `Registrar inquilinos, enviar credenciales por WhatsApp/Email y administrar accesos en ${communityName}`,
+          title: 'Control de Usuarios',
+          subtitle: `Registrar inquilinos y administrar accesos en ${communityName}`,
         };
       case 'announcements':
         return {
-          title: 'Envío y Difusión de Anuncios',
-          subtitle: `Publicar comunicados y avisos en los celulares de los residentes de ${communityName}`,
+          title: 'Envío de Anuncios',
+          subtitle: `Publicar comunicados en los celulares de los residentes de ${communityName}`,
         };
       case 'visits':
         return {
-          title: 'Control de Garita y Validación QR',
+          title: 'Garita y Pases QR',
           subtitle: `Monitoreo de ingresos de visitantes y vehículos en ${communityName}`,
         };
       case 'parcels':
         return {
-          title: 'Recepcionar Paquetes en Garita',
-          subtitle: `Registro de encomiendas de DHL, FedEx, UPS, Cargo Express y Trans Express para ${communityName}`,
+          title: 'Recepción Paquetes',
+          subtitle: `Registro de encomiendas de DHL, FedEx, UPS para ${communityName}`,
         };
       case 'pqrs':
         return {
-          title: 'Soporte y Atención de PQRS',
-          subtitle: `Responder peticiones, quejas, reclamos y solicitudes de los residentes de ${communityName}`,
+          title: 'Soporte y PQRS',
+          subtitle: `Responder peticiones y quejas de los residentes de ${communityName}`,
         };
       case 'payments':
         return {
-          title: 'Gestión de Pagos y Mantenimiento',
+          title: 'Gestión de Pagos',
           subtitle: `Emisión de cuotas y seguimiento de transacciones en ${communityName}`,
         };
       default:
@@ -82,11 +83,13 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
-      {/* Navigation Sidebar */}
+    <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans relative overflow-x-hidden">
+      {/* Responsive Navigation Sidebar */}
       <Sidebar
         currentView={currentView}
         onSelectView={(view) => setCurrentView(view)}
+        isOpenMobile={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Main Layout Container */}
@@ -96,10 +99,11 @@ export default function App() {
           subtitle={metadata.subtitle}
           communityName={communityName}
           onUpdateCommunityName={(newName) => setCommunityName(newName)}
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
         />
 
         {/* Dynamic View Page Body */}
-        <main className="p-8 flex-1 overflow-y-auto">{renderViewContent()}</main>
+        <main className="p-4 md:p-8 flex-1 overflow-y-auto">{renderViewContent()}</main>
       </div>
     </div>
   );
