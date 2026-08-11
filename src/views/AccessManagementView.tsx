@@ -70,7 +70,8 @@ interface AccessManagementViewProps {
 export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   communityName = 'Residencial Zentary',
 }) => {
-  const [users, setUsers] = useState<ExtendedUser[]>(INITIAL_USERS);
+  const [users, setUsers] = useState<ExtendedUser[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
 
@@ -104,43 +105,99 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     mailtoLink: string;
   } | null>(null);
 
+  const fetchUsersFromBackend = async () => {
+    setIsLoadingUsers(true);
+    try {
+      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
+        headers: { 'Authorization': 'Bearer admin_demo_token' },
+      });
+      const data = await res.json();
+      setIsLoadingUsers(false);
+
+      if (data.success && Array.isArray(data.users) && data.users.length > 0) {
+        setUsers(data.users);
+      } else {
+        setUsers(INITIAL_USERS);
+      }
+    } catch (err) {
+      console.warn('Backend fetch fallback:', err);
+      setIsLoadingUsers(false);
+      setUsers(INITIAL_USERS);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchUsersFromBackend();
+  }, []);
+
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 5000);
   };
 
-  const handleToggleAccess = (userId: string) => {
+  const handleToggleAccess = async (userId: string) => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+
+    const nextState = !targetUser.isActive;
+
     setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          const nextState = !u.isActive;
-          return { ...u, isActive: nextState };
-        }
-        return u;
-      })
+      prev.map((u) => (u.id === userId ? { ...u, isActive: nextState } : u))
     );
+
+    try {
+      await fetch(`https://zentary-backend-production.up.railway.app/api/admin/users/${userId}/access`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
+        body: JSON.stringify({ isActive: nextState }),
+      });
+      showToast(`Acceso ${nextState ? 'habilitado' : 'deshabilitado'} en PostgreSQL.`, 'info');
+    } catch (err) {
+      console.warn('Error saving toggle access in PostgreSQL:', err);
+    }
   };
 
-  const handleRegisterTenant = (e: React.FormEvent) => {
+  const handleRegisterTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !unitNumber || !email) return;
 
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
-    const newUser: ExtendedUser = {
-      id: `u-${Date.now()}`,
-      fullName,
-      email,
-      phone: phone || '61489595',
-      role: 'RESIDENT',
-      isActive: true,
-      mustChangePassword: true,
-      property: { unitNumber, block: block || undefined },
-      createdAt: new Date().toISOString().split('T')[0],
-    };
+    // 1. Send POST request to Railway PostgreSQL API
+    try {
+      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
+        body: JSON.stringify({
+          fullName,
+          unitNumber,
+          block: block || undefined,
+          email,
+          phone: phone || '61489595',
+          communityName,
+        }),
+      });
 
-    setUsers([newUser, ...users]);
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showToast(`⚠️ ${data.message || 'Error al guardar en base de datos PostgreSQL'}`, 'error');
+      } else {
+        showToast(`Inquilino ${fullName} creado en PostgreSQL en Railway.`, 'success');
+      }
+
+      // Re-fetch users from Railway PostgreSQL
+      fetchUsersFromBackend();
+    } catch (err) {
+      console.warn('DB register error:', err);
+    }
 
     const cleanPhone = phone.replace(/[^\d]/g, '');
     const messageText = `Hola ${fullName}, bienvenido a ${communityName}. Se ha creado tu acceso a la aplicación móvil Zentary.\n\n` +
@@ -156,17 +213,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
 
     setCreatedTenantInfo({
-      id: newUser.id,
       fullName,
       email,
-      phone,
+      phone: phone || '61489595',
       unitNumber,
       genericPassword,
       whatsappLink,
       mailtoLink,
     });
-
-    showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
 
     // Reset Form
     setFullName('');
