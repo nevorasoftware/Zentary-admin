@@ -9,7 +9,6 @@ import {
   CreditCard,
   Building2,
   LogOut,
-  Sliders,
 } from 'lucide-react';
 
 export type AdminViewType =
@@ -20,6 +19,14 @@ export type AdminViewType =
   | 'parcels'
   | 'pqrs'
   | 'payments';
+
+interface MenuItem {
+  id: AdminViewType;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  badgeNum?: number;
+}
 
 interface SidebarProps {
   currentView: AdminViewType;
@@ -34,7 +41,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   openPqrsCount = 3,
   pendingParcelsCount = 4,
 }) => {
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users, badge: 'Pro' },
     { id: 'announcements', label: 'Envío de Anuncios', icon: Megaphone },
@@ -42,7 +49,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'parcels', label: 'Recepcionar Paquetes', icon: Package, badgeNum: pendingParcelsCount },
     { id: 'pqrs', label: 'Soporte y PQRS', icon: MessageSquare, badgeNum: openPqrsCount },
     { id: 'payments', label: 'Gestión de Pagos', icon: CreditCard },
-  ] as const;
+  ];
 
   return (
     <aside className="w-72 glass-sidebar flex flex-col justify-between h-screen sticky top-0 z-30 select-none">
@@ -66,7 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             return (
               <button
                 key={item.id}
-                onClick={() => onSelectView(item.id as AdminViewType)}
+                onClick={() => onSelectView(item.id)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
                   isActive
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold translate-x-1'
