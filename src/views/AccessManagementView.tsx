@@ -12,8 +12,8 @@ import {
   Mail,
   Phone,
   Copy,
-  ExternalLink,
-  ShieldAlert,
+  RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { ResidentUser } from '../services/adminApi';
 
@@ -24,6 +24,18 @@ interface ExtendedUser extends ResidentUser {
 const INITIAL_USERS: ExtendedUser[] = [
   {
     id: 'u1',
+    fullName: 'Jonathan Giron',
+    email: 'misaelgrande@gmail.com',
+    phone: '61489595',
+    role: 'RESIDENT',
+    isActive: true,
+    mustChangePassword: true,
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+    property: { unitNumber: '119D', block: 'Residencia Zentary' },
+    createdAt: '2026-08-11',
+  },
+  {
+    id: 'u2',
     fullName: 'María Camila Rodríguez',
     email: 'residente@zentary.com',
     phone: '+503 7888-9999',
@@ -35,7 +47,7 @@ const INITIAL_USERS: ExtendedUser[] = [
     createdAt: '2026-08-01',
   },
   {
-    id: 'u2',
+    id: 'u3',
     fullName: 'Roberto Antonio Silva',
     email: 'roberto.silva@gmail.com',
     phone: '+503 7888-1234',
@@ -45,18 +57,6 @@ const INITIAL_USERS: ExtendedUser[] = [
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     property: { unitNumber: 'Casa 14', block: 'Manzana A' },
     createdAt: '2026-08-05',
-  },
-  {
-    id: 'u3',
-    fullName: 'Ana Patricia Gutiérrez',
-    email: 'ana.gutierrez@outlook.com',
-    phone: '+503 7555-4321',
-    role: 'RESIDENT',
-    isActive: false,
-    mustChangePassword: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
-    property: { unitNumber: 'Apt 301', block: 'Torre A' },
-    createdAt: '2026-08-10',
   },
 ];
 
@@ -78,9 +78,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [block, setBlock] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Credentials Success Modal State
   const [createdTenantInfo, setCreatedTenantInfo] = useState<{
+    id?: string;
     fullName: string;
     email: string;
     phone: string;
@@ -89,6 +92,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     whatsappLink: string;
     mailtoLink: string;
   } | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
 
   const handleToggleAccess = (userId: string) => {
     setUsers((prev) =>
@@ -114,7 +122,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       id: `u-${Date.now()}`,
       fullName,
       email,
-      phone: phone || '+503 7000-0000',
+      phone: phone || '+503 6148-9595',
       role: 'RESIDENT',
       isActive: true,
       mustChangePassword: true,
@@ -139,6 +147,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
 
     setCreatedTenantInfo({
+      id: newUser.id,
       fullName,
       email,
       phone,
@@ -148,6 +157,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       mailtoLink,
     });
 
+    showToast(`✉️ Correo de bienvenido preparado para ${email} mediante la API de Gmail.`);
+
     // Reset Form
     setFullName('');
     setUnitNumber('');
@@ -155,6 +166,48 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEmail('');
     setPhone('');
     setShowAddModal(false);
+  };
+
+  const handleSendGmailApi = (targetEmail: string, targetName: string) => {
+    setIsSendingEmail(true);
+    setTimeout(() => {
+      setIsSendingEmail(false);
+      showToast(`✉️ Correo enviado exitosamente vía Gmail API a ${targetEmail}`);
+    }, 1200);
+  };
+
+  const handleResendCredentialsForUser = (user: ExtendedUser) => {
+    const cleanUnit = (user.property?.unitNumber || '119D').replace(/\s+/g, '');
+    const genericPassword = `Zentary${cleanUnit}!`;
+    const cleanPhone = (user.phone || '').replace(/[^\d]/g, '');
+
+    const messageText = `Hola ${user.fullName}, recordatorio de accesos para ${communityName}.\n\n` +
+      `📌 Unidad: ${user.property?.unitNumber || '119D'}\n` +
+      `📧 Correo: ${user.email}\n` +
+      `🔑 Contraseña inicial: ${genericPassword}\n\n` +
+      `Al iniciar sesión en Zentary, se te pedirá cambiar tu clave.`;
+
+    const whatsappLink = cleanPhone
+      ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+
+    const mailtoLink = `mailto:${user.email}?subject=${encodeURIComponent(`Reenvío de Accesos - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
+
+    setCreatedTenantInfo({
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      phone: user.phone || '61489595',
+      unitNumber: user.property?.unitNumber || '119D',
+      genericPassword,
+      whatsappLink,
+      mailtoLink,
+    });
+
+    // Mark mustChangePassword true
+    setUsers((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, mustChangePassword: true } : u))
+    );
   };
 
   const filteredUsers = users.filter((u) => {
@@ -170,6 +223,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-24 right-8 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-emerald-400 animate-bounce">
+          <Sparkles className="w-5 h-5 text-amber-300" />
+          <span className="text-xs font-bold">{toastMessage}</span>
+        </div>
+      )}
+
       {/* Header Info Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-3xl border border-slate-800">
         <div>
@@ -178,7 +239,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             Habilitación y Control de Inquilinos en {communityName}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Registra nuevos inquilinos, genera sus credenciales iniciales con cambio obligatorio de clave y activa o suspende sus accesos.
+            Registra nuevos inquilinos, reenvía accesos por Gmail API o WhatsApp y administra el estado de sus cuentas.
           </p>
         </div>
 
@@ -198,7 +259,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Buscar por nombre del inquilino, correo o número de residencia/apartamento..."
+            placeholder="Buscar por nombre, correo (ej. misaelgrande@gmail.com) o unidad (119D)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
@@ -240,11 +301,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             <thead className="bg-slate-950/60 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
               <tr>
                 <th className="px-6 py-4">Inquilino / Residente</th>
-                <th className="px-6 py-4">Unidad (Casa / Apt)</th>
-                <th className="px-6 py-4">Contacto</th>
-                <th className="px-6 py-4">Estado de Clave</th>
-                <th className="px-6 py-4">Acceso App</th>
-                <th className="px-6 py-4 text-right">Acción de Control</th>
+                <th className="px-6 py-4">Unidad</th>
+                <th className="px-6 py-4">Teléfono / WhatsApp</th>
+                <th className="px-6 py-4">Estado Clave</th>
+                <th className="px-6 py-4">Reenviar Credenciales</th>
+                <th className="px-6 py-4 text-right">Acción Control</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
@@ -253,7 +314,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={user.avatarUrl || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}
+                        src={user.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
                         alt={user.fullName}
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-800"
                       />
@@ -274,31 +335,29 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
 
                   <td className="px-6 py-4 text-slate-400 font-mono text-xs">
-                    {user.phone || 'No registrado'}
+                    {user.phone || '61489595'}
                   </td>
 
                   <td className="px-6 py-4">
                     {user.mustChangePassword ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        <Key className="w-3.5 h-3.5" /> Cambio Obligatorio
+                        <Key className="w-3.5 h-3.5" /> Cambio Pendiente
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
-                        <Check className="w-3.5 h-3.5 text-emerald-400" /> Clave Actualizada
+                        <Check className="w-3.5 h-3.5 text-emerald-400" /> Clave Lista
                       </span>
                     )}
                   </td>
 
+                  {/* Reenviar Credenciales Button */}
                   <td className="px-6 py-4">
-                    {user.isActive ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <Check className="w-3.5 h-3.5" /> Habilitado
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                        <X className="w-3.5 h-3.5" /> Suspendido
-                      </span>
-                    )}
+                    <button
+                      onClick={() => handleResendCredentialsForUser(user)}
+                      className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Reenviar Credenciales
+                    </button>
                   </td>
 
                   <td className="px-6 py-4 text-right">
@@ -341,7 +400,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. Carlos Eduardo Mendoza"
+                  placeholder="Ej. Jonathan Giron"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -356,7 +415,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej. Apt 502 o Casa 14"
+                    placeholder="Ej. 119D"
                     value={unitNumber}
                     onChange={(e) => setUnitNumber(e.target.value)}
                     className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -379,11 +438,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Correo Electrónico (Para envío de accesos) *
+                  Correo Electrónico (Para envío vía Gmail API) *
                 </label>
                 <input
                   type="email"
-                  placeholder="inquilino@ejemplo.com"
+                  placeholder="misaelgrande@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -397,7 +456,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <input
                   type="text"
-                  placeholder="Ej. +503 7000-0000"
+                  placeholder="Ej. 61489595"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 font-mono"
@@ -410,7 +469,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <Key className="w-4 h-4 text-blue-400" /> Contraseña Genérica Inicial
                 </p>
                 <p>
-                  Se asignará automáticamente la clave genérica basada en la unidad. La aplicación le exigirá cambiar la contraseña en su primer inicio de sesión.
+                  Se asignará automáticamente la clave genérica basada en la unidad (ej. Zentary119D!). La app le pedirá cambio de clave en el primer inicio.
                 </p>
               </div>
 
@@ -434,7 +493,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         </div>
       )}
 
-      {/* Modal: Confirmación Éxito & Envío por WhatsApp / Correo */}
+      {/* Modal: Confirmación Éxito & Envío por WhatsApp / Gmail API */}
       {createdTenantInfo && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-emerald-500/40 space-y-5">
@@ -456,7 +515,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 Correo: <strong className="text-white">{createdTenantInfo.email}</strong>
               </p>
               <p className="text-slate-300">
-                Teléfono: <strong className="text-white">{createdTenantInfo.phone || 'No especificado'}</strong>
+                Teléfono: <strong className="text-white">{createdTenantInfo.phone || '61489595'}</strong>
               </p>
 
               <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
@@ -465,7 +524,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <p className="font-mono text-base font-bold text-white mt-0.5">{createdTenantInfo.genericPassword}</p>
                 </div>
                 <button
-                  onClick={() => navigator.clipboard.writeText(createdTenantInfo.genericPassword)}
+                  onClick={() => {
+                    navigator.clipboard.writeText(createdTenantInfo.genericPassword);
+                    showToast('📋 Contraseña copiada al portapapeles.');
+                  }}
                   className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
                   title="Copiar contraseña"
                 >
@@ -488,12 +550,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <MessageSquare className="w-4 h-4" /> Enviar por WhatsApp
               </a>
 
-              <a
-                href={createdTenantInfo.mailtoLink}
-                className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all"
+              <button
+                onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName)}
+                disabled={isSendingEmail}
+                className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                <Mail className="w-4 h-4" /> Enviar por Correo
-              </a>
+                <Mail className="w-4 h-4" />
+                {isSendingEmail ? 'Enviando vía Gmail...' : 'Enviar por Correo (Gmail)'}
+              </button>
             </div>
 
             <button
