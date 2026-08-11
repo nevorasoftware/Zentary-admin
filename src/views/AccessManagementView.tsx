@@ -1,15 +1,35 @@
 import React, { useState } from 'react';
-import { Users, Search, UserCheck, UserX, Shield, Building2, Check, X, Filter } from 'lucide-react';
+import {
+  Users,
+  Search,
+  UserPlus,
+  Building2,
+  Check,
+  X,
+  Send,
+  MessageSquare,
+  Key,
+  Mail,
+  Phone,
+  Copy,
+  ExternalLink,
+  ShieldAlert,
+} from 'lucide-react';
 import { ResidentUser } from '../services/adminApi';
 
-const INITIAL_USERS: ResidentUser[] = [
+interface ExtendedUser extends ResidentUser {
+  mustChangePassword?: boolean;
+}
+
+const INITIAL_USERS: ExtendedUser[] = [
   {
     id: 'u1',
     fullName: 'María Camila Rodríguez',
     email: 'residente@zentary.com',
-    phone: '+503 7000-0000',
+    phone: '+503 7888-9999',
     role: 'RESIDENT',
     isActive: true,
+    mustChangePassword: true,
     avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
     property: { unitNumber: 'Apt 502', block: 'Torre B' },
     createdAt: '2026-08-01',
@@ -21,6 +41,7 @@ const INITIAL_USERS: ResidentUser[] = [
     phone: '+503 7888-1234',
     role: 'RESIDENT',
     isActive: true,
+    mustChangePassword: false,
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
     property: { unitNumber: 'Casa 14', block: 'Manzana A' },
     createdAt: '2026-08-05',
@@ -31,17 +52,43 @@ const INITIAL_USERS: ResidentUser[] = [
     email: 'ana.gutierrez@outlook.com',
     phone: '+503 7555-4321',
     role: 'RESIDENT',
-    isActive: false, // Pending approval / Access Disabled
+    isActive: false,
+    mustChangePassword: true,
     avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
     property: { unitNumber: 'Apt 301', block: 'Torre A' },
     createdAt: '2026-08-10',
   },
 ];
 
-export const AccessManagementView: React.FC = () => {
-  const [users, setUsers] = useState<ResidentUser[]>(INITIAL_USERS);
+interface AccessManagementViewProps {
+  communityName?: string;
+}
+
+export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
+  communityName = 'Residencial Zentary',
+}) => {
+  const [users, setUsers] = useState<ExtendedUser[]>(INITIAL_USERS);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+
+  // Tenant Modal States
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [unitNumber, setUnitNumber] = useState('');
+  const [block, setBlock] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  // Credentials Success Modal State
+  const [createdTenantInfo, setCreatedTenantInfo] = useState<{
+    fullName: string;
+    email: string;
+    phone: string;
+    unitNumber: string;
+    genericPassword: string;
+    whatsappLink: string;
+    mailtoLink: string;
+  } | null>(null);
 
   const handleToggleAccess = (userId: string) => {
     setUsers((prev) =>
@@ -53,6 +100,61 @@ export const AccessManagementView: React.FC = () => {
         return u;
       })
     );
+  };
+
+  const handleRegisterTenant = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName || !unitNumber || !email) return;
+
+    // Generate generic initial password based on unit
+    const cleanUnit = unitNumber.replace(/\s+/g, '');
+    const genericPassword = `Zentary${cleanUnit}!`;
+
+    const newUser: ExtendedUser = {
+      id: `u-${Date.now()}`,
+      fullName,
+      email,
+      phone: phone || '+503 7000-0000',
+      role: 'RESIDENT',
+      isActive: true,
+      mustChangePassword: true,
+      property: { unitNumber, block: block || undefined },
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    setUsers([newUser, ...users]);
+
+    // Build notification message text
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+    const messageText = `Hola ${fullName}, bienvenido a ${communityName}. Se ha creado tu acceso a la aplicación móvil Zentary.\n\n` +
+      `📌 Unidad: ${unitNumber} ${block ? `(${block})` : ''}\n` +
+      `📧 Correo: ${email}\n` +
+      `🔑 Contraseña inicial: ${genericPassword}\n\n` +
+      `Por tu seguridad, al iniciar sesión la app te solicitará actualizar tu contraseña.`;
+
+    const whatsappLink = cleanPhone
+      ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(messageText)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
+
+    setCreatedTenantInfo({
+      fullName,
+      email,
+      phone,
+      unitNumber,
+      genericPassword,
+      whatsappLink,
+      mailtoLink,
+    });
+
+    // Reset Form
+    setFullName('');
+    setUnitNumber('');
+    setBlock('');
+    setEmail('');
+    setPhone('');
+    setShowAddModal(false);
   };
 
   const filteredUsers = users.filter((u) => {
@@ -68,23 +170,45 @@ export const AccessManagementView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Info */}
+      {/* Header Info Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-3xl border border-slate-800">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Users className="w-5 h-5 text-blue-500" />
-            Habilitación y Control de Accesos
+            Habilitación y Control de Inquilinos en {communityName}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Desde este panel puedes aprobar, activar o suspender el acceso de residentes a la aplicación móvil Zentary.
+            Registra nuevos inquilinos, genera sus credenciales iniciales con cambio obligatorio de clave y activa o suspende sus accesos.
           </p>
         </div>
 
-        {/* Status Filters */}
-        <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
+          >
+            <UserPlus className="w-5 h-5" /> Registrar Nuevo Inquilino
+          </button>
+        </div>
+      </div>
+
+      {/* Filters and Search Bar */}
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="relative flex-1 w-full">
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            placeholder="Buscar por nombre del inquilino, correo o número de residencia/apartamento..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 w-full md:w-auto justify-center">
           <button
             onClick={() => setFilterStatus('ALL')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'ALL' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -92,7 +216,7 @@ export const AccessManagementView: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterStatus('ACTIVE')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'ACTIVE' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -100,7 +224,7 @@ export const AccessManagementView: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterStatus('INACTIVE')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'INACTIVE' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -109,28 +233,17 @@ export const AccessManagementView: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Input */}
-      <div className="relative">
-        <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          placeholder="Buscar por nombre, correo electrónico o número de apartamento/unidad..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
-        />
-      </div>
-
       {/* Users Table */}
       <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-950/60 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
               <tr>
-                <th className="px-6 py-4">Residente</th>
-                <th className="px-6 py-4">Propiedad / Unidad</th>
-                <th className="px-6 py-4">Teléfono</th>
-                <th className="px-6 py-4">Estado de Acceso</th>
+                <th className="px-6 py-4">Inquilino / Residente</th>
+                <th className="px-6 py-4">Unidad (Casa / Apt)</th>
+                <th className="px-6 py-4">Contacto</th>
+                <th className="px-6 py-4">Estado de Clave</th>
+                <th className="px-6 py-4">Acceso App</th>
                 <th className="px-6 py-4 text-right">Acción de Control</th>
               </tr>
             </thead>
@@ -165,13 +278,25 @@ export const AccessManagementView: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4">
+                    {user.mustChangePassword ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                        <Key className="w-3.5 h-3.5" /> Cambio Obligatorio
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                        <Check className="w-3.5 h-3.5 text-emerald-400" /> Clave Actualizada
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-6 py-4">
                     {user.isActive ? (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        <Check className="w-3.5 h-3.5" /> Acceso Permitido
+                        <Check className="w-3.5 h-3.5" /> Habilitado
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                        <X className="w-3.5 h-3.5" /> Acceso Suspendido
+                        <X className="w-3.5 h-3.5" /> Suspendido
                       </span>
                     )}
                   </td>
@@ -185,7 +310,7 @@ export const AccessManagementView: React.FC = () => {
                           : 'bg-emerald-600 text-white hover:bg-emerald-500'
                       }`}
                     >
-                      {user.isActive ? 'Deshabilitar Acceso' : 'Habilitar Acceso'}
+                      {user.isActive ? 'Bloquear Acceso' : 'Permitir Acceso'}
                     </button>
                   </td>
                 </tr>
@@ -194,6 +319,192 @@ export const AccessManagementView: React.FC = () => {
           </table>
         </div>
       </div>
+
+      {/* Modal: Formulario para Registrar Nuevo Inquilino */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-blue-500" />
+                Registrar Nuevo Inquilino / Residente
+              </h3>
+              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterTenant} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Nombre Completo del Inquilino *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Carlos Eduardo Mendoza"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Número de Unidad *
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Apt 502 o Casa 14"
+                    value={unitNumber}
+                    onChange={(e) => setUnitNumber(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                    Bloque / Manzana / Torre
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Torre B o Manzana A"
+                    value={block}
+                    onChange={(e) => setBlock(e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Correo Electrónico (Para envío de accesos) *
+                </label>
+                <input
+                  type="email"
+                  placeholder="inquilino@ejemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Número de Teléfono / WhatsApp *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. +503 7000-0000"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 font-mono"
+                  required
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 space-y-1">
+                <p className="font-bold flex items-center gap-1.5 text-blue-200">
+                  <Key className="w-4 h-4 text-blue-400" /> Contraseña Genérica Inicial
+                </p>
+                <p>
+                  Se asignará automáticamente la clave genérica basada en la unidad. La aplicación le exigirá cambiar la contraseña en su primer inicio de sesión.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md"
+                >
+                  Registrar e Ir a Enviar Accesos
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Confirmación Éxito & Envío por WhatsApp / Correo */}
+      {createdTenantInfo && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-emerald-500/40 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Check className="w-5 h-5 text-emerald-400" />
+                ¡Inquilino Creado Exitosamente!
+              </h3>
+              <button onClick={() => setCreatedTenantInfo(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2 text-sm">
+              <p className="text-slate-300">
+                Residente: <strong className="text-white">{createdTenantInfo.fullName}</strong> ({createdTenantInfo.unitNumber})
+              </p>
+              <p className="text-slate-300">
+                Correo: <strong className="text-white">{createdTenantInfo.email}</strong>
+              </p>
+              <p className="text-slate-300">
+                Teléfono: <strong className="text-white">{createdTenantInfo.phone || 'No especificado'}</strong>
+              </p>
+
+              <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wider text-amber-400 font-bold">Contraseña Genérica Asignada</p>
+                  <p className="font-mono text-base font-bold text-white mt-0.5">{createdTenantInfo.genericPassword}</p>
+                </div>
+                <button
+                  onClick={() => navigator.clipboard.writeText(createdTenantInfo.genericPassword)}
+                  className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
+                  title="Copiar contraseña"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Utiliza los botones a continuación para transmitir automáticamente las credenciales al inquilino:
+            </p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <a
+                href={createdTenantInfo.whatsappLink}
+                target="_blank"
+                rel="noreferrer"
+                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
+              >
+                <MessageSquare className="w-4 h-4" /> Enviar por WhatsApp
+              </a>
+
+              <a
+                href={createdTenantInfo.mailtoLink}
+                className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all"
+              >
+                <Mail className="w-4 h-4" /> Enviar por Correo
+              </a>
+            </div>
+
+            <button
+              onClick={() => setCreatedTenantInfo(null)}
+              className="w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-white border border-slate-800 rounded-xl"
+            >
+              Cerrar y Volver a la Lista
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
