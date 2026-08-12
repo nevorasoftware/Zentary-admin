@@ -6,18 +6,58 @@ interface DashboardViewProps {
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
-  const stats = [
-    { title: 'Residentes Activos', value: '142', change: '+12% este mes', icon: Users, color: 'from-blue-600 to-indigo-600' },
-    { title: 'Visitas en Curso', value: '18', change: '8 ingresaron hoy', icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
-    { title: 'Paquetes en Garita', value: '7', change: '3 retirados hoy', icon: Package, color: 'from-amber-600 to-orange-600' },
-    { title: 'PQRS Abiertas', value: '4', change: '2 de alta prioridad', icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
-    { title: 'Cobros del Mes', value: '$12,450.00', change: '84% recolectado', icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
-  ];
+  const [statsData, setStatsData] = React.useState({
+    totalUsers: 0,
+    activeVisits: 0,
+    pendingParcels: 0,
+    openPqrs: 3,
+    totalPayments: '$12,450.00',
+  });
+  const [recentVisits, setRecentVisits] = React.useState<any[]>([]);
 
-  const recentVisits = [
-    { id: 'v1', visitor: 'Carlos Eduardo Mendoza', resident: 'María Camila (Apt 502)', plate: 'P 452-910', status: 'IN_PROGRESS', time: '10:42 AM' },
-    { id: 'v2', visitor: 'Uber Eats - Repartidor', resident: 'Roberto Silva (Torre B 104)', plate: 'M 182-300', status: 'IN_PROGRESS', time: '10:15 AM' },
-    { id: 'v3', visitor: 'Técnico de Cable / Internet', resident: 'Ana Gutiérrez (Casa 12)', plate: 'P 992-104', status: 'COMPLETED', time: '09:00 AM' },
+  React.useEffect(() => {
+    fetchDashboardMetrics();
+  }, []);
+
+  const fetchDashboardMetrics = async () => {
+    try {
+      const token = localStorage.getItem('zentary_admin_token') || 'admin_demo_token';
+      const [usersRes, visitsRes, parcelsRes] = await Promise.all([
+        fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).then((r) => r.json()).catch(() => ({ users: [] })),
+        fetch('https://zentary-backend-production.up.railway.app/api/admin/visits', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).then((r) => r.json()).catch(() => ({ visits: [] })),
+        fetch('https://zentary-backend-production.up.railway.app/api/admin/parcels', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        }).then((r) => r.json()).catch(() => ({ parcels: [] })),
+      ]);
+
+      const users = usersRes.users || [];
+      const visits = visitsRes.visits || [];
+      const parcels = parcelsRes.parcels || [];
+
+      setStatsData({
+        totalUsers: users.length,
+        activeVisits: visits.filter((v: any) => v.status === 'IN_PROGRESS').length,
+        pendingParcels: parcels.filter((p: any) => p.status === 'PENDING').length,
+        openPqrs: 3,
+        totalPayments: '$12,450.00',
+      });
+
+      setRecentVisits(visits.slice(0, 5));
+    } catch (err) {
+      console.warn('Dashboard fetch error:', err);
+    }
+  };
+
+  const stats = [
+    { title: 'Residentes Activos', value: `${statsData.totalUsers}`, change: 'Base de Datos PostgreSQL', icon: Users, color: 'from-blue-600 to-indigo-600' },
+    { title: 'Visitas en Curso', value: `${statsData.activeVisits}`, change: 'Pases Garita / QR', icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
+    { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', icon: Package, color: 'from-amber-600 to-orange-600' },
+    { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: 'Atención residente', icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
+    { title: 'Cobros del Mes', value: statsData.totalPayments, change: '84% recolectado', icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
   ];
 
   return (
@@ -91,31 +131,43 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           <div className="divide-y divide-slate-800">
-            {recentVisits.map((v) => (
-              <div key={v.id} className="py-3.5 flex items-center justify-between hover:bg-slate-800/30 px-2 rounded-xl transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
-                    {v.visitor.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{v.visitor}</p>
-                    <p className="text-xs text-slate-400">Visita a: {v.resident} • Placa: {v.plate}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${
-                      v.status === 'IN_PROGRESS'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-slate-800 text-slate-400'
-                    }`}
-                  >
-                    {v.status === 'IN_PROGRESS' ? 'En Curso' : 'Completado'}
-                  </span>
-                  <p className="text-[11px] text-slate-500 mt-1">{v.time}</p>
-                </div>
+            {recentVisits.length === 0 ? (
+              <div className="py-8 text-center text-xs text-slate-500">
+                No hay visitas registradas aún en la base de datos de PostgreSQL.
               </div>
-            ))}
+            ) : (
+              recentVisits.map((v) => {
+                const visitorName = v.visitorName || v.visitor || 'Visitante';
+                const residentName = v.resident?.fullName || v.resident || 'Residente';
+                const plate = v.vehiclePlate || v.plate || 'Sin Placa';
+                const status = v.status || 'IN_PROGRESS';
+
+                return (
+                  <div key={v.id} className="py-3.5 flex items-center justify-between hover:bg-slate-800/30 px-2 rounded-xl transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                        {visitorName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-white">{visitorName}</p>
+                        <p className="text-xs text-slate-400">Visita a: {residentName} • Placa: {plate}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${
+                          status === 'IN_PROGRESS'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {status === 'IN_PROGRESS' ? 'En Curso' : 'Completado'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

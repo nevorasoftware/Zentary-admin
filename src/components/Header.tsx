@@ -7,6 +7,13 @@ interface HeaderProps {
   communityName?: string;
   onUpdateCommunityName?: (newName: string) => void;
   onOpenMobileMenu?: () => void;
+  adminUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+    avatarUrl?: string;
+  } | null;
+  onOpenEditProfile?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -15,6 +22,8 @@ export const Header: React.FC<HeaderProps> = ({
   communityName = 'Residencial Zentary',
   onUpdateCommunityName,
   onOpenMobileMenu,
+  adminUser,
+  onOpenEditProfile,
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(communityName);
@@ -39,6 +48,8 @@ export const Header: React.FC<HeaderProps> = ({
     }
     setIsEditingName(false);
   };
+
+  const avatar = adminUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
 
   return (
     <header className="min-h-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 md:px-8 py-3 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-4">
@@ -121,6 +132,15 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
           <span>Railway API</span>
         </div>
+
+        {/* Admin Avatar Button to edit profile */}
+        <button
+          onClick={onOpenEditProfile}
+          className="p-1 rounded-full border border-blue-500/30 hover:border-blue-400 transition-all"
+          title="Editar Perfil de Administrador"
+        >
+          <img src={avatar} alt="Admin Avatar" className="w-8 h-8 rounded-full object-cover" />
+        </button>
       </div>
     </header>
   );

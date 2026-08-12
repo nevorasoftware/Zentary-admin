@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar, { AdminViewType } from './components/Sidebar';
 import Header from './components/Header';
 import DashboardView from './views/DashboardView';
@@ -8,20 +8,38 @@ import VisitsLogView from './views/VisitsLogView';
 import ParcelsView from './views/ParcelsView';
 import PqrsSupportView from './views/PqrsSupportView';
 import PaymentsView from './views/PaymentsView';
+import LoginView from './views/LoginView';
+import EditProfileModal from './components/EditProfileModal';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
-  React.useEffect(() => {
-    fetchCommunityConfig();
-  }, []);
+  // Authentication State
+  const [adminToken, setAdminToken] = useState<string | null>(() => {
+    return localStorage.getItem('zentary_admin_token');
+  });
+
+  const [adminUser, setAdminUser] = useState<any>(() => {
+    const saved = localStorage.getItem('zentary_admin_user');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { return null; }
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (adminToken) {
+      fetchCommunityConfig();
+    }
+  }, [adminToken]);
 
   const fetchCommunityConfig = async () => {
     try {
       const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
-        headers: { 'Authorization': 'Bearer admin_demo_token' },
+        headers: { 'Authorization': `Bearer ${adminToken || 'admin_demo_token'}` },
       });
       const data = await res.json();
       if (data.success && data.community?.name) {
@@ -31,6 +49,36 @@ export default function App() {
       console.warn('Failed to fetch community config from DB:', err);
     }
   };
+
+  const handleLoginSuccess = (user: any, token: string) => {
+    localStorage.setItem('zentary_admin_token', token);
+    localStorage.setItem('zentary_admin_user', JSON.stringify(user));
+    setAdminToken(token);
+    setAdminUser(user);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('zentary_admin_token');
+    localStorage.removeItem('zentary_admin_user');
+    setAdminToken(null);
+    setAdminUser(null);
+  };
+
+  const handleProfileUpdated = (updatedUser: any) => {
+    const mergedUser = { ...adminUser, ...updatedUser };
+    setAdminUser(mergedUser);
+    localStorage.setItem('zentary_admin_user', JSON.stringify(mergedUser));
+  };
+
+  // If Admin is not logged in, render Login screen
+  if (!adminToken) {
+    return (
+      <LoginView
+        communityName={communityName}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
+  }
 
   const getViewMetadata = () => {
     switch (currentView) {
@@ -108,6 +156,9 @@ export default function App() {
         onSelectView={(view) => setCurrentView(view)}
         isOpenMobile={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
+        adminUser={adminUser}
+        onOpenEditProfile={() => setIsEditProfileOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Layout Container */}
@@ -118,11 +169,23 @@ export default function App() {
           communityName={communityName}
           onUpdateCommunityName={(newName) => setCommunityName(newName)}
           onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+          adminUser={adminUser}
+          onOpenEditProfile={() => setIsEditProfileOpen(true)}
         />
 
         {/* Dynamic View Page Body */}
         <main className="p-4 md:p-8 flex-1 overflow-y-auto">{renderViewContent()}</main>
       </div>
+
+      {/* Admin Edit Profile Modal */}
+      {isEditProfileOpen && adminUser && (
+        <EditProfileModal
+          currentUser={adminUser}
+          token={adminToken}
+          onClose={() => setIsEditProfileOpen(false)}
+          onProfileUpdated={handleProfileUpdated}
+        />
+      )}
     </div>
   );
 }

@@ -36,6 +36,14 @@ interface SidebarProps {
   pendingParcelsCount?: number;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
+  adminUser?: {
+    id: string;
+    fullName: string;
+    email: string;
+    avatarUrl?: string;
+  } | null;
+  onOpenEditProfile?: () => void;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -45,6 +53,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   pendingParcelsCount = 4,
   isOpenMobile = false,
   onCloseMobile,
+  adminUser,
+  onOpenEditProfile,
+  onLogout,
 }) => {
   const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
@@ -62,6 +73,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       onCloseMobile();
     }
   };
+
+  const avatar = adminUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+  const name = adminUser?.fullName || 'Administración Zentary';
+  const email = adminUser?.email || 'admin@zentary.com';
 
   return (
     <>
@@ -145,19 +160,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Admin Profile Footer */}
         <div className="p-4 m-4 rounded-2xl bg-slate-800/40 border border-slate-800/80">
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <button
+              onClick={onOpenEditProfile}
+              className="relative group focus:outline-none"
+              title="Editar Perfil"
+            >
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"
+                src={avatar}
                 alt="Admin"
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/50"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/50 group-hover:ring-blue-400 transition-all"
               />
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-slate-900" />
+            </button>
+            <div
+              onClick={onOpenEditProfile}
+              className="flex-1 min-w-0 cursor-pointer group"
+            >
+              <p className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
+                {name}
+              </p>
+              <p className="text-xs text-slate-400 truncate">{email}</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">Administración Zentary</p>
-              <p className="text-xs text-slate-400 truncate">admin@zentary.com</p>
-            </div>
-            <button className="text-slate-400 hover:text-rose-400 p-1.5 transition-colors" title="Cerrar sesión">
+            <button
+              onClick={onLogout}
+              className="text-slate-400 hover:text-rose-400 p-1.5 transition-colors rounded-lg hover:bg-slate-800"
+              title="Cerrar sesión"
+            >
               <LogOut className="w-5 h-5" />
             </button>
           </div>
