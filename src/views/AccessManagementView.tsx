@@ -184,7 +184,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         if (onUpdateCommunityName) {
           onUpdateCommunityName(commNameInput.trim());
         }
-        showToast('🏢 Residencial (Tabla Community) actualizada exitosamente en PostgreSQL.', 'success');
+        showToast('🏢 Información de la Residencial actualizada exitosamente.', 'success');
         setShowCommunityModal(false);
       } else {
         showToast(`⚠️ ${data.message || 'Error al actualizar Residencial'}`, 'error');
@@ -192,7 +192,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     } catch (err) {
       setIsSavingCommunity(false);
       console.error('Save community error:', err);
-      showToast('❌ Error al conectar con el servidor para actualizar la Residencial.', 'error');
+      showToast('❌ Ocurrió un error al actualizar los datos de la Residencial.', 'error');
     }
   };
 
@@ -220,9 +220,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         },
         body: JSON.stringify({ isActive: nextState }),
       });
-      showToast(`Acceso ${nextState ? 'habilitado' : 'deshabilitado'} en PostgreSQL.`, 'info');
+      showToast(`Acceso ${nextState ? 'habilitado' : 'deshabilitado'} correctamente.`, 'info');
     } catch (err) {
-      console.warn('Error saving toggle access in PostgreSQL:', err);
+      console.warn('Error saving toggle access:', err);
     }
   };
 
@@ -257,7 +257,6 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
-    // 1. Send POST request to Railway PostgreSQL API
     try {
       const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants', {
         method: 'POST',
@@ -278,12 +277,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showToast(`⚠️ ${data.message || 'Error al guardar en base de datos PostgreSQL'}`, 'error');
+        showToast(`⚠️ ${data.message || 'Error al registrar el inquilino.'}`, 'error');
       } else {
-        showToast(`Inquilino ${fullName} creado en PostgreSQL en Railway.`, 'success');
+        showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
       }
 
-      // Re-fetch users from Railway PostgreSQL
       fetchUsersFromBackend();
     } catch (err) {
       console.warn('DB register error:', err);
@@ -389,7 +387,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string) => {
     setIsSendingEmail(true);
-    setEmailStatus({ state: 'SENDING', message: 'Conectando con la API de Gmail en Railway...' });
+    setEmailStatus({ state: 'SENDING', message: 'Enviando correo de accesos...' });
 
     try {
       const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/resend-credentials', {
@@ -419,17 +417,17 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       } else {
         setEmailStatus({
           state: 'ERROR',
-          message: 'NO SE PUDO ENVIAR EL CORREO POR GMAIL',
-          details: data.message || 'Por favor verifica que la variable GMAIL_APP_PASSWORD esté configurada en Railway.',
+          message: 'NO SE PUDO ENVIAR EL CORREO',
+          details: data.message || 'No se pudo enviar el correo automático. Intenta nuevamente o transmite las credenciales por WhatsApp.',
         });
-        showToast(`❌ ${data.message || 'Falló el envío de correo por Gmail.'}`, 'error');
+        showToast(`❌ ${data.message || 'No se pudo enviar el correo.'}`, 'error');
       }
     } catch (error: any) {
       setIsSendingEmail(false);
       setEmailStatus({
         state: 'ERROR',
-        message: 'ERROR DE CONEXIÓN CON EL SERVIDOR',
-        details: 'No se pudo contactar la API del Backend en Railway.',
+        message: 'ERROR DE CONEXIÓN',
+        details: 'No se pudo contactar el servidor en este momento.',
       });
       showToast('❌ Error de conexión al intentar enviar correo.', 'error');
     }
@@ -509,7 +507,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             Habilitación y Control de Inquilinos en {communityName}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Registra nuevos inquilinos, edita su información, reenvía accesos por Gmail API o WhatsApp y administra la datos de la Residencial (Tabla Community).
+            Registra nuevos inquilinos, edita su información, reenvía accesos por correo o WhatsApp y gestiona los datos de la Residencial.
           </p>
         </div>
 
@@ -517,7 +515,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           <button
             onClick={() => setShowCommunityModal(true)}
             className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
-            title="Editar nombre, dirección y ciudad de la Residencial en la base de datos (Tabla Community)"
+            title="Editar nombre, dirección y ubicación de la Residencial"
           >
             <Building2 className="w-4.5 h-4.5 text-amber-400" />
             <span>Editar Residencial</span>
@@ -727,10 +725,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
                 <p className="font-bold flex items-center gap-1.5 text-amber-200">
-                  <Building2 className="w-4 h-4 text-amber-400" /> Persistencia Real en PostgreSQL (Tabla Community)
+                  <Building2 className="w-4 h-4 text-amber-400" /> Información Oficial de la Residencial
                 </p>
                 <p>
-                  Al guardar, este nombre se actualizará en toda la consola de administración y en los correos y mensajes generados.
+                  Al guardar, este nombre se actualizará en toda la consola de administración, comprobantes y mensajes enviados a los inquilinos.
                 </p>
               </div>
 
@@ -747,7 +745,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   disabled={isSavingCommunity}
                   className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isSavingCommunity ? 'Guardando en BD...' : 'Guardar Datos de Residencial'}
+                  {isSavingCommunity ? 'Guardando...' : 'Guardar Datos de Residencial'}
                 </button>
               </div>
             </form>
@@ -814,7 +812,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                  Correo Electrónico (Para envío vía Gmail API) *
+                  Correo Electrónico *
                 </label>
                 <input
                   type="email"
@@ -842,10 +840,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div className="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-blue-300 space-y-1">
                 <p className="font-bold flex items-center gap-1.5 text-blue-200">
-                  <Key className="w-4 h-4 text-blue-400" /> Contraseña Genérica Inicial
+                  <Key className="w-4 h-4 text-blue-400" /> Contraseña Inicial de Ingreso
                 </p>
                 <p>
-                  Se asignará automáticamente la clave genérica basada en la unidad (ej. Zentary119D!). La app le pedirá cambio de clave en el primer inicio.
+                  Se generará una contraseña inicial temporal basada en la unidad (ej. Zentary119D!). El residente la actualizará al ingresar a la app.
                 </p>
               </div>
 
@@ -1055,7 +1053,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <Mail className="w-4 h-4" />
-                {isSendingEmail ? 'Enviando correo...' : 'Enviar por Correo (Gmail)'}
+                {isSendingEmail ? 'Enviando correo...' : 'Enviar por Correo Electrónico'}
               </button>
             </div>
 
