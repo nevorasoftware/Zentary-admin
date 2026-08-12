@@ -65,15 +65,25 @@ const INITIAL_USERS: ExtendedUser[] = [
 
 interface AccessManagementViewProps {
   communityName?: string;
+  onUpdateCommunityName?: (newName: string) => void;
 }
 
 export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   communityName = 'Residencial Zentary',
+  onUpdateCommunityName,
 }) => {
   const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+
+  // Community Maintenance Modal States (Tabla Community)
+  const [showCommunityModal, setShowCommunityModal] = useState(false);
+  const [commId, setCommId] = useState<string>('');
+  const [commNameInput, setCommNameInput] = useState<string>(communityName);
+  const [commAddressInput, setCommAddressInput] = useState<string>('Av. Las Palmas #123');
+  const [commCityInput, setCommCityInput] = useState<string>('San Salvador');
+  const [isSavingCommunity, setIsSavingCommunity] = useState(false);
 
   // Tenant Register Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -126,9 +136,65 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
   };
 
+  const fetchCommunityConfigFromBackend = async () => {
+    try {
+      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+        headers: { 'Authorization': 'Bearer admin_demo_token' },
+      });
+      const data = await res.json();
+      if (data.success && data.community) {
+        if (data.community.id) setCommId(data.community.id);
+        if (data.community.name) setCommNameInput(data.community.name);
+        if (data.community.address) setCommAddressInput(data.community.address);
+        if (data.community.city) setCommCityInput(data.community.city);
+      }
+    } catch (err) {
+      console.warn('Community fetch error:', err);
+    }
+  };
+
   React.useEffect(() => {
     fetchUsersFromBackend();
+    fetchCommunityConfigFromBackend();
   }, []);
+
+  const handleSaveCommunityDetails = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commNameInput.trim()) return;
+
+    setIsSavingCommunity(true);
+    try {
+      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
+        body: JSON.stringify({
+          id: commId || undefined,
+          name: commNameInput.trim(),
+          address: commAddressInput.trim(),
+          city: commCityInput.trim(),
+        }),
+      });
+      const data = await res.json();
+      setIsSavingCommunity(false);
+
+      if (data.success) {
+        if (onUpdateCommunityName) {
+          onUpdateCommunityName(commNameInput.trim());
+        }
+        showToast('🏢 Residencial (Tabla Community) actualizada exitosamente en PostgreSQL.', 'success');
+        setShowCommunityModal(false);
+      } else {
+        showToast(`⚠️ ${data.message || 'Error al actualizar Residencial'}`, 'error');
+      }
+    } catch (err) {
+      setIsSavingCommunity(false);
+      console.error('Save community error:', err);
+      showToast('❌ Error al conectar con el servidor para actualizar la Residencial.', 'error');
+    }
+  };
 
   const showToast = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToastMessage({ text, type });
@@ -443,11 +509,20 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             Habilitación y Control de Inquilinos en {communityName}
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Registra nuevos inquilinos, edita su información, reenvía accesos por Gmail API o WhatsApp y administra el estado de sus cuentas.
+            Registra nuevos inquilinos, edita su información, reenvía accesos por Gmail API o WhatsApp y administra la datos de la Residencial (Tabla Community).
           </p>
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowCommunityModal(true)}
+            className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
+            title="Editar nombre, dirección y ciudad de la Residencial en la base de datos (Tabla Community)"
+          >
+            <Building2 className="w-4.5 h-4.5 text-amber-400" />
+            <span>Editar Residencial</span>
+          </button>
+
           <button
             onClick={() => setShowAddModal(true)}
             className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
@@ -594,6 +669,91 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           </table>
         </div>
       </div>
+
+      {/* Modal: Mantenimiento de la Residencial (Tabla Community) */}
+      {showCommunityModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-amber-500/30 space-y-5 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-amber-400" />
+                Mantenimiento de Residencial / Comunidad
+              </h3>
+              <button onClick={() => setShowCommunityModal(false)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCommunityDetails} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Nombre de la Residencial / Condominio *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Residencial Zentary, Residencial Amapolas..."
+                  value={commNameInput}
+                  onChange={(e) => setCommNameInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500 font-semibold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Dirección Principal
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. Av. Las Palmas #123, Col. San Benito"
+                  value={commAddressInput}
+                  onChange={(e) => setCommAddressInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Ciudad / Municipio
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej. San Salvador, Santa Tecla..."
+                  value={commCityInput}
+                  onChange={(e) => setCommCityInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 space-y-1">
+                <p className="font-bold flex items-center gap-1.5 text-amber-200">
+                  <Building2 className="w-4 h-4 text-amber-400" /> Persistencia Real en PostgreSQL (Tabla Community)
+                </p>
+                <p>
+                  Al guardar, este nombre se actualizará en toda la consola de administración y en los correos y mensajes generados.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCommunityModal(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingCommunity}
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSavingCommunity ? 'Guardando en BD...' : 'Guardar Datos de Residencial'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Formulario para Registrar Nuevo Inquilino */}
       {showAddModal && (

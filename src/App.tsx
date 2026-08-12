@@ -132,7 +132,12 @@ export default function App() {
       case 'dashboard':
         return <DashboardView onNavigate={(view) => setCurrentView(view)} />;
       case 'access':
-        return <AccessManagementView communityName={communityName} />;
+        return (
+          <AccessManagementView
+            communityName={communityName}
+            onUpdateCommunityName={(newName) => setCommunityName(newName)}
+          />
+        );
       case 'announcements':
         return <AnnouncementsView />;
       case 'visits':
