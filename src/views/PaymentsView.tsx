@@ -55,6 +55,26 @@ export const PaymentsView: React.FC = () => {
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
 
+  // Administrative Notification Configuration State
+  const [notifConfig, setNotifConfig] = useState({
+    enabled: true,
+    frequency: 'DAILY', // DAILY, EVERY_2_DAYS, WEEKLY
+    reminderTime: '09:00 AM',
+    customMessage: 'Estimado residente, le recordamos que la cuota de mantenimiento del mes en curso está pendiente de pago.',
+  });
+  const [isSavingConfig, setIsSavingConfig] = useState(false);
+  const [configSavedSuccess, setConfigSavedSuccess] = useState(false);
+
+  const handleSaveNotifConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingConfig(true);
+    setTimeout(() => {
+      setIsSavingConfig(false);
+      setConfigSavedSuccess(true);
+      setTimeout(() => setConfigSavedSuccess(false), 3000);
+    }, 600);
+  };
+
   const handleCreateBilling = (e: React.FormEvent) => {
     e.preventDefault();
     if (!concept || !amount || !dueDate) return;
@@ -94,7 +114,7 @@ export const PaymentsView: React.FC = () => {
             Gestión de Cobros y Mantenimientos
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Emitir cobros masivos de cuotas de mantenimiento y rastrear pagos realizados desde la aplicación móvil.
+            Emitir cobros masivos, configurar recordatorios automáticos de pago y rastrear transacciones.
           </p>
         </div>
 
@@ -104,6 +124,100 @@ export const PaymentsView: React.FC = () => {
         >
           <Plus className="w-5 h-5" /> Emitir Nuevo Cobro
         </button>
+      </div>
+
+      {/* Administrative Panel: Configuración de Recordatorios Automáticos de Pago */}
+      <div className="glass-card p-6 rounded-3xl border border-slate-800 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-lg">
+              🔔
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-white">Configuración de Recordatorios Automáticos de Pago (App Móvil)</h3>
+              <p className="text-xs text-slate-400">
+                Define las reglas con las que la aplicación móvil enviará recordatorios diarios a los residentes con cobros pendientes.
+              </p>
+            </div>
+          </div>
+
+          {configSavedSuccess && (
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 animate-fade-in">
+              ✓ Configuración Guardada
+            </span>
+          )}
+        </div>
+
+        <form onSubmit={handleSaveNotifConfig} className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          {/* Activar/Desactivar */}
+          <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+              Estado del Recordatorio
+            </label>
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-sm font-semibold text-slate-200">
+                {notifConfig.enabled ? 'Activado para la App' : 'Desactivado'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setNotifConfig({ ...notifConfig, enabled: !notifConfig.enabled })}
+                className={`w-12 h-6 rounded-full transition-colors relative ${
+                  notifConfig.enabled ? 'bg-blue-600' : 'bg-slate-700'
+                }`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-full bg-white transition-transform absolute top-0.5 ${
+                    notifConfig.enabled ? 'right-0.5' : 'left-0.5'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          {/* Frecuencia */}
+          <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+              Frecuencia de Notificación
+            </label>
+            <select
+              value={notifConfig.frequency}
+              onChange={(e) => setNotifConfig({ ...notifConfig, frequency: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+            >
+              <option value="DAILY">Una vez al día (Diario)</option>
+              <option value="EVERY_2_DAYS">Cada 2 días</option>
+              <option value="WEEKLY">Una vez a la semana</option>
+            </select>
+          </div>
+
+          {/* Hora Preferida */}
+          <div className="bg-slate-900/60 p-4 rounded-2xl border border-slate-800 space-y-2">
+            <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+              Hora de Envío Diario
+            </label>
+            <select
+              value={notifConfig.reminderTime}
+              onChange={(e) => setNotifConfig({ ...notifConfig, reminderTime: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+            >
+              <option value="08:00 AM">08:00 AM</option>
+              <option value="09:00 AM">09:00 AM (Recomendado)</option>
+              <option value="01:00 PM">01:00 PM</option>
+              <option value="07:00 PM">07:00 PM</option>
+            </select>
+          </div>
+
+          {/* Botón de Guardar en Admin */}
+          <div className="md:col-span-3 flex justify-end pt-1">
+            <button
+              type="submit"
+              disabled={isSavingConfig}
+              className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+            >
+              {isSavingConfig ? 'Guardando en Servidor...' : '💾 Guardar Parámetros de Notificaciones'}
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* Search Bar */}
