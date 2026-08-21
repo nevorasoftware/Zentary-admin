@@ -72,6 +72,10 @@ export const PqrsSupportView: React.FC = () => {
 
   useEffect(() => {
     fetchTickets();
+    const interval = setInterval(() => {
+      fetchTickets();
+    }, 8000);
+    return () => clearInterval(interval);
   }, []);
 
   const activeTicket = tickets.find((t) => t.id === selectedTicketId) || tickets[0];
