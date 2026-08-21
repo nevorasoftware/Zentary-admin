@@ -53,17 +53,18 @@ export const PqrsSupportView: React.FC = () => {
     setLoading(true);
     try {
       const res = await adminApi.getPqrsList();
-      if (res.success && res.pqrsList && res.pqrsList.length > 0) {
+      if (res.success && Array.isArray(res.pqrsList)) {
         setTickets(res.pqrsList);
-        setSelectedTicketId((prev) => (prev && res.pqrsList.some((t) => t.id === prev) ? prev : res.pqrsList[0].id));
-      } else {
-        setTickets(MOCK_TICKETS);
-        setSelectedTicketId(MOCK_TICKETS[0].id);
+        if (res.pqrsList.length > 0) {
+          setSelectedTicketId((prev) => (prev && res.pqrsList.some((t) => t.id === prev) ? prev : res.pqrsList[0].id));
+        } else {
+          setSelectedTicketId('');
+        }
       }
     } catch (e) {
-      console.warn('Could not load PQRS from backend, using fallback', e);
-      setTickets(MOCK_TICKETS);
-      setSelectedTicketId(MOCK_TICKETS[0].id);
+      console.warn('Could not load PQRS from backend:', e);
+      setTickets([]);
+      setSelectedTicketId('');
     } finally {
       setLoading(false);
     }
