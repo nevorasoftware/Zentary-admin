@@ -141,7 +141,7 @@ class AdminApiService {
 
   // PQRS Admin API
   async getPqrsList(): Promise<{ success: boolean; pqrsList: PqrsTicketItem[] }> {
-    return this.request('/pqrs');
+    return this.request('/pqrs?all=true');
   }
 
   async sendPqrsMessage(id: string, message: string): Promise<{ success: boolean; message: PqrsMessageItem }> {
