@@ -30,6 +30,43 @@ export interface AnnouncementItem {
   };
 }
 
+export interface PqrsMessageItem {
+  id: string;
+  pqrsId: string;
+  senderId: string;
+  message: string;
+  isStaff: boolean;
+  createdAt: string;
+  sender?: {
+    id: string;
+    fullName: string;
+    avatarUrl?: string;
+    role: string;
+  };
+}
+
+export interface PqrsTicketItem {
+  id: string;
+  residentId: string;
+  category: 'PETICION' | 'QUEJA' | 'RECLAMO' | 'SUGERENCIA';
+  subject: string;
+  description: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  createdAt: string;
+  updatedAt: string;
+  resident?: {
+    id: string;
+    fullName: string;
+    email: string;
+    phone?: string;
+    property?: {
+      unitNumber: string;
+      block?: string;
+    };
+  };
+  messages: PqrsMessageItem[];
+}
+
 export interface DashboardStats {
   totalResidents: number;
   activeVisits: number;
@@ -39,16 +76,23 @@ export interface DashboardStats {
 }
 
 class AdminApiService {
-  private token: string | null = 'admin_demo_token';
+  private getAuthToken(): string {
+    if (typeof localStorage !== 'undefined') {
+      const storedToken = localStorage.getItem('zentary_admin_token') || localStorage.getItem('zentary_token');
+      if (storedToken) return storedToken;
+    }
+    return 'admin_demo_token';
+  }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const token = this.getAuthToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     try {
@@ -60,7 +104,7 @@ class AdminApiService {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.warn('API request fallback to mock data:', endpoint);
+      console.warn('API request fallback or error:', endpoint, error);
       throw error;
     }
   }
@@ -94,6 +138,25 @@ class AdminApiService {
   async deleteAnnouncement(id: string) {
     return this.request(`/announcements/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // PQRS Admin API
+  async getPqrsList(): Promise<{ success: boolean; pqrsList: PqrsTicketItem[] }> {
+    return this.request('/pqrs');
+  }
+
+  async sendPqrsMessage(id: string, message: string): Promise<{ success: boolean; message: PqrsMessageItem }> {
+    return this.request(`/pqrs/${id}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+  }
+
+  async updatePqrsStatus(id: string, status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'): Promise<{ success: boolean; pqrs: PqrsTicketItem }> {
+    return this.request(`/pqrs/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
     });
   }
 }
