@@ -300,6 +300,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
 
+    setWhatsAppStatus({ state: 'IDLE' });
+    setEmailStatus({ state: 'IDLE' });
+
     setCreatedTenantInfo({
       fullName,
       email,
@@ -507,6 +510,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
 
     const mailtoLink = `mailto:${user.email}?subject=${encodeURIComponent(`Reenvío de Accesos - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
+
+    setWhatsAppStatus({ state: 'IDLE' });
+    setEmailStatus({ state: 'IDLE' });
 
     setCreatedTenantInfo({
       id: user.id,
@@ -1123,7 +1129,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <MessageSquare className="w-4 h-4" />
-                {isSendingWhatsApp ? 'Enviando WhatsApp...' : 'Enviar por WhatsApp API'}
+                {isSendingWhatsApp ? 'Enviando WhatsApp...' : 'Enviar por WhatsApp'}
               </button>
 
               <button
