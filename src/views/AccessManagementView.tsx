@@ -378,12 +378,62 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditingUser(null);
   };
 
-  // Email Delivery Feedback Banner State
-  const [emailStatus, setEmailStatus] = useState<{
+  // WhatsApp API Delivery Feedback Banner State
+  const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
+  const [whatsAppStatus, setWhatsAppStatus] = useState<{
     state: 'IDLE' | 'SENDING' | 'SUCCESS' | 'ERROR';
     message?: string;
     details?: string;
   }>({ state: 'IDLE' });
+
+  const handleSendWhatsAppApi = async (targetPhone: string, targetName: string, targetUnit?: string, targetEmail?: string) => {
+    setIsSendingWhatsApp(true);
+    setWhatsAppStatus({ state: 'SENDING', message: 'Enviando WhatsApp por Meta Cloud API...' });
+
+    try {
+      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/send-whatsapp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin_demo_token',
+        },
+        body: JSON.stringify({
+          phone: targetPhone,
+          fullName: targetName,
+          unitNumber: targetUnit || '119D',
+          email: targetEmail || '',
+          communityName,
+        }),
+      });
+
+      const data = await response.json();
+      setIsSendingWhatsApp(false);
+
+      if (data.success) {
+        setWhatsAppStatus({
+          state: 'SUCCESS',
+          message: '¡WHATSAPP ENVIADO CON ÉXITO VÍA CLOUD API!',
+          details: `El mensaje fue entregado a ${targetPhone}`,
+        });
+        showToast(`📱 WhatsApp enviado exitosamente a ${targetPhone} por Meta Cloud API`, 'success');
+      } else {
+        setWhatsAppStatus({
+          state: 'ERROR',
+          message: 'NO SE PUDO ENVIAR POR WHATSAPP API',
+          details: data.message || 'Ocurrió un error al enviar por WhatsApp Cloud API.',
+        });
+        showToast(`❌ ${data.message || 'No se pudo enviar el WhatsApp.'}`, 'error');
+      }
+    } catch (error: any) {
+      setIsSendingWhatsApp(false);
+      setWhatsAppStatus({
+        state: 'ERROR',
+        message: 'ERROR DE CONEXIÓN',
+        details: 'No se pudo conectar con el servidor de WhatsApp API.',
+      });
+      showToast('❌ Error de conexión al intentar enviar WhatsApp.', 'error');
+    }
+  };
 
   const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string) => {
     setIsSendingEmail(true);
@@ -1012,6 +1062,27 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
             </div>
 
+            {/* Visual Status Indicator for WhatsApp Cloud API Dispatch */}
+            {whatsAppStatus.state !== 'IDLE' && (
+              <div
+                className={`p-3.5 rounded-2xl border text-xs space-y-1 transition-all ${
+                  whatsAppStatus.state === 'SENDING'
+                    ? 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+                    : whatsAppStatus.state === 'SUCCESS'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300'
+                    : 'bg-rose-500/15 border-rose-500/40 text-rose-300'
+                }`}
+              >
+                <div className="font-bold flex items-center gap-2">
+                  {whatsAppStatus.state === 'SENDING' && <Sparkles className="w-4 h-4 text-blue-400 animate-spin" />}
+                  {whatsAppStatus.state === 'SUCCESS' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                  {whatsAppStatus.state === 'ERROR' && <AlertCircle className="w-4 h-4 text-rose-400" />}
+                  <span>{whatsAppStatus.message}</span>
+                </div>
+                {whatsAppStatus.details && <p className="opacity-90">{whatsAppStatus.details}</p>}
+              </div>
+            )}
+
             {/* Visual Status Indicator for Email Dispatch */}
             {emailStatus.state !== 'IDLE' && (
               <div
@@ -1038,14 +1109,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             </p>
 
             <div className="grid grid-cols-2 gap-3">
-              <a
-                href={createdTenantInfo.whatsappLink}
-                target="_blank"
-                rel="noreferrer"
-                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all"
+              <button
+                onClick={() => handleSendWhatsAppApi(createdTenantInfo.phone, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.email)}
+                disabled={isSendingWhatsApp}
+                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
-                <MessageSquare className="w-4 h-4" /> Enviar por WhatsApp
-              </a>
+                <MessageSquare className="w-4 h-4" />
+                {isSendingWhatsApp ? 'Enviando WhatsApp...' : 'Enviar por WhatsApp API'}
+              </button>
 
               <button
                 onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName, createdTenantInfo.unitNumber)}
