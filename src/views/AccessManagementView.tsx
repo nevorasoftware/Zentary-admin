@@ -378,6 +378,13 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditingUser(null);
   };
 
+  // Email Delivery Feedback Banner State
+  const [emailStatus, setEmailStatus] = useState<{
+    state: 'IDLE' | 'SENDING' | 'SUCCESS' | 'ERROR';
+    message?: string;
+    details?: string;
+  }>({ state: 'IDLE' });
+
   // WhatsApp API Delivery Feedback Banner State
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
   const [whatsAppStatus, setWhatsAppStatus] = useState<{
@@ -385,6 +392,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     message?: string;
     details?: string;
   }>({ state: 'IDLE' });
+
 
   const handleSendWhatsAppApi = async (targetPhone: string, targetName: string, targetUnit?: string, targetEmail?: string) => {
     setIsSendingWhatsApp(true);
