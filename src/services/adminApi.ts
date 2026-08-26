@@ -172,6 +172,19 @@ class AdminApiService {
       body: JSON.stringify({ status }),
     });
   }
+
+  // Payments Admin API
+  async getAllPayments(): Promise<{ success: boolean; payments: any[] }> {
+    return this.request('/payments/admin/all');
+  }
+
+  async createBillingCharge(data: { concept: string; amount: number; dueDate: string; targetResidentId?: string }): Promise<{ success: boolean; payment: any }> {
+    return this.request('/payments/admin/create-charge', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
 }
 
 export const adminApi = new AdminApiService();
+
