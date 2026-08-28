@@ -124,8 +124,9 @@ export const PaymentsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert(res.message || '💵 Cobro emitido correctamente en la base de datos PostgreSQL.');
+        alert((res as any).message || '💵 Cobro emitido correctamente en la base de datos PostgreSQL.');
         setConcept('');
+
         setAmount('');
         setDueDate('');
         setTargetResidentId('ALL');
