@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, DollarSign, CheckCircle, Clock, AlertTriangle, Plus, Search, Building2, RefreshCw } from 'lucide-react';
-import { adminApi } from '../services/adminApi';
+import { CreditCard, DollarSign, CheckCircle, Clock, AlertTriangle, Plus, Search, Building2, RefreshCw, Users } from 'lucide-react';
+import { adminApi, ResidentUser } from '../services/adminApi';
 
 interface PaymentRecord {
   id: string;
@@ -39,12 +39,14 @@ const FALLBACK_PAYMENTS: PaymentRecord[] = [
 
 export const PaymentsView: React.FC = () => {
   const [payments, setPayments] = useState<PaymentRecord[]>(FALLBACK_PAYMENTS);
+  const [residents, setResidents] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showBillingModal, setShowBillingModal] = useState(false);
   const [concept, setConcept] = useState('');
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [targetResidentId, setTargetResidentId] = useState('ALL');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Administrative Notification Configuration State
@@ -82,8 +84,20 @@ export const PaymentsView: React.FC = () => {
     }
   };
 
+  const fetchResidents = async () => {
+    try {
+      const res = await adminApi.getUsers('RESIDENT');
+      if (res.success && Array.isArray(res.users)) {
+        setResidents(res.users);
+      }
+    } catch (err) {
+      console.warn('⚠️ Error al cargar lista de residentes.');
+    }
+  };
+
   useEffect(() => {
     fetchAllPayments();
+    fetchResidents();
   }, []);
 
   const handleSaveNotifConfig = (e: React.FormEvent) => {
@@ -106,34 +120,22 @@ export const PaymentsView: React.FC = () => {
         concept,
         amount: parseFloat(amount),
         dueDate: dueDate,
+        targetResidentId: targetResidentId === 'ALL' ? undefined : targetResidentId,
       });
 
       if (res.success) {
-        alert('💵 Cobro emitido correctamente y sincronizado con Wompi 3DS y la app móvil.');
+        alert(res.message || '💵 Cobro emitido correctamente en la base de datos PostgreSQL.');
         setConcept('');
         setAmount('');
         setDueDate('');
+        setTargetResidentId('ALL');
         setShowBillingModal(false);
         fetchAllPayments();
       } else {
         alert('Error al emitir cobro.');
       }
     } catch (err: any) {
-      const newBilling: PaymentRecord = {
-        id: `pay-${Date.now()}`,
-        residentName: 'Todos los Residentes',
-        unitNumber: 'Toda la Comunidad',
-        concept,
-        amount: parseFloat(amount),
-        dueDate,
-        status: 'PENDING',
-      };
-      setPayments([newBilling, ...payments]);
-      setConcept('');
-      setAmount('');
-      setDueDate('');
-      setShowBillingModal(false);
-      alert('💵 Cobro emitido localmente.');
+      alert('Error de servidor al emitir cobro.');
     } finally {
       setIsSubmitting(false);
     }
@@ -156,7 +158,7 @@ export const PaymentsView: React.FC = () => {
             Gestión de Cobros y Mantenimientos (Wompi 3DS Gateway)
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Emitir cobros masivos, configurar recordatorios automáticos de pago y monitorear transacciones 3DS en tiempo real.
+            Emitir cobros masivos en la base de datos PostgreSQL, configurar recordatorios automáticos de pago y monitorear transacciones 3DS en tiempo real.
           </p>
         </div>
 
@@ -345,9 +347,27 @@ export const PaymentsView: React.FC = () => {
       {showBillingModal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-md w-full p-6 rounded-3xl border border-slate-700 space-y-5">
-            <h3 className="text-lg font-bold text-white">Emitir Nuevo Cobro Masivo</h3>
+            <h3 className="text-lg font-bold text-white">Emitir Nuevo Cobro</h3>
 
             <form onSubmit={handleCreateBilling} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Destinatario del Cobro *
+                </label>
+                <select
+                  value={targetResidentId}
+                  onChange={(e) => setTargetResidentId(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                >
+                  <option value="ALL">🏢 TODOS LOS RESIDENTES (Cobro Masivo Comunidad)</option>
+                  {residents.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      👤 {r.fullName} ({r.property?.unitNumber ? `Unidad ${r.property.unitNumber}` : r.email})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Concepto del Cobro *
@@ -403,7 +423,7 @@ export const PaymentsView: React.FC = () => {
                   disabled={isSubmitting}
                   className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                 >
-                  {isSubmitting ? 'Emitiendo...' : 'Emitir Cobro'}
+                  {isSubmitting ? 'Emitiendo...' : 'Emitir Cobro en BD'}
                 </button>
               </div>
             </form>
