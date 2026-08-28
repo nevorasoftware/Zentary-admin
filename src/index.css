@@ -2,18 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-electric-blue: #1877F2;
+  --color-vibrant-purple: #6203FF;
+  --color-bright-yellow: #FFCF36;
+  --color-deep-purple: #2A0A73;
+  --color-royal-blue: #0B3C91;
+  --color-dark-bg: #0A0F1F;
+}
+
+body {
+  background-color: var(--color-dark-bg);
+  color: #F8FAFC;
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
 @layer utilities {
   .glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(145deg, rgba(42, 10, 115, 0.4), rgba(11, 60, 145, 0.25));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(98, 3, 255, 0.2);
+    box-shadow: 0 10px 30px -10px rgba(98, 3, 255, 0.15);
   }
   
   .glass-sidebar {
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(16px);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(180deg, rgba(10, 15, 31, 0.95), rgba(42, 10, 115, 0.85));
+    backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(98, 3, 255, 0.25);
+  }
+
+  .brand-gradient-text {
+    background: linear-gradient(135deg, #1877F2, #6203FF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .brand-gradient-btn {
+    background: linear-gradient(135deg, #1877F2, #6203FF);
+    box-shadow: 0 4px 15px rgba(98, 3, 255, 0.35);
+  }
+
+  .brand-gradient-btn:hover {
+    background: linear-gradient(135deg, #2582fc, #731affe0);
+    box-shadow: 0 6px 20px rgba(98, 3, 255, 0.5);
   }
 }
 
@@ -24,14 +56,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #0A0F1F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #2A0A73;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #6203FF;
 }

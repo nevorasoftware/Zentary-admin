@@ -7,7 +7,6 @@ import {
   Package,
   MessageSquare,
   CreditCard,
-  Building2,
   LogOut,
   X,
 } from 'lucide-react';
@@ -84,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {isOpenMobile && (
         <div
           onClick={onCloseMobile}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-[#0A0F1F]/80 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
         />
       )}
 
@@ -96,28 +95,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
         <div>
           {/* Brand Header */}
-          <div className="p-6 flex items-center justify-between border-b border-slate-800">
+          <div className="p-6 flex items-center justify-between border-b border-purple-900/40">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                <Building2 className="w-6 h-6 text-white" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="Zentary Logo"
+                className="w-10 h-10 rounded-xl object-cover shadow-lg shadow-purple-600/40 border border-purple-400/30"
+              />
               <div>
-                <h1 className="font-bold text-lg text-white tracking-wide">ZENTARY</h1>
-                <p className="text-xs text-blue-400 font-semibold uppercase tracking-wider">Web Admin Console</p>
+                <h1 className="font-extrabold text-lg text-white tracking-wide">ZENTARY</h1>
+                <p className="text-xs text-[#FFCF36] font-bold uppercase tracking-wider">Web Admin Console</p>
               </div>
             </div>
 
             {/* Mobile Close Button */}
             <button
               onClick={onCloseMobile}
-              className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+              className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-purple-900/40"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Navigation Menu */}
-          <nav className="p-4 space-y-1.5 mt-2">
+          <nav className="p-4 space-y-2 mt-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentView === item.id;
@@ -125,21 +126,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 ${
                     isActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30 font-semibold translate-x-1'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                      ? 'bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white shadow-lg shadow-purple-600/35 translate-x-1 border border-purple-400/30'
+                      : 'text-slate-300 hover:text-white hover:bg-purple-900/30'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                    <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-purple-300'}`} />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badgeNum !== undefined && item.badgeNum > 0 && (
                     <span
-                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                        isActive ? 'bg-white text-blue-600' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      className={`px-2.5 py-0.5 text-xs font-black rounded-full ${
+                        isActive ? 'bg-[#FFCF36] text-[#0A0F1F]' : 'bg-[#FFCF36]/20 text-[#FFCF36] border border-[#FFCF36]/30'
                       }`}
                     >
                       {item.badgeNum}
@@ -147,7 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider rounded bg-[#FFCF36] text-[#0A0F1F]">
                       {item.badge}
                     </span>
                   )}
@@ -158,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Admin Profile Footer */}
-        <div className="p-4 m-4 rounded-2xl bg-slate-800/40 border border-slate-800/80">
+        <div className="p-4 m-4 rounded-2xl bg-slate-900/80 border border-purple-900/50">
           <div className="flex items-center gap-3">
             <button
               onClick={onOpenEditProfile}
@@ -168,22 +169,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <img
                 src={avatar}
                 alt="Admin"
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/50 group-hover:ring-blue-400 transition-all"
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-[#6203FF] group-hover:ring-[#1877F2] transition-all"
               />
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-slate-900" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full ring-2 ring-[#0A0F1F]" />
             </button>
             <div
               onClick={onOpenEditProfile}
               className="flex-1 min-w-0 cursor-pointer group"
             >
-              <p className="text-sm font-semibold text-white truncate group-hover:text-blue-300 transition-colors">
+              <p className="text-sm font-bold text-white truncate group-hover:text-blue-300 transition-colors">
                 {name}
               </p>
               <p className="text-xs text-slate-400 truncate">{email}</p>
             </div>
             <button
               onClick={onLogout}
-              className="text-slate-400 hover:text-rose-400 p-1.5 transition-colors rounded-lg hover:bg-slate-800"
+              className="text-slate-400 hover:text-rose-400 p-1.5 transition-colors rounded-lg hover:bg-purple-900/40"
               title="Cerrar sesión"
             >
               <LogOut className="w-5 h-5" />
