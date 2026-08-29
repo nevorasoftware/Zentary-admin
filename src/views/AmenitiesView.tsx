@@ -286,6 +286,23 @@ export const AmenitiesView: React.FC = () => {
     setCurrentWeekStart(next);
   };
 
+  const handleImageFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 6 * 1024 * 1024) {
+      setFormError('La imagen seleccionada supera el límite de 6MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64Str = event.target?.result as string;
+      setImageUrl(base64Str);
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="space-y-6">
       {/* View Header with Tabs */}
@@ -650,14 +667,34 @@ export const AmenitiesView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">URL Fotografía / Imagen de la amenidad</label>
-                <input
-                  type="url"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full bg-slate-950 text-white font-medium text-xs rounded-xl px-3.5 py-2.5 border border-purple-900/60 focus:outline-none focus:border-purple-500"
-                />
+                <label className="block text-xs font-bold text-slate-300 mb-1">Fotografía / Imagen de la amenidad *</label>
+                <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-purple-900/60 hover:border-purple-500/80 rounded-2xl bg-slate-950/60 transition-all">
+                  {imageUrl ? (
+                    <div className="relative w-full h-44 rounded-xl overflow-hidden group">
+                      <img src={imageUrl} alt="Vista previa" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <label className="px-3.5 py-2 bg-[#1877F2] hover:bg-blue-600 text-white font-extrabold text-xs rounded-xl cursor-pointer shadow-lg transition-all">
+                          Cambiar Imagen
+                          <input type="file" accept="image/*" className="hidden" onChange={handleImageFileSelect} />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setImageUrl('')}
+                          className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center cursor-pointer w-full py-6">
+                      <ImageIcon className="w-9 h-9 text-purple-400 mb-2" />
+                      <span className="text-xs font-bold text-white mb-1">Cargar Fotografía desde tu Dispositivo</span>
+                      <span className="text-[10px] text-slate-400">Archivos soportados: JPG, PNG, WEBP (Se guardará directamente en la base de datos)</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileSelect} />
+                    </label>
+                  )}
+                </div>
               </div>
 
               <div>
