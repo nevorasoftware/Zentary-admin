@@ -8,6 +8,7 @@ import VisitsLogView from './views/VisitsLogView';
 import ParcelsView from './views/ParcelsView';
 import PqrsSupportView from './views/PqrsSupportView';
 import PaymentsView from './views/PaymentsView';
+import AmenitiesView from './views/AmenitiesView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 
@@ -92,6 +93,11 @@ export default function App() {
           title: 'Control de Usuarios',
           subtitle: `Registrar inquilinos y administrar accesos en ${communityName}`,
         };
+      case 'amenities':
+        return {
+          title: 'Administración de Amenidades',
+          subtitle: `Gestionar espacios comunes y calendario de reservas en ${communityName}`,
+        };
       case 'announcements':
         return {
           title: 'Envío de Anuncios',
@@ -138,6 +144,8 @@ export default function App() {
             onUpdateCommunityName={(newName) => setCommunityName(newName)}
           />
         );
+      case 'amenities':
+        return <AmenitiesView />;
       case 'announcements':
         return <AnnouncementsView />;
       case 'visits':

@@ -7,6 +7,7 @@ import {
   Package,
   MessageSquare,
   CreditCard,
+  Building2,
   LogOut,
   X,
 } from 'lucide-react';
@@ -18,7 +19,8 @@ export type AdminViewType =
   | 'visits'
   | 'parcels'
   | 'pqrs'
-  | 'payments';
+  | 'payments'
+  | 'amenities';
 
 interface MenuItem {
   id: AdminViewType;
@@ -59,6 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users, badge: 'Pro' },
+    { id: 'amenities', label: 'Amenidades', icon: Building2 },
     { id: 'announcements', label: 'Envío de Anuncios', icon: Megaphone },
     { id: 'visits', label: 'Accesos de Garita / QR', icon: ShieldCheck },
     { id: 'parcels', label: 'Recepcionar Paquetes', icon: Package, badgeNum: pendingParcelsCount },
