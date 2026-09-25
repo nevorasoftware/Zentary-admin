@@ -1,61 +1,94 @@
-import React, { useState } from 'react';
-import { Megaphone, Send, Trash2, BellRing, Sparkles, AlertTriangle, Calendar, Info } from 'lucide-react';
-import { AnnouncementItem } from '../services/adminApi';
-
-const INITIAL_ANNOUNCEMENTS: AnnouncementItem[] = [
-  {
-    id: 'a1',
-    title: 'Mantenimiento de Piscina Principal',
-    body: 'Estimados residentes, el área de la piscina permanecerá cerrada el próximo jueves por labores de limpieza general.',
-    category: 'MANTENIMIENTO',
-    createdAt: '2026-08-11T09:30:00Z',
-    author: { fullName: 'Administración Zentary' },
-  },
-  {
-    id: 'a2',
-    title: 'Asamblea General Ordinaria de Residentes',
-    body: 'Se convoca a todos los propietarios a la asamblea anual en el salón social el sábado 20 de agosto a las 05:00 PM.',
-    category: 'EVENTO',
-    createdAt: '2026-08-08T14:00:00Z',
-    author: { fullName: 'Administración Zentary' },
-  },
-];
+import React, { useState, useEffect } from 'react';
+import {
+  Megaphone,
+  Send,
+  Trash2,
+  BellRing,
+  Sparkles,
+  AlertTriangle,
+  Calendar,
+  Info,
+  Flame,
+  Image as ImageIcon,
+  Users,
+  Building,
+} from 'lucide-react';
+import { adminApi, AnnouncementItem } from '../services/adminApi';
 
 export const AnnouncementsView: React.FC = () => {
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(INITIAL_ANNOUNCEMENTS);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<'MANTENIMIENTO' | 'URGENTE' | 'EVENTO' | 'GENERAL'>('GENERAL');
+  const [priority, setPriority] = useState<'NORMAL' | 'IMPORTANTE' | 'URGENTE'>('NORMAL');
+  const [targetAudience, setTargetAudience] = useState<'TODOS' | 'BLOQUE'>('TODOS');
+  const [targetBlock, setTargetBlock] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [publishing, setPublishing] = useState(false);
 
-  const handlePublish = (e: React.FormEvent) => {
+  const fetchAnnouncements = async () => {
+    try {
+      setLoading(true);
+      const res = await adminApi.getAnnouncements();
+      if (res.success && Array.isArray(res.announcements)) {
+        setAnnouncements(res.announcements);
+      }
+    } catch (err) {
+      console.warn('Error fetching announcements from API.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnnouncements();
+  }, []);
+
+  const handlePublish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !body) return;
 
-    setPublishing(true);
-
-    setTimeout(() => {
-      const newAnnouncement: AnnouncementItem = {
-        id: `ann-${Date.now()}`,
-        title,
-        body,
+    try {
+      setPublishing(true);
+      const res = await adminApi.createAnnouncement({
+        title: title.trim(),
+        body: body.trim(),
         category,
-        createdAt: new Date().toISOString(),
-        author: { fullName: 'Administración Zentary' },
-      };
+        priority,
+        targetAudience,
+        targetBlock: targetAudience === 'BLOQUE' ? targetBlock : undefined,
+        imageUrl: imageUrl.trim() || undefined,
+      });
 
-      setAnnouncements([newAnnouncement, ...announcements]);
-      setTitle('');
-      setBody('');
-      setCategory('GENERAL');
+      if (res.success) {
+        alert('📢 Comunicado transmitido y notificado a la comunidad.');
+        setTitle('');
+        setBody('');
+        setImageUrl('');
+        setTargetBlock('');
+        setCategory('GENERAL');
+        setPriority('NORMAL');
+        setTargetAudience('TODOS');
+        fetchAnnouncements();
+      } else {
+        alert('Error al publicar anuncio.');
+      }
+    } catch (err: any) {
+      alert('Error al publicar: ' + err.message);
+    } finally {
       setPublishing(false);
-      alert('¡Anuncio transmitido exitosamente a la aplicación móvil Zentary!');
-    }, 600);
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('¿Estás seguro de eliminar este comunicado?')) {
-      setAnnouncements(announcements.filter((a) => a.id !== id));
+      try {
+        await adminApi.deleteAnnouncement(id);
+        setAnnouncements(announcements.filter((a) => a.id !== id));
+      } catch (err: any) {
+        alert('Error al eliminar: ' + err.message);
+      }
     }
   };
 
@@ -72,6 +105,17 @@ export const AnnouncementsView: React.FC = () => {
     }
   };
 
+  const getPriorityBadge = (p?: string) => {
+    switch (p) {
+      case 'URGENTE':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/40">🚨 URGENTE</span>;
+      case 'IMPORTANTE':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/40">⚠️ IMPORTANTE</span>;
+      default:
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">NORMAL</span>;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Broadcast Creation Form */}
@@ -79,17 +123,18 @@ export const AnnouncementsView: React.FC = () => {
         <div className="border-b border-slate-800 pb-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Megaphone className="w-5 h-5 text-blue-500" />
-            Crear Anuncio Residencial
+            Crear Comunicado Residencial (Fase 3)
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Los anuncios publicados se mostrarán inmediatamente en la pantalla de inicio de la aplicación de los residentes.
+            Los comunicados se difunden vía notificaciones push a la aplicación móvil y se fijan en la cartelera digital.
           </p>
         </div>
 
         <form onSubmit={handlePublish} className="space-y-4">
+          {/* Categoría */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Categoría del Comunicado
+              Categoría
             </label>
             <div className="grid grid-cols-2 gap-2">
               {(['GENERAL', 'MANTENIMIENTO', 'URGENTE', 'EVENTO'] as const).map((cat) => (
@@ -109,31 +154,92 @@ export const AnnouncementsView: React.FC = () => {
             </div>
           </div>
 
+          {/* Prioridad y Público Objetivo */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Prioridad
+              </label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value as any)}
+                className="w-full bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+              >
+                <option value="NORMAL">Normal</option>
+                <option value="IMPORTANTE">Importante</option>
+                <option value="URGENTE">Urgente</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Destinatarios
+              </label>
+              <select
+                value={targetAudience}
+                onChange={(e) => setTargetAudience(e.target.value as any)}
+                className="w-full bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+              >
+                <option value="TODOS">Toda la Comunidad</option>
+                <option value="BLOQUE">Bloque / Torre Específica</option>
+              </select>
+            </div>
+          </div>
+
+          {targetAudience === 'BLOQUE' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+                Nombre del Bloque o Torre
+              </label>
+              <input
+                type="text"
+                placeholder="Ej. Torre A o Senda 3"
+                value={targetBlock}
+                onChange={(e) => setTargetBlock(e.target.value)}
+                required
+                className="w-full bg-slate-900 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          )}
+
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-              Título del Anuncio *
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              Título del Comunicado *
             </label>
             <input
               type="text"
               placeholder="Ej. Limpieza de Cisterna de Agua"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-all"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Contenido del Mensaje *
             </label>
             <textarea
-              rows={5}
-              placeholder="Escribe los detalles del anuncio que verán todos los residentes..."
+              rows={4}
+              placeholder="Escribe los detalles del anuncio que verán los residentes..."
               value={body}
               onChange={(e) => setBody(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-all resize-none"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              Imagen de Cabecera (Opcional)
+            </label>
+            <input
+              type="text"
+              placeholder="https://images.unsplash.com/..."
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="w-full bg-slate-900/80 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500"
             />
           </div>
 
@@ -142,60 +248,98 @@ export const AnnouncementsView: React.FC = () => {
             disabled={publishing}
             className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all"
           >
-            <Send className="w-4 h-4" />
-            {publishing ? 'Transmitiendo...' : 'Publicar a la App Móvil'}
+            {publishing ? (
+              <span className="animate-spin">⏳</span>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                Transmitir Comunicado a Residentes
+              </>
+            )}
           </button>
         </form>
       </div>
 
-      {/* Broadcast Feed */}
-      <div className="lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <BellRing className="w-5 h-5 text-emerald-400" />
-              Historial de Anuncios Publicados
-            </h2>
-            <p className="text-xs text-slate-400 mt-1">Anuncios activos visibles en los celulares de los residentes</p>
+      {/* Announcements Feed */}
+      <div className="lg:col-span-2 space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <BellRing className="w-4 h-4 text-amber-400" />
+            Cartelera Digital Vigente ({announcements.length})
+          </h3>
+          <span className="text-xs text-slate-500">Sincronizado con base de datos</span>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-12 text-slate-500 text-sm">Cargando comunicados...</div>
+        ) : announcements.length === 0 ? (
+          <div className="text-center py-12 text-slate-500 text-sm glass-card rounded-3xl p-8 border border-slate-800">
+            No hay comunicados publicados aún.
           </div>
-          <span className="px-3 py-1 text-xs font-bold rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-            {announcements.length} Anuncios
-          </span>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            {announcements.map((a) => {
+              const badge = getCategoryBadge(a.category);
+              const BadgeIcon = badge.icon;
 
-        <div className="space-y-4">
-          {announcements.map((item) => {
-            const badge = getCategoryBadge(item.category);
-            const Icon = badge.icon;
-            return (
-              <div key={item.id} className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold border ${badge.bg}`}>
-                    <Icon className="w-3 h-3" />
-                    {badge.label}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(item.id)}
-                    className="text-slate-500 hover:text-rose-400 p-1 transition-colors"
-                    title="Eliminar comunicado"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+              return (
+                <div
+                  key={a.id}
+                  className="glass-card p-6 rounded-3xl border border-slate-800 hover:border-slate-700 transition-all space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${badge.bg}`}
+                      >
+                        <BadgeIcon className="w-3.5 h-3.5" />
+                        {badge.label}
+                      </span>
+                      {getPriorityBadge(a.priority)}
+                      {a.targetBlock && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          {a.targetBlock}
+                        </span>
+                      )}
+                    </div>
 
-                <div>
-                  <h3 className="text-base font-bold text-white">{item.title}</h3>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">{item.body}</p>
-                </div>
+                    <button
+                      onClick={() => handleDelete(a.id)}
+                      className="text-slate-500 hover:text-rose-400 transition-colors p-1"
+                      title="Eliminar comunicado"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/60">
-                  <span>Publicado por: {item.author?.fullName}</span>
-                  <span>{new Date(item.createdAt).toLocaleDateString('es-ES')}</span>
+                  <div>
+                    <h4 className="text-base font-bold text-white mb-1.5">{a.title}</h4>
+                    <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">{a.body}</p>
+                  </div>
+
+                  {a.imageUrl && (
+                    <div className="rounded-2xl overflow-hidden max-h-48 border border-slate-800">
+                      <img src={a.imageUrl} alt={a.title} className="w-full h-full object-cover" />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-800/60">
+                    <span>Publicado por: {a.author?.fullName || 'Administración Zentary'}</span>
+                    <span>
+                      {new Date(a.createdAt).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

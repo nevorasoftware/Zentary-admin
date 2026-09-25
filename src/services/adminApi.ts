@@ -7,12 +7,18 @@ export interface ResidentUser {
   fullName: string;
   email: string;
   phone?: string;
-  role: 'RESIDENT' | 'ADMIN' | 'GUARD';
+  role: 'RESIDENT' | 'ADMIN' | 'GUARD' | 'RESIDENTIAL_ADMIN';
   isActive: boolean;
   avatarUrl?: string;
   property?: {
     unitNumber: string;
     block?: string;
+  };
+  house?: {
+    id: string;
+    unitNumber: string;
+    block?: string;
+    financialStatus?: string;
   };
   createdAt: string;
 }
@@ -21,7 +27,12 @@ export interface AnnouncementItem {
   id: string;
   title: string;
   body: string;
-  category: 'MANTENIMIENTO' | 'URGENTE' | 'EVENTO' | 'GENERAL';
+  category: 'MANTENIMIENTO' | 'URGENTE' | 'EVENTO' | 'GENERAL' | string;
+  priority?: 'NORMAL' | 'IMPORTANTE' | 'URGENTE';
+  targetAudience?: 'TODOS' | 'TORRE' | 'BLOQUE' | 'VIVIENDA';
+  targetBlock?: string;
+  imageUrl?: string;
+  fileUrl?: string;
   createdAt: string;
   author?: {
     fullName: string;
@@ -47,9 +58,17 @@ export interface PqrsTicketItem {
   id: string;
   residentId: string;
   category: 'PETICION' | 'QUEJA' | 'RECLAMO' | 'SUGERENCIA';
+  priority?: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
   subject: string;
   description: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+  assignedToUserId?: string;
+  assignedToUser?: {
+    id: string;
+    fullName: string;
+    role: string;
+  };
+  attachments?: string;
   createdAt: string;
   updatedAt: string;
   resident?: {
@@ -62,6 +81,11 @@ export interface PqrsTicketItem {
       block?: string;
     };
   };
+  house?: {
+    id: string;
+    unitNumber: string;
+    block?: string;
+  };
   messages: PqrsMessageItem[];
 }
 
@@ -71,6 +95,21 @@ export interface DashboardStats {
   pendingParcels: number;
   openPqrs: number;
   pendingPaymentsSum: number;
+}
+
+export interface FinancialSummary {
+  totalCollected: number;
+  totalPending: number;
+  totalOverdue: number;
+  totalLateFees: number;
+  totalBilled: number;
+  collectionRate: number;
+  paidCount: number;
+  pendingCount: number;
+  overdueCount: number;
+  morososHousesCount: number;
+  totalPayments: number;
+  recentPayments?: any[];
 }
 
 class AdminApiService {
@@ -101,7 +140,7 @@ class AdminApiService {
 
       let data = await response.json();
 
-      // If token expired or unauthorized (401), clean up local storage & retry with admin_demo_token
+      // If token expired or unauthorized (401), retry with admin_demo_token
       if (response.status === 401 && token !== 'admin_demo_token') {
         if (typeof localStorage !== 'undefined') {
           localStorage.removeItem('zentary_admin_token');
@@ -137,13 +176,29 @@ class AdminApiService {
     });
   }
 
+  // Announcements Admin API (Fase 3 Comunidad)
   async getAnnouncements(): Promise<{ success: boolean; announcements: AnnouncementItem[] }> {
     return this.request('/announcements');
   }
 
-  async createAnnouncement(data: { title: string; body: string; category: string }) {
+  async createAnnouncement(data: {
+    title: string;
+    body: string;
+    category: string;
+    priority?: string;
+    targetAudience?: string;
+    targetBlock?: string;
+    imageUrl?: string;
+  }) {
     return this.request('/announcements', {
       method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateAnnouncement(id: string, data: any) {
+    return this.request(`/announcements/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(data),
     });
   }
@@ -154,7 +209,7 @@ class AdminApiService {
     });
   }
 
-  // PQRS Admin API
+  // PQRS Admin API (Fase 3 Comunidad)
   async getPqrsList(): Promise<{ success: boolean; pqrsList: PqrsTicketItem[] }> {
     return this.request('/pqrs?all=true');
   }
@@ -166,22 +221,101 @@ class AdminApiService {
     });
   }
 
-  async updatePqrsStatus(id: string, status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'): Promise<{ success: boolean; pqrs: PqrsTicketItem }> {
+  async updatePqrsStatus(
+    id: string,
+    status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED'
+  ): Promise<{ success: boolean; pqrs: PqrsTicketItem }> {
     return this.request(`/pqrs/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
   }
 
-  // Payments Admin API
-  async getAllPayments(): Promise<{ success: boolean; payments: any[] }> {
-    return this.request('/payments/admin/all');
+  async assignPqrsStaff(id: string, assignedToUserId: string): Promise<{ success: boolean; message: string; pqrs: any }> {
+    return this.request(`/pqrs/${id}/assign`, {
+      method: 'PATCH',
+      body: JSON.stringify({ assignedToUserId }),
+    });
   }
 
-  async createBillingCharge(data: { concept: string; amount: number; dueDate: string; targetResidentId?: string }): Promise<{ success: boolean; payment: any; message?: string }> {
+  // Payments & Finanzas Admin API (Fase 4 Finanzas)
+  async getAllPayments(params?: { status?: string; houseId?: string; search?: string }): Promise<{ success: boolean; payments: any[] }> {
+    const q = new URLSearchParams();
+    if (params?.status) q.append('status', params.status);
+    if (params?.houseId) q.append('houseId', params.houseId);
+    if (params?.search) q.append('search', params.search);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.request(`/payments/admin/all${qs}`);
+  }
+
+  async getFinancialSummary(): Promise<{ success: boolean; summary: FinancialSummary }> {
+    return this.request('/payments/admin/financial-summary');
+  }
+
+  async createBillingCharge(data: {
+    concept: string;
+    amount: number;
+    dueDate: string;
+    targetResidentId?: string;
+    graceDays?: number;
+    periodMonth?: number;
+    periodYear?: number;
+    notes?: string;
+  }): Promise<{ success: boolean; payment: any; message?: string }> {
     return this.request('/payments/admin/create-charge', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  }
+
+  async applyLateFees(data?: {
+    lateFeePercent?: number;
+    defaultGraceDays?: number;
+  }): Promise<{
+    success: boolean;
+    message: string;
+    processedCount: number;
+    totalLateFeesApplied: number;
+    affectedHousesCount: number;
+  }> {
+    return this.request('/payments/admin/apply-late-fees', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async registerManualPayment(data: {
+    paymentId?: string;
+    residentId?: string;
+    houseId?: string;
+    amount: number;
+    paymentMethod: string;
+    receiptUrl?: string;
+    notes?: string;
+    concept?: string;
+  }): Promise<{ success: boolean; message: string; payment: any }> {
+    return this.request('/payments/admin/register-manual-payment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updatePaymentStatus(id: string, status: string, notes?: string): Promise<{ success: boolean; message: string; payment: any }> {
+    return this.request(`/payments/admin/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, notes }),
+    });
+  }
+
+  // Amenities Admin API (Fase 3 Comunidad)
+  async updateReservationStatus(
+    id: string,
+    status: 'CONFIRMED' | 'REJECTED' | 'CANCELLED' | 'COMPLETED',
+    rejectionReason?: string
+  ): Promise<{ success: boolean; message: string; reservation: any }> {
+    return this.request(`/amenities/admin/reservations/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, rejectionReason }),
     });
   }
 
@@ -249,4 +383,3 @@ class AdminApiService {
 }
 
 export const adminApi = new AdminApiService();
-

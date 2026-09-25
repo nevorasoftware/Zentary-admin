@@ -16,6 +16,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+import { adminApi } from '../services/adminApi';
+
 const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
 
 const ALL_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -44,8 +46,9 @@ interface Reservation {
   startTime: string;
   endTime: string;
   price: number;
-  reservationStatus: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED';
+  reservationStatus: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'EXPIRED' | 'REJECTED' | 'COMPLETED';
   paymentStatus: 'NOT_REQUIRED' | 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED';
+  rejectionReason?: string;
   amenity?: {
     name: string;
     type: string;
@@ -58,6 +61,10 @@ interface Reservation {
       unitNumber: string;
       block?: string;
     };
+  };
+  house?: {
+    unitNumber: string;
+    block?: string;
   };
 }
 
@@ -145,6 +152,32 @@ export const AmenitiesView: React.FC = () => {
       }
     } catch (err) {
       console.error('Error fetching reservations:', err);
+    }
+  };
+
+  const handleApproveReservation = async (resId: string) => {
+    try {
+      const res = await adminApi.updateReservationStatus(resId, 'CONFIRMED');
+      if (res.success) {
+        alert('✓ Reserva aprobada exitosamente.');
+        fetchWeeklyReservations();
+      }
+    } catch (err: any) {
+      alert('Error al aprobar reserva: ' + err.message);
+    }
+  };
+
+  const handleRejectReservation = async (resId: string) => {
+    const reason = prompt('Indica el motivo del rechazo para notificar al residente:');
+    if (reason === null) return;
+    try {
+      const res = await adminApi.updateReservationStatus(resId, 'REJECTED', reason || undefined);
+      if (res.success) {
+        alert('Reserva rechazada.');
+        fetchWeeklyReservations();
+      }
+    } catch (err: any) {
+      alert('Error al rechazar reserva: ' + err.message);
     }
   };
 
@@ -592,6 +625,31 @@ export const AmenitiesView: React.FC = () => {
                                   : '⏳ Pendiente Pago'}
                               </span>
                             </div>
+
+                            {res.rejectionReason && (
+                              <div className="text-[10px] text-rose-300 font-semibold italic">
+                                Motivo: {res.rejectionReason}
+                              </div>
+                            )}
+
+                            {isPending && (
+                              <div className="flex gap-1.5 pt-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveReservation(res.id)}
+                                  className="flex-1 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] text-center transition-all"
+                                >
+                                  ✓ Aprobar
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectReservation(res.id)}
+                                  className="flex-1 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-[10px] text-center transition-all"
+                                >
+                                  ✕ Rechazar
+                                </button>
+                              </div>
+                            )}
                           </div>
                         );
                       })

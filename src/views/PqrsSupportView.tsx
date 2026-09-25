@@ -1,53 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Send, CheckCircle2, Clock, User, Building2, AlertCircle, RefreshCw } from 'lucide-react';
-import { adminApi, PqrsTicketItem } from '../services/adminApi';
-
-const MOCK_TICKETS: PqrsTicketItem[] = [
-  {
-    id: 'pq-demo-1',
-    residentId: 'res-1',
-    category: 'PETICION',
-    subject: 'Solicitud de tag de acceso electromagnético extra',
-    description: 'Deseo solicitar un tag electromagnético adicional para mi segundo vehículo.',
-    status: 'OPEN',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    resident: {
-      id: 'res-1',
-      fullName: 'María Camila Rodríguez',
-      email: 'maria.rodriguez@example.com',
-      phone: '+503 7000-1122',
-      property: {
-        unitNumber: 'Apt 502',
-        block: 'Torre B',
-      },
-    },
-    messages: [
-      {
-        id: 'msg-1',
-        pqrsId: 'pq-demo-1',
-        senderId: 'res-1',
-        message: 'Hola administración, quisiera saber el costo de un tag extra para mi segundo carro.',
-        isStaff: false,
-        createdAt: new Date().toISOString(),
-        sender: {
-          id: 'res-1',
-          fullName: 'María Camila Rodríguez',
-          role: 'RESIDENT',
-        },
-      },
-    ],
-  },
-];
+import {
+  MessageSquare,
+  Send,
+  CheckCircle2,
+  Clock,
+  User,
+  Building2,
+  AlertCircle,
+  RefreshCw,
+  UserCheck,
+  Flame,
+} from 'lucide-react';
+import { adminApi, PqrsTicketItem, ResidentUser } from '../services/adminApi';
 
 export const PqrsSupportView: React.FC = () => {
   const [tickets, setTickets] = useState<PqrsTicketItem[]>([]);
+  const [staffUsers, setStaffUsers] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -70,11 +45,23 @@ export const PqrsSupportView: React.FC = () => {
     }
   };
 
+  const fetchStaff = async () => {
+    try {
+      const res = await adminApi.getUsers('ADMIN');
+      if (res.success && Array.isArray(res.users)) {
+        setStaffUsers(res.users);
+      }
+    } catch (e) {
+      console.warn('Could not load staff users:', e);
+    }
+  };
+
   useEffect(() => {
     fetchTickets();
+    fetchStaff();
     const interval = setInterval(() => {
       fetchTickets();
-    }, 8000);
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -104,93 +91,111 @@ export const PqrsSupportView: React.FC = () => {
               : t
           )
         );
-        setNotificationStatus('📲 Respuesta enviada y notificación push emitida al dispositivo móvil.');
-      } else {
-        // Local fallback update if API didn't return full object
-        const localMsg = {
-          id: `msg-${Date.now()}`,
-          pqrsId: activeTicket.id,
-          senderId: 'admin',
-          message: messageContent,
-          isStaff: true,
-          createdAt: new Date().toISOString(),
-          sender: { id: 'admin', fullName: 'Administración Zentary', role: 'ADMIN' },
-        };
-        setTickets((prev) =>
-          prev.map((t) =>
-            t.id === activeTicket.id
-              ? {
-                  ...t,
-                  status: 'IN_PROGRESS',
-                  messages: [...(t.messages || []), localMsg],
-                }
-              : t
-          )
-        );
-        setNotificationStatus('📲 Respuesta guardada y notificación enviada.');
+        setNotificationStatus('📲 Respuesta enviada y notificación push emitida al residente.');
       }
     } catch (err) {
       console.error('Error sending reply:', err);
-      setNotificationStatus('⚠️ Se guardó localmente. Verifica la conexión con el backend.');
+      setNotificationStatus('⚠️ Error al enviar respuesta.');
     } finally {
       setIsSending(false);
       setTimeout(() => setNotificationStatus(null), 5000);
     }
   };
 
-  const handleResolveTicket = async () => {
+  const handleUpdateStatus = async (newStatus: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED') => {
     if (!activeTicket || isResolving) return;
 
     setIsResolving(true);
     setNotificationStatus(null);
 
     try {
-      const res = await adminApi.updatePqrsStatus(activeTicket.id, 'RESOLVED');
+      const res = await adminApi.updatePqrsStatus(activeTicket.id, newStatus);
       if (res.success) {
         setTickets((prev) =>
-          prev.map((t) => (t.id === activeTicket.id ? { ...t, status: 'RESOLVED' } : t))
+          prev.map((t) => (t.id === activeTicket.id ? { ...t, status: newStatus } : t))
         );
-        setNotificationStatus('✅ PQRS marcada como Resuelta. Notificación enviada al celular del residente.');
+        setNotificationStatus(`✅ Estado actualizado a ${newStatus}. Notificación enviada al residente.`);
       }
     } catch (err) {
-      console.error('Error resolving ticket:', err);
-      // Fallback update in local state
-      setTickets((prev) =>
-        prev.map((t) => (t.id === activeTicket.id ? { ...t, status: 'RESOLVED' } : t))
-      );
-      setNotificationStatus('✅ Marcada como Resuelta en panel.');
+      console.error('Error updating ticket status:', err);
+      setNotificationStatus('Error al actualizar estado.');
     } finally {
       setIsResolving(false);
       setTimeout(() => setNotificationStatus(null), 5000);
     }
   };
 
+  const handleAssignStaff = async (staffId: string) => {
+    if (!activeTicket) return;
+
+    try {
+      const res = await adminApi.assignPqrsStaff(activeTicket.id, staffId);
+      if (res.success) {
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === activeTicket.id
+              ? {
+                  ...t,
+                  assignedToUserId: staffId || undefined,
+                  assignedToUser: staffUsers.find((s) => s.id === staffId),
+                }
+              : t
+          )
+        );
+        setNotificationStatus(`✓ ${res.message}`);
+        setTimeout(() => setNotificationStatus(null), 4000);
+      }
+    } catch (err: any) {
+      alert('Error al asignar staff: ' + err.message);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'OPEN':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">ABIERTA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">ABIERTA</span>;
       case 'IN_PROGRESS':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">EN PROCESO</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">EN PROCESO</span>;
+      case 'WAITING_USER':
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">ESPERA RESIDENTE</span>;
       case 'RESOLVED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">RESUELTA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">RESUELTA</span>;
       case 'CLOSED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">CERRADA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">CERRADA</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">{status}</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">{status}</span>;
     }
   };
+
+  const getPriorityBadge = (p?: string) => {
+    switch (p) {
+      case 'URGENTE':
+        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">URGENTE</span>;
+      case 'ALTA':
+        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">ALTA</span>;
+      case 'BAJA':
+        return <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-slate-800 text-slate-400 border border-slate-700">BAJA</span>;
+      default:
+        return <span className="px-2 py-0.5 rounded text-[9px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIA</span>;
+    }
+  };
+
+  const filteredTickets = tickets.filter((t) => {
+    if (statusFilter === 'ALL') return true;
+    return t.status === statusFilter;
+  });
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-140px)]">
       {/* Ticket List Column */}
-      <div className="glass-card p-5 rounded-3xl border border-slate-800 flex flex-col h-full space-y-4">
+      <div className="glass-card p-5 rounded-3xl border border-slate-800 flex flex-col h-full space-y-3">
         <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-purple-400" />
-              Tickets PQRS & Soporte
+              PQRS & Soporte (Fase 3)
             </h2>
-            <p className="text-xs text-slate-400">Solicitudes enviadas por los residentes</p>
+            <p className="text-xs text-slate-400">Peticiones, quejas, reclamos y sugerencias</p>
           </div>
           <button
             onClick={fetchTickets}
@@ -201,6 +206,23 @@ export const PqrsSupportView: React.FC = () => {
           </button>
         </div>
 
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto pb-1">
+          {['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${
+                statusFilter === s
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-900 text-slate-400 hover:text-white'
+              }`}
+            >
+              {s === 'ALL' ? 'Todos' : s}
+            </button>
+          ))}
+        </div>
+
         {notificationStatus && (
           <div className="p-3 text-xs rounded-xl bg-blue-900/40 border border-blue-500/40 text-blue-200">
             {notificationStatus}
@@ -208,14 +230,16 @@ export const PqrsSupportView: React.FC = () => {
         )}
 
         <div className="overflow-y-auto space-y-3 flex-1 pr-1">
-          {tickets.length === 0 ? (
+          {filteredTickets.length === 0 ? (
             <div className="text-center py-10 text-slate-500 text-sm">No hay tickets registrados</div>
           ) : (
-            tickets.map((t) => {
+            filteredTickets.map((t) => {
               const isSelected = activeTicket && t.id === activeTicket.id;
-              const unit = t.resident?.property
+              const unit = t.house?.unitNumber
+                ? `Casa ${t.house.unitNumber}${t.house.block ? ` (${t.house.block})` : ''}`
+                : t.resident?.property
                 ? `${t.resident.property.unitNumber}${t.resident.property.block ? ` (${t.resident.property.block})` : ''}`
-                : 'Sin unidad';
+                : 'Sin vivienda';
               const residentName = t.resident?.fullName || 'Residente';
 
               return (
@@ -228,10 +252,13 @@ export const PqrsSupportView: React.FC = () => {
                       : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
-                      {t.category}
-                    </span>
+                  <div className="flex items-center justify-between mb-1.5 gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                        {t.category}
+                      </span>
+                      {getPriorityBadge(t.priority)}
+                    </div>
                     {getStatusBadge(t.status)}
                   </div>
                   <h3 className="font-bold text-sm text-white truncate mt-1">{t.subject}</h3>
@@ -249,45 +276,70 @@ export const PqrsSupportView: React.FC = () => {
       {activeTicket ? (
         <div className="lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 flex flex-col h-full">
           {/* Ticket Top Header */}
-          <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">
                   {activeTicket.category}
                 </span>
+                {getPriorityBadge(activeTicket.priority)}
                 <h3 className="text-lg font-bold text-white">{activeTicket.subject}</h3>
               </div>
               <p className="text-xs text-slate-400 mt-1">
                 Enviado por <strong className="text-slate-200">{activeTicket.resident?.fullName || 'Residente'}</strong>{' '}
-                {activeTicket.resident?.property && (
-                  <>
-                    ({activeTicket.resident.property.unitNumber}{' '}
-                    {activeTicket.resident.property.block ? activeTicket.resident.property.block : ''})
-                  </>
+                {activeTicket.house && (
+                  <span className="text-blue-400 font-bold ml-1">
+                    (Casa {activeTicket.house.unitNumber} {activeTicket.house.block || ''})
+                  </span>
                 )}
                 {activeTicket.resident?.email && <span className="ml-2 text-slate-500">• {activeTicket.resident.email}</span>}
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {getStatusBadge(activeTicket.status)}
-              {activeTicket.status !== 'RESOLVED' && activeTicket.status !== 'CLOSED' && (
-                <button
-                  onClick={handleResolveTicket}
-                  disabled={isResolving}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  {isResolving ? 'Procesando...' : 'Marcar Resuelto'}
-                </button>
-              )}
+
+              {/* Status Change Selector */}
+              <select
+                value={activeTicket.status}
+                onChange={(e) => handleUpdateStatus(e.target.value as any)}
+                disabled={isResolving}
+                className="bg-slate-900 border border-slate-700 text-xs font-bold text-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500"
+              >
+                <option value="OPEN">ABIERTA</option>
+                <option value="IN_PROGRESS">EN PROCESO</option>
+                <option value="WAITING_USER">ESPERA RESIDENTE</option>
+                <option value="RESOLVED">RESUELTA</option>
+                <option value="CLOSED">CERRADA</option>
+              </select>
             </div>
           </div>
 
-          {/* Description banner */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 mb-4 text-xs text-slate-300">
-            <span className="font-bold text-purple-300 block mb-1">Descripción inicial de la solicitud:</span>
-            <p className="leading-relaxed">{activeTicket.description}</p>
+          {/* Staff Assignment & Description Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="sm:col-span-2 bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-xs text-slate-300">
+              <span className="font-bold text-purple-300 block mb-1">Descripción de la solicitud:</span>
+              <p className="leading-relaxed">{activeTicket.description}</p>
+            </div>
+
+            <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-3 text-xs text-slate-300 flex flex-col justify-between">
+              <span className="font-bold text-slate-400 flex items-center gap-1.5 mb-1.5">
+                <UserCheck className="w-4 h-4 text-blue-400" />
+                Personal Asignado:
+              </span>
+              <select
+                value={activeTicket.assignedToUserId || ''}
+                onChange={(e) => handleAssignStaff(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none"
+              >
+                <option value="">Sin Asignar</option>
+                {staffUsers.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.fullName} ({s.role})
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Chat Conversation Body */}
