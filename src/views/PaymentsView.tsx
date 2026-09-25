@@ -64,7 +64,7 @@ export const PaymentsView: React.FC = () => {
   const [manualConcept, setManualConcept] = useState('Abono Cuota de Mantenimiento');
   const [isManualSubmitting, setIsManualSubmitting] = useState(false);
 
-  // Mora Automática State
+  // Control de Mora State
   const [isApplyingLateFees, setIsApplyingLateFees] = useState(false);
   const [lateFeeFeedback, setLateFeeFeedback] = useState<string | null>(null);
 
@@ -178,7 +178,7 @@ export const PaymentsView: React.FC = () => {
   };
 
   const handleApplyLateFees = async () => {
-    if (!confirm('¿Deseas ejecutar el motor de Mora Automática? Se evaluarán todos los cobros vencidos y se aplicará un 5% de recargo.')) {
+    if (!confirm('¿Deseas ejecutar el Control de Mora? Se evaluarán todos los cobros vencidos y se aplicará un 5% de recargo.')) {
       return;
     }
 
@@ -186,15 +186,15 @@ export const PaymentsView: React.FC = () => {
       setIsApplyingLateFees(true);
       const res = await adminApi.applyLateFees({ lateFeePercent: 5.0, defaultGraceDays: 3 });
       if (res.success) {
-        setLateFeeFeedback(`✓ Se aplicó recargo de mora a ${res.processedCount} cobros ($${res.totalLateFeesApplied} USD en recargos).`);
+        setLateFeeFeedback(`✓ Control de mora aplicado a ${res.processedCount} cobros ($${res.totalLateFeesApplied} USD en recargos).`);
         setTimeout(() => setLateFeeFeedback(null), 5000);
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert('No se pudo aplicar la mora automática.');
+        alert('No se pudo aplicar el control de mora.');
       }
     } catch (err: any) {
-      alert('Error en motor de mora: ' + err.message);
+      alert('Error en control de mora: ' + err.message);
     } finally {
       setIsApplyingLateFees(false);
     }
@@ -269,7 +269,7 @@ export const PaymentsView: React.FC = () => {
             Finanzas y Cuotas de Mantenimiento (Zentary 2.0 - Fase 4)
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Gestión de cuentas corrientes por vivienda, motor de mora automática, registro de pagos con comprobante y pasarela Wompi 3DS.
+            Gestión de cuentas corrientes por vivienda, control de mora, registro de pagos con comprobante y pasarela Wompi 3DS.
           </p>
         </div>
 
@@ -289,10 +289,10 @@ export const PaymentsView: React.FC = () => {
             onClick={handleApplyLateFees}
             disabled={isApplyingLateFees}
             className="px-4 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-sm flex items-center gap-2 transition-all whitespace-nowrap"
-            title="Evaluar cobros vencidos y aplicar 5% de mora"
+            title="Evaluar cobros vencidos y aplicar control de mora (5%)"
           >
             <Flame className={`w-4 h-4 ${isApplyingLateFees ? 'animate-spin' : ''}`} />
-            {isApplyingLateFees ? 'Calculando...' : 'Aplicar Mora Automática (5%)'}
+            {isApplyingLateFees ? 'Calculando...' : 'Ejecutar Control de Mora (5%)'}
           </button>
 
           <button

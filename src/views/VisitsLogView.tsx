@@ -295,7 +295,7 @@ export const VisitsLogView: React.FC = () => {
                 EN VIVO
               </span>
             </div>
-            <p className="text-xs text-slate-400">Control criptográfico de accesos y monitoreo de permanencia</p>
+            <p className="text-xs text-slate-400">Control de accesos con QR Dinámico y Estado de Permanencia</p>
           </div>
         </div>
 
@@ -517,7 +517,7 @@ export const VisitsLogView: React.FC = () => {
           }`}
         >
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          Monitor de Permanencia ({activeVisits.length})
+          Estado de Permanencia ({activeVisits.length})
         </button>
 
         <button
@@ -533,7 +533,7 @@ export const VisitsLogView: React.FC = () => {
         </button>
       </div>
 
-      {/* TAB 1: GARITA OPERATIVA & MONITOR DE PERMANENCIA */}
+      {/* TAB 1: GARITA OPERATIVA & ESTADO DE PERMANENCIA */}
       {activeTab === 'monitor' && (
         <div className="space-y-6">
           {/* Active Visitors Inside List */}
@@ -580,17 +580,17 @@ export const VisitsLogView: React.FC = () => {
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
                             item.severity === 'EXCEEDED'
-                              ? 'bg-rose-500/20 text-rose-400 border-rose-500/40 animate-pulse'
+                              ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
                               : item.severity === 'WARNING'
                               ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
                               : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                           }`}
                         >
                           {item.severity === 'EXCEEDED'
-                            ? `Excedido +${formatDuration(item.exceededMinutes)}`
+                            ? `Tiempo prolongado (+${formatDuration(item.exceededMinutes)})`
                             : item.severity === 'WARNING'
-                            ? `Quedan ${formatDuration(item.remainingMinutes)}`
-                            : 'Permanencia Normal'}
+                            ? `Tiempo estimado ${formatDuration(item.remainingMinutes)}`
+                            : 'Permanencia Activa'}
                         </span>
 
                         <span className="text-xs font-mono text-slate-300 font-bold flex items-center gap-1">
