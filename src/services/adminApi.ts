@@ -82,7 +82,7 @@ class AdminApiService {
     return 'admin_demo_token';
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
     let token = this.getAuthToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -185,6 +185,67 @@ class AdminApiService {
     });
   }
 
+  // Visits & Garita Access Control (Zentary 2.0 - Fase 2)
+  async getVisits(params?: { category?: string; status?: string; search?: string }): Promise<{ success: boolean; visits: any[] }> {
+    const q = new URLSearchParams();
+    if (params?.category) q.append('category', params.category);
+    if (params?.status) q.append('status', params.status);
+    if (params?.search) q.append('search', params.search);
+    const qs = q.toString() ? `?${q.toString()}` : '';
+    return this.request(`/visits${qs}`);
+  }
+
+  async getActiveInsideVisits(): Promise<{
+    success: boolean;
+    summary: { totalInside: number; totalExceeded: number; totalExpectedToday: number };
+    activeVisits: any[];
+    expectedToday: any[];
+  }> {
+    return this.request('/visits/active-inside');
+  }
+
+  async scanQRToken(token: string): Promise<{ success: boolean; valid: boolean; visit?: any; message?: string; code?: string }> {
+    return this.request('/visits/scan-qr', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async confirmEntry(visitId: string, data?: { gateName?: string; vehiclePlate?: string; notes?: string }): Promise<{ success: boolean; message?: string; visit?: any }> {
+    return this.request(`/visits/${visitId}/confirm-entry`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async registerExit(visitId: string, data?: { notes?: string }): Promise<{ success: boolean; message?: string; durationFormatted?: string; durationMinutes?: number; visit?: any }> {
+    return this.request(`/visits/${visitId}/exit`, {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
+  }
+
+  async quickEntry(data: {
+    visitorName: string;
+    visitorDni?: string;
+    visitorPhone?: string;
+    vehiclePlate?: string;
+    houseId?: string;
+    unitNumber?: string;
+    entryType?: string;
+    notes?: string;
+    gateName?: string;
+    maxDurationHours?: number;
+  }): Promise<{ success: boolean; message?: string; visit?: any }> {
+    return this.request('/visits/quick-entry', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getHouses(): Promise<{ success: boolean; houses: any[] }> {
+    return this.request('/houses');
+  }
 }
 
 export const adminApi = new AdminApiService();
