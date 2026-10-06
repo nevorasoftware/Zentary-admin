@@ -266,7 +266,7 @@ export const PaymentsView: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-blue-400" />
-            Finanzas y Cuotas de Mantenimiento (Zentary 2.0 - Fase 4)
+            Finanzas y Cuotas de Mantenimiento
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             Gestión de cuentas corrientes por vivienda, control de mora, registro de pagos con comprobante y pasarela Wompi 3DS.

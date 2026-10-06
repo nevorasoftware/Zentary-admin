@@ -290,7 +290,7 @@ export const VisitsLogView: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-white">Garita de Seguridad Digital 2.0</h2>
+              <h2 className="text-lg font-bold text-white">Garita de Seguridad Digital</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 EN VIVO
               </span>
