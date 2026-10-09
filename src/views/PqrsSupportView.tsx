@@ -102,7 +102,7 @@ export const PqrsSupportView: React.FC = () => {
     }
   };
 
-  const handleUpdateStatus = async (newStatus: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED') => {
+  const handleUpdateStatus = async (newStatus: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED') => {
     if (!activeTicket || isResolving) return;
 
     setIsResolving(true);
@@ -115,10 +115,12 @@ export const PqrsSupportView: React.FC = () => {
           prev.map((t) => (t.id === activeTicket.id ? { ...t, status: newStatus } : t))
         );
         setNotificationStatus(`✅ Estado actualizado a ${newStatus}. Notificación enviada al residente.`);
+      } else {
+        setNotificationStatus('⚠️ Error al actualizar estado.');
       }
     } catch (err) {
       console.error('Error updating ticket status:', err);
-      setNotificationStatus('Error al actualizar estado.');
+      setNotificationStatus('⚠️ Error al actualizar estado.');
     } finally {
       setIsResolving(false);
       setTimeout(() => setNotificationStatus(null), 5000);
@@ -156,8 +158,6 @@ export const PqrsSupportView: React.FC = () => {
         return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">ABIERTA</span>;
       case 'IN_PROGRESS':
         return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">EN PROCESO</span>;
-      case 'WAITING_USER':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/30">ESPERA RESIDENTE</span>;
       case 'RESOLVED':
         return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">RESUELTA</span>;
       case 'CLOSED':
@@ -308,7 +308,6 @@ export const PqrsSupportView: React.FC = () => {
               >
                 <option value="OPEN">ABIERTA</option>
                 <option value="IN_PROGRESS">EN PROCESO</option>
-                <option value="WAITING_USER">ESPERA RESIDENTE</option>
                 <option value="RESOLVED">RESUELTA</option>
                 <option value="CLOSED">CERRADA</option>
               </select>
