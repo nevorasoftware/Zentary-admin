@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Camera, X, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
-import { getAdminToken } from '../services/adminApi';
+import { getAdminToken, API_BASE_URL } from '../services/adminApi';
 
 interface EditProfileModalProps {
   currentUser: {
@@ -63,7 +63,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setFeedback(null);
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/auth/profile', {
+      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       }
 
       if (newPassword.trim() !== '') {
-        const passwordResponse = await fetch('https://zentary-backend-production.up.railway.app/api/auth/change-password', {
+        const passwordResponse = await fetch(`${API_BASE_URL}/auth/change-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

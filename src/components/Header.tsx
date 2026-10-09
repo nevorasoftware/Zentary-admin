@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Bell, Building2, Edit3, Check, Menu } from 'lucide-react';
-import { getAdminToken } from '../services/adminApi';
+import { getAdminToken, API_BASE_URL } from '../services/adminApi';
 
 interface HeaderProps {
   title: string;
@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
       onUpdateCommunityName(updatedName);
 
       try {
-        await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+        await fetch(`${API_BASE_URL}/admin/community`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

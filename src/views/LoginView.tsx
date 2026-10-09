@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Lock, Mail, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
-import { ADMIN_ROLES } from '../services/adminApi';
+import { ADMIN_ROLES, API_BASE_URL } from '../services/adminApi';
 
 interface LoginViewProps {
   onLoginSuccess: (user: any, token: string) => void;
@@ -36,7 +36,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
     setErrorMessage('');
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/auth/change-password', {
+      const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
     setErrorMessage('');
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),

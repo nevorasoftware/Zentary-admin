@@ -16,9 +16,8 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { adminApi, handleUnauthorized, isSafeUrl } from '../services/adminApi';
+import { adminApi, handleUnauthorized, isSafeUrl, API_BASE_URL } from '../services/adminApi';
 
-const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
 
 const ALL_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const AMENITY_TYPES = ['Salón', 'Piscina', 'Cancha', 'Gimnasio', 'BBQ', 'Área Infantil', 'Otro'];

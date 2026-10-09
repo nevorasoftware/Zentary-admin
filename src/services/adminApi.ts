@@ -1,6 +1,6 @@
 // API Client for Zentary Admin Panel
 
-export const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://zentary-backend-production.up.railway.app/api';
 
 // Acepta solo URLs http(s) y data:image/ para mostrar enlaces e imágenes
 export const isSafeUrl = (url?: string | null): boolean => {

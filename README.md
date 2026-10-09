@@ -26,4 +26,6 @@ npm run dev
 ```
 
 El servidor web correrá en `http://localhost:5173`.
+
+Opcionalmente, define `VITE_API_URL` (por ejemplo en `.env.local`, que no se versiona) para apuntar el panel a otro backend. Debe incluir el sufijo `/api` (por ejemplo `https://mi-backend.example.com/api`); si no se define, se usa el backend de producción actual.
 "# Zentary-admin" 
