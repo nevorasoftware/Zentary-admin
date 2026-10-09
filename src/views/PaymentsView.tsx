@@ -746,8 +746,12 @@ export const PaymentsView: React.FC = () => {
                     value={manualAmount}
                     onChange={(e) => setManualAmount(e.target.value)}
                     required
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                    readOnly={!!selectedPaymentForPay}
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 read-only:opacity-60 read-only:cursor-not-allowed"
                   />
+                  {selectedPaymentForPay && (
+                    <p className="text-xs text-slate-500 mt-1">Se debe registrar el monto total del cobro.</p>
+                  )}
                 </div>
 
                 <div>
