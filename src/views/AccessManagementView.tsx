@@ -29,7 +29,7 @@ const INITIAL_USERS: ExtendedUser[] = [
     id: 'u1',
     fullName: 'Jonathan Giron',
     email: 'misaelgrande@gmail.com',
-    phone: '61489595',
+    phone: '',
     role: 'RESIDENT',
     isActive: true,
     mustChangePassword: true,
@@ -261,7 +261,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
 
     const finalBlock = block.trim() !== '' ? block : communityName;
-    const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '+503 6148-9595';
+    const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '';
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
@@ -531,7 +531,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       id: user.id,
       fullName: user.fullName,
       email: user.email,
-      phone: user.phone || '61489595',
+      phone: user.phone || '',
       unitNumber: user.property?.unitNumber || '119D',
       genericPassword,
       whatsappLink,
@@ -689,7 +689,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
 
                   <td className="px-6 py-4 text-slate-400 font-mono text-xs">
-                    {user.phone || '61489595'}
+                    {user.phone || 'Sin teléfono'}
                   </td>
 
                   <td className="px-6 py-4">
@@ -1068,7 +1068,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 Correo: <strong className="text-white">{createdTenantInfo.email}</strong>
               </p>
               <p className="text-slate-300">
-                Teléfono: <strong className="text-white">{createdTenantInfo.phone || '61489595'}</strong>
+                Teléfono: <strong className="text-white">{createdTenantInfo.phone || 'Sin teléfono'}</strong>
               </p>
 
               <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
@@ -1138,11 +1138,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => handleSendWhatsAppApi(createdTenantInfo.phone, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.email)}
-                disabled={isSendingWhatsApp}
-                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                disabled={isSendingWhatsApp || !createdTenantInfo.phone}
+                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageSquare className="w-4 h-4" />
-                {isSendingWhatsApp ? 'Enviando WhatsApp...' : 'Enviar por WhatsApp'}
+                {isSendingWhatsApp ? 'Enviando WhatsApp...' : createdTenantInfo.phone ? 'Enviar por WhatsApp' : 'Sin teléfono para WhatsApp'}
               </button>
 
               <button
