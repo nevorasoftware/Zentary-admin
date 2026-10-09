@@ -72,6 +72,7 @@ export const AmenitiesView: React.FC = () => {
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   // Modal State for Create / Edit Amenity
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,6 +116,7 @@ export const AmenitiesView: React.FC = () => {
   const fetchAmenities = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const res = await fetch(`${API_BASE_URL}/amenities/admin`, {
         headers: { Authorization: `Bearer ${getAdminToken()}` },
       });
@@ -125,9 +127,12 @@ export const AmenitiesView: React.FC = () => {
       const data = await res.json();
       if (data.success) {
         setAmenities(data.amenities || []);
+      } else {
+        setLoadError(data.message || 'No se pudieron cargar las amenidades.');
       }
     } catch (err) {
       console.error('Error fetching amenities:', err);
+      setLoadError('No se pudieron cargar las amenidades. Verifica tu conexión e inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -403,6 +408,16 @@ export const AmenitiesView: React.FC = () => {
             <div className="text-center py-12">
               <div className="w-8 h-8 border-4 border-[#FFCF36] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
               <p className="text-sm text-slate-400 font-bold">Cargando amenidades...</p>
+            </div>
+          ) : loadError ? (
+            <div className="text-center py-16 bg-rose-500/10 rounded-2xl border border-rose-500/30">
+              <p className="text-sm font-bold text-rose-300 mb-3">⚠️ {loadError}</p>
+              <button
+                onClick={fetchAmenities}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all"
+              >
+                Reintentar
+              </button>
             </div>
           ) : amenities.length === 0 ? (
             <div className="text-center py-16 bg-slate-900/60 rounded-2xl border border-purple-900/30">

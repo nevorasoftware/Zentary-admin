@@ -18,6 +18,7 @@ import { adminApi, isSafeUrl, AnnouncementItem } from '../services/adminApi';
 export const AnnouncementsView: React.FC = () => {
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [category, setCategory] = useState<'MANTENIMIENTO' | 'URGENTE' | 'EVENTO' | 'GENERAL'>('GENERAL');
@@ -30,12 +31,16 @@ export const AnnouncementsView: React.FC = () => {
   const fetchAnnouncements = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const res = await adminApi.getAnnouncements();
       if (res.success && Array.isArray(res.announcements)) {
         setAnnouncements(res.announcements);
+      } else {
+        setLoadError('No se pudieron cargar los comunicados.');
       }
     } catch (err) {
       console.warn('Error fetching announcements from API.');
+      setLoadError('No se pudieron cargar los comunicados. Verifica tu conexión e inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -276,6 +281,10 @@ export const AnnouncementsView: React.FC = () => {
 
         {loading ? (
           <div className="text-center py-12 text-slate-500 text-sm">Cargando comunicados...</div>
+        ) : loadError ? (
+          <div className="text-center py-12 text-rose-300 text-sm font-semibold glass-card rounded-3xl p-8 border border-rose-500/30">
+            ⚠️ {loadError}
+          </div>
         ) : announcements.length === 0 ? (
           <div className="text-center py-12 text-slate-500 text-sm glass-card rounded-3xl p-8 border border-slate-800">
             No hay comunicados publicados aún.

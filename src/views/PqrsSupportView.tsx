@@ -17,6 +17,7 @@ export const PqrsSupportView: React.FC = () => {
   const [tickets, setTickets] = useState<PqrsTicketItem[]>([]);
   const [staffUsers, setStaffUsers] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -26,6 +27,7 @@ export const PqrsSupportView: React.FC = () => {
 
   const fetchTickets = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const res = await adminApi.getPqrsList();
       if (res.success && Array.isArray(res.pqrsList)) {
@@ -35,9 +37,12 @@ export const PqrsSupportView: React.FC = () => {
         } else {
           setSelectedTicketId('');
         }
+      } else {
+        setLoadError('No se pudieron cargar los tickets.');
       }
     } catch (e) {
       console.warn('Could not load PQRS from backend:', e);
+      setLoadError('No se pudieron cargar los tickets. Verifica tu conexión e inténtalo de nuevo.');
       setTickets([]);
       setSelectedTicketId('');
     } finally {
@@ -232,7 +237,9 @@ export const PqrsSupportView: React.FC = () => {
         )}
 
         <div className="overflow-y-auto space-y-3 flex-1 pr-1">
-          {filteredTickets.length === 0 ? (
+          {loadError ? (
+            <div className="text-center py-10 text-rose-300 text-sm font-semibold">⚠️ {loadError}</div>
+          ) : filteredTickets.length === 0 ? (
             <div className="text-center py-10 text-slate-500 text-sm">No hay tickets registrados</div>
           ) : (
             filteredTickets.map((t) => {

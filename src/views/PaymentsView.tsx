@@ -40,6 +40,7 @@ export const PaymentsView: React.FC = () => {
   const [financialSummary, setFinancialSummary] = useState<FinancialSummary | null>(null);
   const [residents, setResidents] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<'ALL' | 'PENDING' | 'OVERDUE' | 'PAID'>('ALL');
 
@@ -81,6 +82,7 @@ export const PaymentsView: React.FC = () => {
   const fetchAllPayments = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const res = await adminApi.getAllPayments();
       if (res.success && Array.isArray(res.payments)) {
         const formatted: PaymentRecord[] = res.payments.map((p: any) => ({
@@ -106,9 +108,12 @@ export const PaymentsView: React.FC = () => {
           confirmedAt: p.confirmedAt ? new Date(p.confirmedAt).toLocaleDateString() : undefined,
         }));
         setPayments(formatted);
+      } else {
+        setLoadError('No se pudieron cargar los cobros.');
       }
     } catch (err) {
       console.warn('⚠️ Error al cargar pagos desde backend.');
+      setLoadError('No se pudieron cargar los cobros. Verifica tu conexión e inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -468,7 +473,13 @@ export const PaymentsView: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60 font-medium">
-              {filteredPayments.length === 0 ? (
+              {loadError ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-rose-300 font-semibold">
+                    ⚠️ {loadError}
+                  </td>
+                </tr>
+              ) : filteredPayments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     No se encontraron cobros registrados con los criterios seleccionados.
