@@ -360,7 +360,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               email: editEmail || u.email,
               phone: editPhone !== undefined ? editPhone : u.phone,
               property: {
-                unitNumber: editUnitNumber || u.property?.unitNumber || '119D',
+                unitNumber: editUnitNumber,
                 block: editBlock !== undefined ? editBlock : u.property?.block,
               },
             };
@@ -395,6 +395,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
 
   const handleSendWhatsAppApi = async (targetPhone: string, targetName: string, targetUnit?: string, targetEmail?: string) => {
+    if (!targetUnit) {
+      showToast('⚠️ No se puede enviar: el residente no tiene una unidad registrada. Edita el usuario e indica su unidad.', 'error');
+      return;
+    }
+
     setIsSendingWhatsApp(true);
     setWhatsAppStatus({ state: 'SENDING', message: 'Enviando WhatsApp por Meta Cloud API...' });
 
@@ -408,7 +413,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         body: JSON.stringify({
           phone: targetPhone,
           fullName: targetName,
-          unitNumber: targetUnit || '119D',
+          unitNumber: targetUnit,
           email: targetEmail || '',
           communityName,
         }),
@@ -444,6 +449,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   };
 
   const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string, targetUserId?: string) => {
+    if (!targetUnit) {
+      showToast('⚠️ No se puede enviar: el residente no tiene una unidad registrada. Edita el usuario e indica su unidad.', 'error');
+      return;
+    }
+
     setIsSendingEmail(true);
     setEmailStatus({ state: 'SENDING', message: 'Enviando correo de accesos...' });
 
@@ -458,7 +468,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           userId: targetUserId,
           email: targetEmail,
           fullName: targetName,
-          unitNumber: targetUnit || '119D',
+          unitNumber: targetUnit,
           communityName,
         }),
       });
@@ -493,12 +503,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   };
 
   const handleResendCredentialsForUser = (user: ExtendedUser) => {
-    const cleanUnit = (user.property?.unitNumber || '119D').replace(/\s+/g, '');
+    if (!user.property?.unitNumber) {
+      showToast('⚠️ El residente no tiene una unidad registrada. Edita el usuario e indica su unidad antes de reenviar credenciales.', 'error');
+      return;
+    }
+    const cleanUnit = user.property.unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
     const cleanPhone = (user.phone || '').replace(/[^\d]/g, '');
 
     const messageText = `Hola ${user.fullName}, recordatorio de accesos para ${communityName}.\n\n` +
-      `📌 Unidad: ${user.property?.unitNumber || '119D'}\n` +
+      `📌 Unidad: ${user.property.unitNumber}\n` +
       `📧 Correo: ${user.email}\n` +
       `🔑 Contraseña inicial: ${genericPassword}\n\n` +
       `Al iniciar sesión en Zentary, se te pedirá cambiar tu clave.`;
@@ -517,7 +531,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       fullName: user.fullName,
       email: user.email,
       phone: user.phone || '',
-      unitNumber: user.property?.unitNumber || '119D',
+      unitNumber: user.property.unitNumber,
       genericPassword,
       whatsappLink,
       mailtoLink,
