@@ -65,7 +65,6 @@ export const PqrsSupportView: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const activeTicket = tickets.find((t) => t.id === selectedTicketId) || tickets[0];
 
   const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,6 +183,8 @@ export const PqrsSupportView: React.FC = () => {
     if (statusFilter === 'ALL') return true;
     return t.status === statusFilter;
   });
+
+  const activeTicket = filteredTickets.find((t) => t.id === selectedTicketId) || filteredTickets[0];
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-140px)]">
