@@ -18,7 +18,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
-import { ResidentUser, getAdminToken, handleUnauthorized } from '../services/adminApi';
+import { ResidentUser, getAdminToken, handleUnauthorized, API_BASE_URL } from '../services/adminApi';
 
 interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
@@ -80,7 +80,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const fetchUsersFromBackend = async () => {
     setIsLoadingUsers(true);
     try {
-      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
+      const res = await fetch(`${API_BASE_URL}/admin/users`, {
         headers: { 'Authorization': `Bearer ${getAdminToken()}` },
       });
       if (res.status === 401) {
@@ -105,7 +105,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   const fetchCommunityConfigFromBackend = async () => {
     try {
-      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+      const res = await fetch(`${API_BASE_URL}/admin/community`, {
         headers: { 'Authorization': `Bearer ${getAdminToken()}` },
       });
       if (res.status === 401) {
@@ -135,7 +135,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
     setIsSavingCommunity(true);
     try {
-      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+      const res = await fetch(`${API_BASE_URL}/admin/community`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -188,7 +188,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       );
 
     try {
-      const res = await fetch(`https://zentary-backend-production.up.railway.app/api/admin/users/${userId}/access`, {
+      const res = await fetch(`${API_BASE_URL}/admin/users/${userId}/access`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -244,7 +244,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     let createdUserId: string | undefined;
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants', {
+      const response = await fetch(`${API_BASE_URL}/admin/tenants`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
 
     try {
-      const res = await fetch(`https://zentary-backend-production.up.railway.app/api/admin/tenants/${editingUser.id}`, {
+      const res = await fetch(`${API_BASE_URL}/admin/tenants/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -404,7 +404,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setWhatsAppStatus({ state: 'SENDING', message: 'Enviando WhatsApp por Meta Cloud API...' });
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/send-whatsapp', {
+      const response = await fetch(`${API_BASE_URL}/admin/tenants/send-whatsapp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -465,7 +465,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEmailStatus({ state: 'SENDING', message: 'Enviando correo de accesos...' });
 
     try {
-      const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants/resend-credentials', {
+      const response = await fetch(`${API_BASE_URL}/admin/tenants/resend-credentials`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

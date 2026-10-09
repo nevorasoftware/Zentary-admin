@@ -11,7 +11,7 @@ import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
-import { adminApi, ADMIN_ROLES, handleUnauthorized } from './services/adminApi';
+import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL } from './services/adminApi';
 
 // Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
 const isTokenExpired = (token: string): boolean => {
@@ -75,7 +75,7 @@ export default function App() {
 
   const fetchCommunityConfig = async () => {
     try {
-      const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
+      const res = await fetch(`${API_BASE_URL}/admin/community`, {
         headers: { 'Authorization': `Bearer ${adminToken}` },
       });
       if (res.status === 401) {
