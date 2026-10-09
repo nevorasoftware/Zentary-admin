@@ -11,7 +11,7 @@ import {
   UserCheck,
   Flame,
 } from 'lucide-react';
-import { adminApi, PqrsTicketItem, ResidentUser } from '../services/adminApi';
+import { adminApi, ADMIN_ROLES, PqrsTicketItem, ResidentUser } from '../services/adminApi';
 
 export const PqrsSupportView: React.FC = () => {
   const [tickets, setTickets] = useState<PqrsTicketItem[]>([]);
@@ -47,9 +47,9 @@ export const PqrsSupportView: React.FC = () => {
 
   const fetchStaff = async () => {
     try {
-      const res = await adminApi.getUsers('ADMIN');
+      const res = await adminApi.getUsers('');
       if (res.success && Array.isArray(res.users)) {
-        setStaffUsers(res.users);
+        setStaffUsers(res.users.filter((u) => ADMIN_ROLES.includes(u.role)));
       }
     } catch (e) {
       console.warn('Could not load staff users:', e);
