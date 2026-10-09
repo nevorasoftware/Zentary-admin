@@ -50,8 +50,8 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   onSelectView,
-  openPqrsCount = 3,
-  pendingParcelsCount = 4,
+  openPqrsCount = 0,
+  pendingParcelsCount = 0,
   isOpenMobile = false,
   onCloseMobile,
   adminUser,
