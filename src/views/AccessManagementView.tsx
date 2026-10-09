@@ -24,45 +24,6 @@ interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
 }
 
-const INITIAL_USERS: ExtendedUser[] = [
-  {
-    id: 'u1',
-    fullName: 'Jonathan Giron',
-    email: 'misaelgrande@gmail.com',
-    phone: '',
-    role: 'RESIDENT',
-    isActive: true,
-    mustChangePassword: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
-    property: { unitNumber: '119D', block: 'Residencia Zentary' },
-    createdAt: '2026-08-11',
-  },
-  {
-    id: 'u2',
-    fullName: 'María Camila Rodríguez',
-    email: 'residente@zentary.com',
-    phone: '+503 7888-9999',
-    role: 'RESIDENT',
-    isActive: true,
-    mustChangePassword: true,
-    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-    property: { unitNumber: 'Apt 502', block: 'Torre B' },
-    createdAt: '2026-08-01',
-  },
-  {
-    id: 'u3',
-    fullName: 'Roberto Antonio Silva',
-    email: 'roberto.silva@gmail.com',
-    phone: '+503 7888-1234',
-    role: 'RESIDENT',
-    isActive: true,
-    mustChangePassword: false,
-    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
-    property: { unitNumber: 'Casa 14', block: 'Manzana A' },
-    createdAt: '2026-08-05',
-  },
-];
-
 interface AccessManagementViewProps {
   communityName?: string;
   onUpdateCommunityName?: (newName: string) => void;
@@ -74,6 +35,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 }) => {
   const [users, setUsers] = useState<ExtendedUser[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [usersError, setUsersError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
 
@@ -128,15 +90,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       const data = await res.json();
       setIsLoadingUsers(false);
 
-      if (data.success && Array.isArray(data.users) && data.users.length > 0) {
+      if (res.ok && data.success && Array.isArray(data.users)) {
+        setUsersError(null);
         setUsers(data.users);
       } else {
-        setUsers(INITIAL_USERS);
+        setUsersError(data.message || 'No se pudo cargar la lista de usuarios.');
       }
     } catch (err) {
-      console.warn('Backend fetch fallback:', err);
+      console.warn('Backend fetch error:', err);
       setIsLoadingUsers(false);
-      setUsers(INITIAL_USERS);
+      setUsersError('No se pudo conectar con el servidor. Intenta nuevamente.');
     }
   };
 
@@ -219,8 +182,13 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       prev.map((u) => (u.id === userId ? { ...u, isActive: nextState } : u))
     );
 
+    const revertToggle = () =>
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isActive: targetUser.isActive } : u))
+      );
+
     try {
-      await fetch(`https://zentary-backend-production.up.railway.app/api/admin/users/${userId}/access`, {
+      const res = await fetch(`https://zentary-backend-production.up.railway.app/api/admin/users/${userId}/access`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -228,9 +196,17 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         },
         body: JSON.stringify({ isActive: nextState }),
       });
-      showToast(`Acceso ${nextState ? 'habilitado' : 'deshabilitado'} correctamente.`, 'info');
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        showToast(`Acceso ${nextState ? 'habilitado' : 'deshabilitado'} correctamente.`, 'info');
+      } else {
+        revertToggle();
+        showToast(`⚠️ ${data.message || 'No se pudo actualizar el acceso.'}`, 'error');
+      }
     } catch (err) {
       console.warn('Error saving toggle access:', err);
+      revertToggle();
+      showToast('⚠️ No se pudo conectar con el servidor. Intenta nuevamente.', 'error');
     }
   };
 
@@ -354,26 +330,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       return;
     }
 
-    setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === editingUser.id) {
-          return {
-            ...u,
-            fullName: editFullName || u.fullName,
-            email: editEmail || u.email,
-            phone: editPhone !== undefined ? editPhone : u.phone,
-            property: {
-              unitNumber: editUnitNumber || u.property?.unitNumber || '119D',
-              block: editBlock !== undefined ? editBlock : u.property?.block,
-            },
-          };
-        }
-        return u;
-      })
-    );
-
     try {
-      await fetch(`https://zentary-backend-production.up.railway.app/api/admin/tenants/${editingUser.id}`, {
+      const res = await fetch(`https://zentary-backend-production.up.railway.app/api/admin/tenants/${editingUser.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -387,12 +345,37 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           block: editBlock,
         }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        showToast(`⚠️ ${data.message || 'No se pudo actualizar la información del inquilino.'}`, 'error');
+        return;
+      }
+
+      setUsers((prev) =>
+        prev.map((u) => {
+          if (u.id === editingUser.id) {
+            return {
+              ...u,
+              fullName: editFullName || u.fullName,
+              email: editEmail || u.email,
+              phone: editPhone !== undefined ? editPhone : u.phone,
+              property: {
+                unitNumber: editUnitNumber || u.property?.unitNumber || '119D',
+                block: editBlock !== undefined ? editBlock : u.property?.block,
+              },
+            };
+          }
+          return u;
+        })
+      );
+
+
+      showToast(`Información del inquilino ${editFullName} actualizada correctamente.`, 'success');
+      setEditingUser(null);
     } catch (err) {
       console.warn('Backend update failed:', err);
+      showToast('⚠️ No se pudo conectar con el servidor. Intenta nuevamente.', 'error');
     }
-
-    showToast(`Información del inquilino ${editFullName} actualizada correctamente.`, 'success');
-    setEditingUser(null);
   };
 
   // Email Delivery Feedback Banner State
@@ -742,6 +725,20 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
                 </tr>
               ))}
+              {!isLoadingUsers && usersError && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-rose-400">
+                    {usersError}
+                  </td>
+                </tr>
+              )}
+              {!isLoadingUsers && !usersError && filteredUsers.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-slate-400">
+                    {users.length === 0 ? 'No hay usuarios registrados.' : 'No se encontraron usuarios con ese filtro.'}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
