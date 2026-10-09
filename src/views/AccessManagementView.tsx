@@ -476,6 +476,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       const data = await response.json();
       setIsSendingEmail(false);
 
+      // El backend restablece la contraseña al reenviar: se muestra la que devuelve
+      const resetPassword = data.credentialsInfo?.genericPassword;
+      if (resetPassword) {
+        setCreatedTenantInfo((prev) => (prev ? { ...prev, genericPassword: resetPassword } : prev));
+      }
+
       if (data.success) {
         setEmailStatus({
           state: 'SUCCESS',
@@ -507,14 +513,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       showToast('⚠️ El residente no tiene una unidad registrada. Edita el usuario e indica su unidad antes de reenviar credenciales.', 'error');
       return;
     }
-    const cleanUnit = user.property.unitNumber.replace(/\s+/g, '');
-    const genericPassword = `Zentary${cleanUnit}!`;
     const cleanPhone = (user.phone || '').replace(/[^\d]/g, '');
 
     const messageText = `Hola ${user.fullName}, recordatorio de accesos para ${communityName}.\n\n` +
       `📌 Unidad: ${user.property.unitNumber}\n` +
-      `📧 Correo: ${user.email}\n` +
-      `🔑 Contraseña inicial: ${genericPassword}\n\n` +
+      `📧 Correo: ${user.email}\n\n` +
       `Al iniciar sesión en Zentary, se te pedirá cambiar tu clave.`;
 
     const whatsappLink = cleanPhone
@@ -532,7 +535,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       email: user.email,
       phone: user.phone || '',
       unitNumber: user.property.unitNumber,
-      genericPassword,
+      // La contraseña solo se muestra después de que el backend la restablece (envío por correo)
+      genericPassword: '',
       whatsappLink,
       mailtoLink,
     });
@@ -1084,6 +1088,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 Teléfono: <strong className="text-white">{createdTenantInfo.phone || 'Sin teléfono'}</strong>
               </p>
 
+              {createdTenantInfo.genericPassword ? (
               <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
                 <div>
                   <p className="text-[11px] uppercase tracking-wider text-amber-400 font-bold">Contraseña Genérica Asignada</p>
@@ -1100,6 +1105,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <Copy className="w-4 h-4" />
                 </button>
               </div>
+              ) : (
+              <p className="mt-3 text-xs text-slate-400">
+                La contraseña se mostrará después de restablecerla al enviar las credenciales por correo.
+              </p>
+              )}
             </div>
 
             {/* Visual Status Indicator for WhatsApp Cloud API Dispatch */}
