@@ -165,6 +165,8 @@ export const AmenitiesView: React.FC = () => {
       if (res.success) {
         alert('✓ Reserva aprobada exitosamente.');
         fetchWeeklyReservations();
+      } else {
+        alert('Error al aprobar reserva: ' + (res.message || 'No se pudo aprobar la reserva.'));
       }
     } catch (err: any) {
       alert('Error al aprobar reserva: ' + err.message);
@@ -179,6 +181,8 @@ export const AmenitiesView: React.FC = () => {
       if (res.success) {
         alert('Reserva rechazada.');
         fetchWeeklyReservations();
+      } else {
+        alert('Error al rechazar reserva: ' + (res.message || 'No se pudo rechazar la reserva.'));
       }
     } catch (err: any) {
       alert('Error al rechazar reserva: ' + err.message);
@@ -600,7 +604,17 @@ export const AmenitiesView: React.FC = () => {
                                     : 'bg-rose-500 text-white'
                                 }`}
                               >
-                                {isConfirmed ? 'Confirmada' : isPending ? 'Pendiente' : 'Cancelada'}
+                                {isConfirmed
+                                  ? 'Confirmada'
+                                  : isPending
+                                  ? 'Pendiente'
+                                  : res.reservationStatus === 'REJECTED'
+                                  ? 'Rechazada'
+                                  : res.reservationStatus === 'EXPIRED'
+                                  ? 'Expirada'
+                                  : res.reservationStatus === 'COMPLETED'
+                                  ? 'Completada'
+                                  : 'Cancelada'}
                               </span>
                             </div>
 
