@@ -139,6 +139,7 @@ export const PqrsSupportView: React.FC = () => {
                   ...t,
                   assignedToUserId: staffId || undefined,
                   assignedToUser: staffUsers.find((s) => s.id === staffId),
+                  status: res.pqrs?.status || t.status,
                 }
               : t
           )
