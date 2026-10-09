@@ -13,7 +13,7 @@ import {
   Users,
   Building,
 } from 'lucide-react';
-import { adminApi, AnnouncementItem } from '../services/adminApi';
+import { adminApi, isSafeUrl, AnnouncementItem } from '../services/adminApi';
 
 export const AnnouncementsView: React.FC = () => {
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
@@ -321,7 +321,7 @@ export const AnnouncementsView: React.FC = () => {
                     <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line">{a.body}</p>
                   </div>
 
-                  {a.imageUrl && (
+                  {isSafeUrl(a.imageUrl) && (
                     <div className="rounded-2xl overflow-hidden max-h-48 border border-slate-800">
                       <img src={a.imageUrl} alt={a.title} className="w-full h-full object-cover" />
                     </div>
