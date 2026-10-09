@@ -96,7 +96,7 @@ export const PaymentsView: React.FC = () => {
           amount: typeof p.amount === 'number' ? p.amount : parseFloat(p.amount || '0'),
           lateFee: typeof p.lateFee === 'number' ? p.lateFee : parseFloat(p.lateFee || '0'),
           dueDate: p.dueDate
-            ? new Date(p.dueDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+            ? new Date(p.dueDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' })
             : 'Pendiente',
           status: p.status,
           paymentMethod: p.paymentMethod || undefined,
