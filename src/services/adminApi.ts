@@ -61,7 +61,7 @@ export interface PqrsTicketItem {
   priority?: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
   subject: string;
   description: string;
-  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
   assignedToUserId?: string;
   assignedToUser?: {
     id: string;
@@ -226,7 +226,7 @@ class AdminApiService {
 
   async updatePqrsStatus(
     id: string,
-    status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_USER' | 'RESOLVED' | 'CLOSED' | 'CANCELLED'
+    status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
   ): Promise<{ success: boolean; pqrs: PqrsTicketItem }> {
     return this.request(`/pqrs/${id}/status`, {
       method: 'PATCH',
