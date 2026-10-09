@@ -13,6 +13,16 @@ import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 import { adminApi, ADMIN_ROLES, handleUnauthorized } from './services/adminApi';
 
+// Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return typeof payload.exp === 'number' && payload.exp * 1000 <= Date.now();
+  } catch (e) {
+    return false;
+  }
+};
+
 export default function App() {
   const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
@@ -50,6 +60,12 @@ export default function App() {
       }
     }).catch(() => {});
   }, [adminToken, currentView]);
+
+  useEffect(() => {
+    if (adminToken && isTokenExpired(adminToken)) {
+      handleLogout();
+    }
+  }, [adminToken]);
 
   useEffect(() => {
     if (adminUser && !ADMIN_ROLES.includes(adminUser.role)) {

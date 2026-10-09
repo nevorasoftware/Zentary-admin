@@ -11,10 +11,56 @@ export const LoginView: React.FC<LoginViewProps> = ({
   onLoginSuccess,
   communityName = 'Residencial Zentary',
 }) => {
-  const [email, setEmail] = useState('admin@zentary.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [pendingSession, setPendingSession] = useState<{ user: any; token: string } | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleChangePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pendingSession) return;
+
+    if (newPassword.length < 6) {
+      setErrorMessage('La nueva contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setErrorMessage('Las contraseñas no coinciden.');
+      return;
+    }
+
+    setIsLoading(true);
+    setErrorMessage('');
+
+    try {
+      const response = await fetch('https://zentary-backend-production.up.railway.app/api/auth/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${pendingSession.token}`,
+        },
+        body: JSON.stringify({ newPassword }),
+      });
+
+      const data = await response.json();
+      setIsLoading(false);
+
+      if (response.ok && data.success) {
+        onLoginSuccess(
+          { ...pendingSession.user, mustChangePassword: false },
+          data.token || pendingSession.token
+        );
+      } else {
+        setErrorMessage(data.message || 'No se pudo cambiar la contraseña.');
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMessage('Error de conexión con el servidor de autenticación en Railway.');
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +82,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
       if (response.ok && data.success && data.token) {
         if (!ADMIN_ROLES.includes(data.user?.role)) {
           setErrorMessage('Esta cuenta no tiene acceso al panel administrativo.');
+          return;
+        }
+        if (data.user?.mustChangePassword) {
+          setPendingSession({ user: data.user, token: data.token });
           return;
         }
         onLoginSuccess(data.user, data.token);
@@ -77,7 +127,62 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </div>
         )}
 
-        {/* Login Form */}
+        {/* Cambio obligatorio de contraseña / Login Form */}
+        {pendingSession ? (
+        <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
+          <p className="text-xs text-slate-400 text-center">
+            Por seguridad, debes definir una nueva contraseña antes de ingresar al panel.
+          </p>
+          <div>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              Nueva Contraseña
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="password"
+                placeholder="••••••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+              Confirmar Contraseña
+            </label>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="password"
+                placeholder="••••••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                required
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 animate-spin" /> Guardando contraseña...
+              </span>
+            ) : (
+              <>
+                <span>Cambiar Contraseña y Entrar</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </form>
+        ) : (
         <form onSubmit={handleLoginSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -130,6 +235,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             )}
           </button>
         </form>
+        )}
 
         <div className="pt-2 text-center text-[11px] text-slate-500 border-t border-slate-800/80 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
