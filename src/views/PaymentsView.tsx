@@ -16,7 +16,7 @@ import {
   ExternalLink,
   Percent,
 } from 'lucide-react';
-import { adminApi, ResidentUser, FinancialSummary } from '../services/adminApi';
+import { adminApi, isSafeUrl, ResidentUser, FinancialSummary } from '../services/adminApi';
 
 interface PaymentRecord {
   id: string;
@@ -530,7 +530,7 @@ export const PaymentsView: React.FC = () => {
                         ) : (
                           <span className="text-slate-500">—</span>
                         )}
-                        {p.receiptUrl && (
+                        {isSafeUrl(p.receiptUrl) && (
                           <a
                             href={p.receiptUrl}
                             target="_blank"

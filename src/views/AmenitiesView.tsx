@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { adminApi, handleUnauthorized } from '../services/adminApi';
+import { adminApi, handleUnauthorized, isSafeUrl } from '../services/adminApi';
 
 const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
 
@@ -430,7 +430,7 @@ export const AmenitiesView: React.FC = () => {
                     {/* Image Header */}
                     <div className="relative h-44 bg-slate-950 overflow-hidden">
                       <img
-                        src={item.imageUrl || 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600'}
+                        src={isSafeUrl(item.imageUrl) ? item.imageUrl : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600'}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -745,7 +745,7 @@ export const AmenitiesView: React.FC = () => {
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1">Fotografía / Imagen de la amenidad *</label>
                 <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-purple-900/60 hover:border-purple-500/80 rounded-2xl bg-slate-950/60 transition-all">
-                  {imageUrl ? (
+                  {isSafeUrl(imageUrl) ? (
                     <div className="relative w-full h-44 rounded-xl overflow-hidden group">
                       <img src={imageUrl} alt="Vista previa" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-slate-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">

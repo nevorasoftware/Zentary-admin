@@ -2,6 +2,13 @@
 
 export const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
 
+// Acepta solo URLs http(s) y data:image/ para mostrar enlaces e imágenes
+export const isSafeUrl = (url?: string | null): boolean => {
+  if (!url) return false;
+  const value = url.trim().toLowerCase();
+  return value.startsWith('https://') || value.startsWith('http://') || value.startsWith('data:image/');
+};
+
 export interface ResidentUser {
   id: string;
   fullName: string;
