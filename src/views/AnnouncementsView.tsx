@@ -84,8 +84,12 @@ export const AnnouncementsView: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (confirm('¿Estás seguro de eliminar este comunicado?')) {
       try {
-        await adminApi.deleteAnnouncement(id);
-        setAnnouncements(announcements.filter((a) => a.id !== id));
+        const res = await adminApi.deleteAnnouncement(id);
+        if (res.success) {
+          setAnnouncements(announcements.filter((a) => a.id !== id));
+        } else {
+          alert('Error al eliminar: ' + (res.message || 'No se pudo eliminar el comunicado.'));
+        }
       } catch (err: any) {
         alert('Error al eliminar: ' + err.message);
       }
