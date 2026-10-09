@@ -65,6 +65,8 @@ export const VisitsLogView: React.FC = () => {
 
   // Loading and Filtering
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [historyLoadError, setHistoryLoadError] = useState('');
   const [searchFilter, setSearchFilter] = useState('');
   const [currentGate, setCurrentGate] = useState('Garita Principal');
 
@@ -105,14 +107,18 @@ export const VisitsLogView: React.FC = () => {
   const fetchGaritaData = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const res = await adminApi.getActiveInsideVisits();
       if (res.success) {
         setSummary(res.summary);
         setActiveVisits(res.activeVisits || []);
         setExpectedVisits(res.expectedToday || []);
+      } else {
+        setLoadError('No se pudieron cargar las visitas en curso.');
       }
     } catch (err) {
       console.warn('Error fetching active inside visits:', err);
+      setLoadError('No se pudieron cargar las visitas en curso. Verifica tu conexión e inténtalo de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -121,12 +127,16 @@ export const VisitsLogView: React.FC = () => {
   // Fetch history data
   const fetchHistoryData = async () => {
     try {
+      setHistoryLoadError('');
       const res = await adminApi.getVisits({ search: searchFilter });
       if (res.success) {
         setHistoryVisits(res.visits || []);
+      } else {
+        setHistoryLoadError('No se pudo cargar el historial de visitas.');
       }
     } catch (err) {
       console.warn('Error fetching visits history:', err);
+      setHistoryLoadError('No se pudo cargar el historial de visitas. Verifica tu conexión e inténtalo de nuevo.');
     }
   };
 
@@ -573,7 +583,11 @@ export const VisitsLogView: React.FC = () => {
               </span>
             </div>
 
-            {activeVisits.length === 0 ? (
+            {loadError ? (
+              <div className="glass-card p-12 rounded-3xl border border-rose-500/30 text-center text-sm font-semibold text-rose-300">
+                ⚠️ {loadError}
+              </div>
+            ) : activeVisits.length === 0 ? (
               <div className="glass-card p-12 rounded-3xl border border-slate-800 text-center space-y-3">
                 <ShieldCheck className="w-12 h-12 text-slate-600 mx-auto" />
                 <h4 className="text-base font-bold text-slate-300">No hay visitantes dentro en este momento</h4>
@@ -757,7 +771,13 @@ export const VisitsLogView: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-slate-300">
-                  {historyVisits.length === 0 ? (
+                  {historyLoadError ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-rose-300 font-semibold">
+                        ⚠️ {historyLoadError}
+                      </td>
+                    </tr>
+                  ) : historyVisits.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-slate-500">
                         No se encontraron registros de visitas con los criterios seleccionados.
