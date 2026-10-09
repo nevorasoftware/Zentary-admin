@@ -43,8 +43,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [showCommunityModal, setShowCommunityModal] = useState(false);
   const [commId, setCommId] = useState<string>('');
   const [commNameInput, setCommNameInput] = useState<string>(communityName);
-  const [commAddressInput, setCommAddressInput] = useState<string>('Av. Las Palmas #123');
-  const [commCityInput, setCommCityInput] = useState<string>('San Salvador');
+  const [commAddressInput, setCommAddressInput] = useState<string>('');
+  const [commCityInput, setCommCityInput] = useState<string>('');
   const [isSavingCommunity, setIsSavingCommunity] = useState(false);
 
   // Tenant Register Modal States
