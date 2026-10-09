@@ -236,7 +236,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       return;
     }
 
-    const finalBlock = block.trim() !== '' ? block : communityName;
+    const finalBlock = block.trim() !== '' ? block : '';
     const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '';
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
@@ -278,7 +278,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
     const cleanPhoneDigits = finalPhone.replace(/[^\d]/g, '');
     const messageText = `Hola ${fullName}, bienvenido a ${communityName}.\n\n` +
-      `📌 Unidad: ${unitNumber} (${finalBlock})\n` +
+      `📌 Unidad: ${unitNumber} ${finalBlock ? `(${finalBlock})` : ''}\n` +
       `📧 Correo: ${email}\n` +
       `🔑 Contraseña inicial: ${genericPassword}\n\n` +
       `Por tu seguridad, al iniciar sesión la app te solicitará actualizar tu contraseña.`;
