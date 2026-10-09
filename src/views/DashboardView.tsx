@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, ShieldCheck, Package, MessageSquare, DollarSign, ArrowUpRight, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { handleUnauthorized } from '../services/adminApi';
+import { adminApi } from '../services/adminApi';
 
 interface DashboardViewProps {
   onNavigate: (view: any) => void;
@@ -11,8 +11,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     totalUsers: 0,
     activeVisits: 0,
     pendingParcels: 0,
-    openPqrs: 3,
-    totalPayments: '$12,450.00',
+    openPqrs: 0,
+    totalPayments: '$0.00',
+    collectionRate: 0,
   });
   const [recentVisits, setRecentVisits] = React.useState<any[]>([]);
 
@@ -22,35 +23,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
   const fetchDashboardMetrics = async () => {
     try {
-      const token = localStorage.getItem('zentary_admin_token') || '';
-      const [usersRes, visitsRes, parcelsRes] = await Promise.all([
-        fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).then((r) => {
-          if (r.status === 401) handleUnauthorized();
-          return r.json();
-        }).catch(() => ({ users: [] })),
-        fetch('https://zentary-backend-production.up.railway.app/api/admin/visits', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).then((r) => r.json()).catch(() => ({ visits: [] })),
-        fetch('https://zentary-backend-production.up.railway.app/api/admin/parcels', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).then((r) => r.json()).catch(() => ({ parcels: [] })),
+      const [statsRes, summaryRes, visitsRes] = await Promise.all([
+        adminApi.getDashboardStats().catch(() => null),
+        adminApi.getFinancialSummary().catch(() => null),
+        adminApi.getVisits().catch(() => null),
       ]);
 
-      const users = usersRes.users || [];
-      const visits = visitsRes.visits || [];
-      const parcels = parcelsRes.parcels || [];
+      setStatsData((prev) => ({
+        totalUsers: statsRes?.success ? statsRes.stats.totalResidents : prev.totalUsers,
+        activeVisits: statsRes?.success ? statsRes.stats.activeVisits : prev.activeVisits,
+        pendingParcels: statsRes?.success ? statsRes.stats.pendingParcels : prev.pendingParcels,
+        openPqrs: statsRes?.success ? statsRes.stats.openPqrs : prev.openPqrs,
+        totalPayments: summaryRes?.success ? `$${summaryRes.summary.totalCollected.toFixed(2)}` : prev.totalPayments,
+        collectionRate: summaryRes?.success ? summaryRes.summary.collectionRate : prev.collectionRate,
+      }));
 
-      setStatsData({
-        totalUsers: users.length,
-        activeVisits: visits.filter((v: any) => v.status === 'IN_PROGRESS').length,
-        pendingParcels: parcels.filter((p: any) => p.status === 'PENDING').length,
-        openPqrs: 3,
-        totalPayments: '$12,450.00',
-      });
-
-      setRecentVisits(visits.slice(0, 5));
+      if (visitsRes?.success) {
+        setRecentVisits((visitsRes.visits || []).slice(0, 5));
+      }
     } catch (err) {
       console.warn('Dashboard fetch error:', err);
     }
@@ -61,7 +51,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     { title: 'Visitas en Curso', value: `${statsData.activeVisits}`, change: 'Pases Garita / QR', icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
     { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', icon: Package, color: 'from-amber-600 to-orange-600' },
     { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: 'Atención residente', icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
-    { title: 'Cobros del Mes', value: statsData.totalPayments, change: '84% recolectado', icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
+    { title: 'Cobros Recaudados', value: statsData.totalPayments, change: `${Math.round(statsData.collectionRate)}% recolectado`, icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
   ];
 
   return (
@@ -145,6 +135,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 const residentName = v.resident?.fullName || v.resident || 'Residente';
                 const plate = v.vehiclePlate || v.plate || 'Sin Placa';
                 const status = v.status || 'IN_PROGRESS';
+                const enCurso = status === 'INGRESADA' || status === 'IN_PROGRESS';
 
                 return (
                   <div key={v.id} className="py-3.5 flex items-center justify-between hover:bg-slate-800/30 px-2 rounded-xl transition-colors">
@@ -160,12 +151,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     <div className="text-right">
                       <span
                         className={`inline-block px-2.5 py-1 text-xs font-bold rounded-full ${
-                          status === 'IN_PROGRESS'
+                          enCurso
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : 'bg-slate-800 text-slate-400'
                         }`}
                       >
-                        {status === 'IN_PROGRESS' ? 'En Curso' : 'Completado'}
+                        {enCurso ? 'En Curso' : 'Completado'}
                       </span>
                     </div>
                   </div>

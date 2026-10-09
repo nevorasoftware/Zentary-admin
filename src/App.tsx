@@ -11,13 +11,16 @@ import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
-import { ADMIN_ROLES, handleUnauthorized } from './services/adminApi';
+import { adminApi, ADMIN_ROLES, handleUnauthorized } from './services/adminApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+
+  const [openPqrsCount, setOpenPqrsCount] = useState(0);
+  const [pendingParcelsCount, setPendingParcelsCount] = useState(0);
 
   // Authentication State
   const [adminToken, setAdminToken] = useState<string | null>(() => {
@@ -37,6 +40,16 @@ export default function App() {
       fetchCommunityConfig();
     }
   }, [adminToken]);
+
+  useEffect(() => {
+    if (!adminToken) return;
+    adminApi.getDashboardStats().then((res) => {
+      if (res.success) {
+        setOpenPqrsCount(res.stats.openPqrs);
+        setPendingParcelsCount(res.stats.pendingParcels);
+      }
+    }).catch(() => {});
+  }, [adminToken, currentView]);
 
   useEffect(() => {
     if (adminUser && !ADMIN_ROLES.includes(adminUser.role)) {
@@ -178,6 +191,8 @@ export default function App() {
       <Sidebar
         currentView={currentView}
         onSelectView={(view) => setCurrentView(view)}
+        openPqrsCount={openPqrsCount}
+        pendingParcelsCount={pendingParcelsCount}
         isOpenMobile={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
         adminUser={adminUser}
