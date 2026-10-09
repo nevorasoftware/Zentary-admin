@@ -88,6 +88,7 @@ export const VisitsLogView: React.FC = () => {
     notes: '',
   });
   const [availableHouses, setAvailableHouses] = useState<any[]>([]);
+  const [housesError, setHousesError] = useState('');
   const [quickSubmitting, setQuickSubmitting] = useState(false);
 
   // Success Feedback Toast
@@ -135,9 +136,13 @@ export const VisitsLogView: React.FC = () => {
       const res = await adminApi.getHouses();
       if (res.success && res.houses) {
         setAvailableHouses(res.houses);
+        setHousesError('');
+      } else {
+        setHousesError('No se pudo cargar la lista de viviendas.');
       }
     } catch (err) {
       console.warn('Error loading houses:', err);
+      setHousesError('No se pudo cargar la lista de viviendas.');
     }
   };
 
@@ -230,6 +235,10 @@ export const VisitsLogView: React.FC = () => {
     e.preventDefault();
     if (!quickForm.visitorName.trim()) {
       alert('El nombre del visitante o conductor es obligatorio.');
+      return;
+    }
+    if (!quickForm.houseId || !availableHouses.some((h) => h.id === quickForm.houseId)) {
+      alert('Selecciona una vivienda destino válida.');
       return;
     }
 
@@ -830,8 +839,9 @@ export const VisitsLogView: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-400 block font-medium">Vivienda Destino:</label>
+                  <label className="text-slate-400 block font-medium">Vivienda Destino *:</label>
                   <select
+                    required
                     value={quickForm.houseId}
                     onChange={(e) => setQuickForm({ ...quickForm, houseId: e.target.value })}
                     className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2.5 focus:border-blue-500"
@@ -843,6 +853,11 @@ export const VisitsLogView: React.FC = () => {
                       </option>
                     ))}
                   </select>
+                  {housesError ? (
+                    <p className="text-red-400 text-[11px]">{housesError}</p>
+                  ) : availableHouses.length === 0 ? (
+                    <p className="text-amber-400 text-[11px]">No hay viviendas registradas en el residencial.</p>
+                  ) : null}
                 </div>
               </div>
 
