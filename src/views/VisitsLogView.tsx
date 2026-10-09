@@ -159,9 +159,25 @@ export const VisitsLogView: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'history') {
-      fetchHistoryData();
-    }
+    if (activeTab !== 'history') return;
+
+    // Debounce de la búsqueda e ignorar respuestas de peticiones anteriores
+    let cancelled = false;
+    const timeout = setTimeout(async () => {
+      try {
+        const res = await adminApi.getVisits({ search: searchFilter });
+        if (!cancelled && res.success) {
+          setHistoryVisits(res.visits || []);
+        }
+      } catch (err) {
+        console.warn('Error fetching visits history:', err);
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeout);
+    };
   }, [activeTab, searchFilter]);
 
   // Handle Scanning or Submitting QR Token
