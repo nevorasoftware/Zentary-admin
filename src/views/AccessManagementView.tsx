@@ -265,6 +265,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     const cleanUnit = unitNumber.replace(/\s+/g, '');
     const genericPassword = `Zentary${cleanUnit}!`;
 
+    let createdUserId: string | undefined;
+
     try {
       const response = await fetch('https://zentary-backend-production.up.railway.app/api/admin/tenants', {
         method: 'POST',
@@ -287,6 +289,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       if (!response.ok || !data.success) {
         showToast(`⚠️ ${data.message || 'Error al registrar el inquilino.'}`, 'error');
       } else {
+        createdUserId = data.tenant?.id;
         showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
       }
 
@@ -312,6 +315,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEmailStatus({ state: 'IDLE' });
 
     setCreatedTenantInfo({
+      id: createdUserId,
       fullName,
       email,
       phone: finalPhone,
@@ -454,7 +458,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
   };
 
-  const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string) => {
+  const handleSendGmailApi = async (targetEmail: string, targetName: string, targetUnit?: string, targetUserId?: string) => {
     setIsSendingEmail(true);
     setEmailStatus({ state: 'SENDING', message: 'Enviando correo de accesos...' });
 
@@ -466,6 +470,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
+          userId: targetUserId,
           email: targetEmail,
           fullName: targetName,
           unitNumber: targetUnit || '119D',
@@ -1141,7 +1146,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </button>
 
               <button
-                onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName, createdTenantInfo.unitNumber)}
+                onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.id)}
                 disabled={isSendingEmail}
                 className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
