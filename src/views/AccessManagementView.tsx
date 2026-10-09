@@ -288,14 +288,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
       if (!response.ok || !data.success) {
         showToast(`⚠️ ${data.message || 'Error al registrar el inquilino.'}`, 'error');
-      } else {
-        createdUserId = data.tenant?.id;
-        showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
+        return;
       }
 
+      createdUserId = data.tenant?.id;
+      showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
       fetchUsersFromBackend();
     } catch (err) {
       console.warn('DB register error:', err);
+      showToast('⚠️ No se pudo conectar con el servidor. Intenta nuevamente.', 'error');
+      return;
     }
 
     const cleanPhoneDigits = finalPhone.replace(/[^\d]/g, '');
