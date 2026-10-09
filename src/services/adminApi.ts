@@ -112,13 +112,26 @@ export interface FinancialSummary {
   recentPayments?: any[];
 }
 
+export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
+
+export const getAdminToken = (): string => {
+  if (typeof localStorage !== 'undefined') {
+    return localStorage.getItem('zentary_admin_token') || '';
+  }
+  return '';
+};
+
+export const handleUnauthorized = () => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('zentary_admin_token');
+    localStorage.removeItem('zentary_admin_user');
+  }
+  window.location.reload();
+};
+
 class AdminApiService {
   private getAuthToken(): string {
-    if (typeof localStorage !== 'undefined') {
-      const storedToken = localStorage.getItem('zentary_admin_token') || localStorage.getItem('zentary_token');
-      if (storedToken) return storedToken;
-    }
-    return 'admin_demo_token';
+    return getAdminToken();
   }
 
   private async request<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -133,25 +146,15 @@ class AdminApiService {
     }
 
     try {
-      let response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
         headers,
       });
 
-      let data = await response.json();
+      const data = await response.json();
 
-      // If token expired or unauthorized (401), retry with admin_demo_token
-      if (response.status === 401 && token !== 'admin_demo_token') {
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem('zentary_admin_token');
-          localStorage.removeItem('zentary_token');
-        }
-        headers['Authorization'] = `Bearer admin_demo_token`;
-        response = await fetch(`${API_BASE_URL}${endpoint}`, {
-          ...options,
-          headers,
-        });
-        data = await response.json();
+      if (response.status === 401) {
+        handleUnauthorized();
       }
 
       return data;

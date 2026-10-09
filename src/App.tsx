@@ -11,6 +11,7 @@ import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
+import { ADMIN_ROLES, handleUnauthorized } from './services/adminApi';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
@@ -37,11 +38,21 @@ export default function App() {
     }
   }, [adminToken]);
 
+  useEffect(() => {
+    if (adminUser && !ADMIN_ROLES.includes(adminUser.role)) {
+      handleLogout();
+    }
+  }, [adminUser]);
+
   const fetchCommunityConfig = async () => {
     try {
       const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
-        headers: { 'Authorization': `Bearer ${adminToken || 'admin_demo_token'}` },
+        headers: { 'Authorization': `Bearer ${adminToken}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (data.success && data.community?.name) {
         setCommunityName(data.community.name);
