@@ -488,7 +488,7 @@ export const PaymentsView: React.FC = () => {
                         <div className="font-bold text-white">${p.amount.toFixed(2)}</div>
                         {p.lateFee && p.lateFee > 0 ? (
                           <div className="text-xs text-rose-400 font-semibold flex items-center gap-1">
-                            <Flame className="w-3 h-3" /> Mora: +${p.lateFee.toFixed(2)}
+                            <Flame className="w-3 h-3" /> Incluye mora de ${p.lateFee.toFixed(2)}
                           </div>
                         ) : null}
                       </td>
