@@ -14,7 +14,7 @@
 body {
   background-color: var(--color-dark-bg);
   color: #F8FAFC;
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 @layer utilities {
