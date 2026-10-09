@@ -205,6 +205,8 @@ export const PaymentsView: React.FC = () => {
     setManualResidentId(record.residentId || '');
     setManualAmount(record.amount.toString());
     setManualConcept(record.concept);
+    setManualReceiptUrl('');
+    setManualNotes('');
     setShowManualPayModal(true);
   };
 
@@ -301,6 +303,8 @@ export const PaymentsView: React.FC = () => {
               setManualResidentId('');
               setManualAmount('');
               setManualConcept('Abono Cuota de Mantenimiento');
+              setManualReceiptUrl('');
+              setManualNotes('');
               setShowManualPayModal(true);
             }}
             className="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
