@@ -394,7 +394,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   }>({ state: 'IDLE' });
 
 
-  const handleSendWhatsAppApi = async (targetPhone: string, targetName: string, targetUnit?: string, targetEmail?: string) => {
+  const handleSendWhatsAppApi = async (targetPhone: string, targetName: string, targetUnit?: string, targetEmail?: string, targetUserId?: string) => {
     if (!targetUnit) {
       showToast('⚠️ No se puede enviar: el residente no tiene una unidad registrada. Edita el usuario e indica su unidad.', 'error');
       return;
@@ -411,6 +411,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
+          userId: targetUserId,
           phone: targetPhone,
           fullName: targetName,
           unitNumber: targetUnit,
@@ -421,6 +422,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
       const data = await response.json();
       setIsSendingWhatsApp(false);
+
+      // El backend restablece la contraseña antes de enviarla: se muestra la que devuelve
+      const resetPassword = data.credentialsInfo?.genericPassword;
+      if (resetPassword) {
+        setCreatedTenantInfo((prev) => (prev ? { ...prev, genericPassword: resetPassword } : prev));
+      }
 
       if (data.success) {
         setWhatsAppStatus({
@@ -1160,7 +1167,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <button
-                onClick={() => handleSendWhatsAppApi(createdTenantInfo.phone, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.email)}
+                onClick={() => handleSendWhatsAppApi(createdTenantInfo.phone, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.email, createdTenantInfo.id)}
                 disabled={isSendingWhatsApp || !createdTenantInfo.phone}
                 className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
