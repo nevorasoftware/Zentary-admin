@@ -1,5 +1,6 @@
 import React from 'react';
 import { Users, ShieldCheck, Package, MessageSquare, DollarSign, ArrowUpRight, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { handleUnauthorized } from '../services/adminApi';
 
 interface DashboardViewProps {
   onNavigate: (view: any) => void;
@@ -21,11 +22,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
   const fetchDashboardMetrics = async () => {
     try {
-      const token = localStorage.getItem('zentary_admin_token') || 'admin_demo_token';
+      const token = localStorage.getItem('zentary_admin_token') || '';
       const [usersRes, visitsRes, parcelsRes] = await Promise.all([
         fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
           headers: { 'Authorization': `Bearer ${token}` },
-        }).then((r) => r.json()).catch(() => ({ users: [] })),
+        }).then((r) => {
+          if (r.status === 401) handleUnauthorized();
+          return r.json();
+        }).catch(() => ({ users: [] })),
         fetch('https://zentary-backend-production.up.railway.app/api/admin/visits', {
           headers: { 'Authorization': `Bearer ${token}` },
         }).then((r) => r.json()).catch(() => ({ visits: [] })),

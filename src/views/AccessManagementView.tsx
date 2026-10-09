@@ -18,7 +18,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
-import { ResidentUser } from '../services/adminApi';
+import { ResidentUser, getAdminToken, handleUnauthorized } from '../services/adminApi';
 
 interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
@@ -119,8 +119,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setIsLoadingUsers(true);
     try {
       const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/users', {
-        headers: { 'Authorization': 'Bearer admin_demo_token' },
+        headers: { 'Authorization': `Bearer ${getAdminToken()}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       setIsLoadingUsers(false);
 
@@ -139,8 +143,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const fetchCommunityConfigFromBackend = async () => {
     try {
       const res = await fetch('https://zentary-backend-production.up.railway.app/api/admin/community', {
-        headers: { 'Authorization': 'Bearer admin_demo_token' },
+        headers: { 'Authorization': `Bearer ${getAdminToken()}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (data.success && data.community) {
         if (data.community.id) setCommId(data.community.id);
@@ -168,7 +176,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           id: commId || undefined,
@@ -216,7 +224,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({ isActive: nextState }),
       });
@@ -262,7 +270,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           fullName,
@@ -363,7 +371,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           fullName: editFullName,
@@ -406,7 +414,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           phone: targetPhone,
@@ -455,7 +463,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin_demo_token',
+          'Authorization': `Bearer ${getAdminToken()}`,
         },
         body: JSON.stringify({
           email: targetEmail,

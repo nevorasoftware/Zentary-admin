@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { adminApi } from '../services/adminApi';
+import { adminApi, handleUnauthorized } from '../services/adminApi';
 
 const API_BASE_URL = 'https://zentary-backend-production.up.railway.app/api';
 
@@ -101,7 +101,7 @@ export const AmenitiesView: React.FC = () => {
     return monday;
   });
 
-  const getAdminToken = () => localStorage.getItem('zentary_admin_token') || 'admin_demo_token';
+  const getAdminToken = () => localStorage.getItem('zentary_admin_token') || '';
 
   useEffect(() => {
     fetchAmenities();
@@ -119,6 +119,10 @@ export const AmenitiesView: React.FC = () => {
       const res = await fetch(`${API_BASE_URL}/amenities/admin`, {
         headers: { Authorization: `Bearer ${getAdminToken()}` },
       });
+      if (res.status === 401) {
+        handleUnauthorized();
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         setAmenities(data.amenities || []);

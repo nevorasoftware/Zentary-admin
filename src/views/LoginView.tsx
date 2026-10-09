@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Building2, Lock, Mail, ShieldCheck, ArrowRight, Sparkles } from 'lucide-react';
+import { ADMIN_ROLES } from '../services/adminApi';
 
 interface LoginViewProps {
   onLoginSuccess: (user: any, token: string) => void;
@@ -33,6 +34,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
       setIsLoading(false);
 
       if (response.ok && data.success && data.token) {
+        if (!ADMIN_ROLES.includes(data.user?.role)) {
+          setErrorMessage('Esta cuenta no tiene acceso al panel administrativo.');
+          return;
+        }
         onLoginSuccess(data.user, data.token);
       } else {
         setErrorMessage(data.message || 'Credenciales administrativas inválidas.');

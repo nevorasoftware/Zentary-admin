@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Bell, Building2, Edit3, Check, Menu } from 'lucide-react';
+import { getAdminToken } from '../services/adminApi';
 
 interface HeaderProps {
   title: string;
@@ -38,7 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer admin_demo_token',
+            'Authorization': `Bearer ${getAdminToken()}`,
           },
           body: JSON.stringify({ name: updatedName }),
         });
