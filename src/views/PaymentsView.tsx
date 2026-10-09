@@ -27,7 +27,7 @@ interface PaymentRecord {
   amount: number;
   lateFee?: number;
   dueDate: string;
-  status: 'PAID' | 'PENDING' | 'OVERDUE' | 'PARTIAL' | 'CANCELLED';
+  status: 'PAID' | 'PENDING' | 'OVERDUE' | 'PARTIAL' | 'CANCELLED' | 'FAILED';
   paymentMethod?: string;
   transactionId?: string;
   receiptUrl?: string;
@@ -502,6 +502,18 @@ export const PaymentsView: React.FC = () => {
                           <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 inline-flex items-center gap-1">
                             <AlertTriangle className="w-3.5 h-3.5" /> En Mora
                           </span>
+                        ) : p.status === 'CANCELLED' ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30 inline-flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" /> Cancelado
+                          </span>
+                        ) : p.status === 'FAILED' ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30 inline-flex items-center gap-1">
+                            <AlertTriangle className="w-3.5 h-3.5" /> Fallido
+                          </span>
+                        ) : p.status === 'PARTIAL' ? (
+                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 inline-flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5" /> Pago Parcial
+                          </span>
                         ) : (
                           <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30 inline-flex items-center gap-1">
                             <Clock className="w-3.5 h-3.5" /> Pendiente
@@ -526,7 +538,7 @@ export const PaymentsView: React.FC = () => {
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        {!isPaid ? (
+                        {p.status === 'PENDING' || p.status === 'OVERDUE' || p.status === 'PARTIAL' ? (
                           <button
                             onClick={() => openManualPaymentForRecord(p)}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 font-bold text-xs transition-all"
@@ -534,7 +546,7 @@ export const PaymentsView: React.FC = () => {
                             Registrar Pago
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-500">Confirmado</span>
+                          <span className="text-xs text-slate-500">{isPaid ? 'Confirmado' : '—'}</span>
                         )}
                       </td>
                     </tr>
