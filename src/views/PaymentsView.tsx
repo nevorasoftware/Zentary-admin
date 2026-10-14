@@ -241,7 +241,7 @@ export const PaymentsView: React.FC = () => {
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert('Error al registrar pago manual.');
+        alert(res.message || 'Error al registrar pago manual.');
       }
     } catch (err: any) {
       alert('Error: ' + err.message);
