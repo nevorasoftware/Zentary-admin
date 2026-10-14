@@ -18,7 +18,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
-import { ResidentUser, getAdminToken, handleUnauthorized, API_BASE_URL } from '../services/adminApi';
+import { ResidentUser, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 
 interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
@@ -81,7 +81,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setIsLoadingUsers(true);
     try {
       const res = await fetch(`${API_BASE_URL}/admin/users`, {
-        headers: { 'Authorization': `Bearer ${getAdminToken()}` },
+        headers: { 'Authorization': `Bearer ${getAdminToken()}`, ...getTenantHeaders() },
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -106,7 +106,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const fetchCommunityConfigFromBackend = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/admin/community`, {
-        headers: { 'Authorization': `Bearer ${getAdminToken()}` },
+        headers: { 'Authorization': `Bearer ${getAdminToken()}`, ...getTenantHeaders() },
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -140,6 +140,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({
           id: commId || undefined,
@@ -193,6 +194,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({ isActive: nextState }),
       });
@@ -250,6 +252,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({
           fullName,
@@ -340,6 +343,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({
           fullName: editFullName,
@@ -413,6 +417,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({
           userId: targetUserId,
@@ -474,6 +479,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify({
           userId: targetUserId,

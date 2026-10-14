@@ -128,6 +128,22 @@ export const getAdminToken = (): string => {
   return '';
 };
 
+export const TENANT_STORAGE_KEY = 'zentary_selected_tenant';
+
+// Residencial elegida por el super administrador; vacío = todas
+export const getSelectedTenantId = (): string => {
+  try {
+    return localStorage.getItem(TENANT_STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
+};
+
+export const getTenantHeaders = (): Record<string, string> => {
+  const tenantId = getSelectedTenantId();
+  return tenantId ? { 'x-tenant-id': tenantId } : {};
+};
+
 export const handleUnauthorized = () => {
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem('zentary_admin_token');
@@ -145,6 +161,7 @@ class AdminApiService {
     let token = this.getAuthToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      ...getTenantHeaders(),
       ...(options.headers as Record<string, string>),
     };
 
