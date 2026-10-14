@@ -238,8 +238,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
     const finalBlock = block.trim() !== '' ? block : '';
     const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '';
-    const cleanUnit = unitNumber.replace(/\s+/g, '');
-    const genericPassword = `Zentary${cleanUnit}!`;
+    let genericPassword = '';
+    let backendWhatsappLink: string | undefined;
+    let backendMailtoLink: string | undefined;
 
     let createdUserId: string | undefined;
 
@@ -268,6 +269,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       }
 
       createdUserId = data.tenant?.id;
+      genericPassword = data.credentialsInfo?.genericPassword || '';
+      backendWhatsappLink = data.credentialsInfo?.whatsappLink;
+      backendMailtoLink = data.credentialsInfo?.mailtoLink;
       showToast(`Inquilino ${fullName} registrado exitosamente.`, 'success');
       fetchUsersFromBackend();
     } catch (err) {
@@ -283,11 +287,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       `🔑 Contraseña inicial: ${genericPassword}\n\n` +
       `Por tu seguridad, al iniciar sesión la app te solicitará actualizar tu contraseña.`;
 
-    const whatsappLink = cleanPhoneDigits
+    const whatsappLink = backendWhatsappLink || (cleanPhoneDigits
       ? `https://api.whatsapp.com/send?phone=${cleanPhoneDigits}&text=${encodeURIComponent(messageText)}`
-      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`;
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(messageText)}`);
 
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
+    const mailtoLink = backendMailtoLink || `mailto:${email}?subject=${encodeURIComponent(`Accesos a la App Zentary - ${communityName}`)}&body=${encodeURIComponent(messageText)}`;
 
     setWhatsAppStatus({ state: 'IDLE' });
     setEmailStatus({ state: 'IDLE' });
@@ -944,7 +948,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <Key className="w-4 h-4 text-blue-400" /> Contraseña Inicial de Ingreso
                 </p>
                 <p>
-                  Se generará una contraseña inicial temporal basada en la unidad (ej. Zentary119D!). El residente la actualizará al ingresar a la app.
+                  Se generará una contraseña inicial temporal generada aleatoriamente por el sistema. El residente la actualizará al ingresar a la app.
                 </p>
               </div>
 
