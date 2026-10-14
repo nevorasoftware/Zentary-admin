@@ -173,7 +173,7 @@ export const PaymentsView: React.FC = () => {
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert('Error al emitir cobro.');
+        alert((res as any).message || 'Error al emitir cobro.');
       }
     } catch (err: any) {
       alert('Error al emitir cobro: ' + err.message);

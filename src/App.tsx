@@ -11,7 +11,7 @@ import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
-import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL } from './services/adminApi';
+import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
 
 // Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
 const isTokenExpired = (token: string): boolean => {
@@ -76,7 +76,7 @@ export default function App() {
   const fetchCommunityConfig = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/admin/community`, {
-        headers: { 'Authorization': `Bearer ${adminToken}` },
+        headers: { 'Authorization': `Bearer ${adminToken}`, ...getTenantHeaders() },
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -101,6 +101,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('zentary_admin_token');
     localStorage.removeItem('zentary_admin_user');
+    try { localStorage.removeItem('zentary_selected_tenant'); } catch { /* noop */ }
     setAdminToken(null);
     setAdminUser(null);
   };

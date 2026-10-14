@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Bell, Building2, Edit3, Check, Menu } from 'lucide-react';
-import { getAdminToken, API_BASE_URL } from '../services/adminApi';
+import { getAdminToken, API_BASE_URL, getTenantHeaders, getSelectedTenantId, TENANT_STORAGE_KEY } from '../services/adminApi';
 
 interface HeaderProps {
   title: string;
@@ -11,6 +11,7 @@ interface HeaderProps {
   adminUser?: {
     id: string;
     fullName: string;
+    role?: string;
     email: string;
     avatarUrl?: string;
   } | null;
@@ -28,6 +29,31 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(communityName);
+  const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
+  const isSuperAdmin = adminUser?.role === 'SUPER_ADMIN';
+
+  // El super administrador elige la residencial con la que trabaja (o todas)
+  useEffect(() => {
+    if (!isSuperAdmin) return;
+    fetch(`${API_BASE_URL}/tenants`, {
+      headers: { 'Authorization': `Bearer ${getAdminToken()}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.tenants)) setTenants(data.tenants);
+      })
+      .catch((err) => console.warn('Failed to fetch tenants:', err));
+  }, [isSuperAdmin]);
+
+  const handleTenantChange = (tenantId: string) => {
+    try {
+      if (tenantId) localStorage.setItem(TENANT_STORAGE_KEY, tenantId);
+      else localStorage.removeItem(TENANT_STORAGE_KEY);
+    } catch {
+      // almacenamiento no disponible
+    }
+    window.location.reload();
+  };
 
   const handleSaveName = async () => {
     if (tempName.trim() && onUpdateCommunityName) {
@@ -40,6 +66,7 @@ export const Header: React.FC<HeaderProps> = ({
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${getAdminToken()}`,
+            ...getTenantHeaders(),
           },
           body: JSON.stringify({ name: updatedName }),
         });
@@ -126,6 +153,20 @@ export const Header: React.FC<HeaderProps> = ({
           <Bell className="w-5 h-5" />
           <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full ring-2 ring-slate-900 animate-pulse" />
         </button>
+
+        {isSuperAdmin && (
+          <select
+            value={getSelectedTenantId()}
+            onChange={(e) => handleTenantChange(e.target.value)}
+            className="bg-slate-800/80 border border-slate-700/80 text-xs md:text-sm text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500 transition-all max-w-[180px]"
+            title="Residencial activa"
+          >
+            <option value="">Todas</option>
+            {tenants.map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+          </select>
+        )}
 
         <div className="hidden md:block h-8 w-px bg-slate-800" />
 

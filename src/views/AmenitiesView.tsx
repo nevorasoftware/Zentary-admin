@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-import { adminApi, handleUnauthorized, isSafeUrl, API_BASE_URL } from '../services/adminApi';
+import { adminApi, handleUnauthorized, isSafeUrl, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 
 
 const ALL_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -118,7 +118,7 @@ export const AmenitiesView: React.FC = () => {
       setLoading(true);
       setLoadError('');
       const res = await fetch(`${API_BASE_URL}/amenities/admin`, {
-        headers: { Authorization: `Bearer ${getAdminToken()}` },
+        headers: { Authorization: `Bearer ${getAdminToken()}`, ...getTenantHeaders() },
       });
       if (res.status === 401) {
         handleUnauthorized();
@@ -152,7 +152,7 @@ export const AmenitiesView: React.FC = () => {
       }
 
       const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${getAdminToken()}` },
+        headers: { Authorization: `Bearer ${getAdminToken()}`, ...getTenantHeaders() },
       });
       const data = await res.json();
       if (data.success) {
@@ -276,6 +276,7 @@ export const AmenitiesView: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${getAdminToken()}`,
+          ...getTenantHeaders(),
         },
         body: JSON.stringify(payload),
       });
@@ -301,7 +302,7 @@ export const AmenitiesView: React.FC = () => {
     try {
       const res = await fetch(`${API_BASE_URL}/amenities/admin/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${getAdminToken()}` },
+        headers: { Authorization: `Bearer ${getAdminToken()}`, ...getTenantHeaders() },
       });
       const data = await res.json();
       if (data.success) {

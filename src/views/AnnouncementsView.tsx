@@ -77,7 +77,7 @@ export const AnnouncementsView: React.FC = () => {
         setTargetAudience('TODOS');
         fetchAnnouncements();
       } else {
-        alert('Error al publicar anuncio.');
+        alert((res as any).message || 'Error al publicar anuncio.');
       }
     } catch (err: any) {
       alert('Error al publicar: ' + err.message);
