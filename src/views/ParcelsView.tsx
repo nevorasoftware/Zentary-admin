@@ -152,10 +152,10 @@ export const ParcelsView: React.FC = () => {
 
             <form onSubmit={handleRegisterParcel} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="parcels-campo-1" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Empresa de Mensajería / Carrier
                 </label>
-                <select
+                <select id="parcels-campo-1"
                   value={carrier}
                   onChange={(e) => setCarrier(e.target.value as any)}
                   className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-amber-500"
@@ -171,10 +171,10 @@ export const ParcelsView: React.FC = () => {
 
               {carrier === 'OTRO' && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label htmlFor="parcels-campo-2" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                     Nombre del Transportista
                   </label>
-                  <input
+                  <input id="parcels-campo-2"
                     type="text"
                     placeholder="Ej. Delivery local / Encomienda"
                     value={customCarrier}
@@ -185,10 +185,10 @@ export const ParcelsView: React.FC = () => {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="parcels-campo-3" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Nombre del Residente Destinatario *
                 </label>
-                <input
+                <input id="parcels-campo-3"
                   type="text"
                   placeholder="Ej. María Camila Rodríguez"
                   value={residentName}
@@ -199,10 +199,10 @@ export const ParcelsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="parcels-campo-4" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Apartamento / Unidad *
                 </label>
-                <input
+                <input id="parcels-campo-4"
                   type="text"
                   placeholder="Ej. Apt 502"
                   value={unitNumber}
@@ -213,10 +213,10 @@ export const ParcelsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="parcels-campo-5" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Código de Rastreo / Número de Guía
                 </label>
-                <input
+                <input id="parcels-campo-5"
                   type="text"
                   placeholder="Ej. 1Z99999999999999"
                   value={trackingNumber}
