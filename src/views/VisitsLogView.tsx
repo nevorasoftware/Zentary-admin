@@ -91,6 +91,9 @@ export const VisitsLogView: React.FC = () => {
   });
   const [availableHouses, setAvailableHouses] = useState<any[]>([]);
   const [housesError, setHousesError] = useState('');
+  const [houseSearch, setHouseSearch] = useState('');
+  const [houseListOpen, setHouseListOpen] = useState(false);
+  const [houseActiveIndex, setHouseActiveIndex] = useState(0);
   const [quickSubmitting, setQuickSubmitting] = useState(false);
 
   // Success Feedback Toast
@@ -254,6 +257,20 @@ export const VisitsLogView: React.FC = () => {
     } catch (err: any) {
       alert(`Error al registrar salida: ${err.message}`);
     }
+  };
+
+  const houseLabel = (h: any) => `${h.block ? `${h.block} - ` : ''}Casa ${h.unitNumber}`;
+  const selectedHouse = availableHouses.find((h) => h.id === quickForm.houseId);
+  const filteredHouses = availableHouses.filter((h) => {
+    const q = houseSearch.trim().toLowerCase();
+    if (!q) return true;
+    const residents = (h.residents || []).map((r: any) => r.fullName || '').join(' ');
+    return `${houseLabel(h)} ${residents}`.toLowerCase().includes(q);
+  });
+  const selectHouse = (h: any) => {
+    setQuickForm({ ...quickForm, houseId: h.id });
+    setHouseSearch('');
+    setHouseListOpen(false);
   };
 
   // Submit Quick Entry (Direct Gate Check-in)
@@ -876,19 +893,87 @@ export const VisitsLogView: React.FC = () => {
 
                 <div className="space-y-1">
                   <label className="text-slate-400 block font-medium">Vivienda Destino *:</label>
-                  <select
-                    required
-                    value={quickForm.houseId}
-                    onChange={(e) => setQuickForm({ ...quickForm, houseId: e.target.value })}
-                    className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2.5 focus:border-blue-500"
-                  >
-                    <option value="">Seleccionar vivienda...</option>
-                    {availableHouses.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.block ? `${h.block} - ` : ''}Casa {h.unitNumber}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      role="combobox"
+                      aria-expanded={houseListOpen}
+                      aria-autocomplete="list"
+                      aria-controls="quick-entry-house-listbox"
+                      aria-activedescendant={
+                        houseListOpen && filteredHouses[houseActiveIndex]
+                          ? `quick-entry-house-${filteredHouses[houseActiveIndex].id}`
+                          : undefined
+                      }
+                      value={houseListOpen ? houseSearch : selectedHouse ? houseLabel(selectedHouse) : ''}
+                      placeholder="Buscar por número, bloque o residente..."
+                      onFocus={() => {
+                        setHouseSearch('');
+                        setHouseActiveIndex(0);
+                        setHouseListOpen(true);
+                      }}
+                      onBlur={() => setHouseListOpen(false)}
+                      onChange={(e) => {
+                        setHouseSearch(e.target.value);
+                        setHouseActiveIndex(0);
+                        setHouseListOpen(true);
+                        if (quickForm.houseId) setQuickForm({ ...quickForm, houseId: '' });
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          setHouseListOpen(true);
+                          setHouseActiveIndex((i) => Math.min(i + 1, filteredHouses.length - 1));
+                        } else if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          setHouseActiveIndex((i) => Math.max(i - 1, 0));
+                        } else if (e.key === 'Enter' && houseListOpen) {
+                          e.preventDefault();
+                          if (filteredHouses[houseActiveIndex]) selectHouse(filteredHouses[houseActiveIndex]);
+                        } else if (e.key === 'Escape' && houseListOpen) {
+                          e.stopPropagation();
+                          setHouseListOpen(false);
+                        }
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2.5 focus:border-blue-500"
+                    />
+                    {houseListOpen && (
+                      <ul
+                        id="quick-entry-house-listbox"
+                        role="listbox"
+                        className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-lg"
+                      >
+                        {filteredHouses.length === 0 ? (
+                          <li className="px-3 py-2 text-slate-400">No se encontraron viviendas.</li>
+                        ) : (
+                          filteredHouses.map((h, i) => (
+                            <li
+                              key={h.id}
+                              id={`quick-entry-house-${h.id}`}
+                              ref={(el) => {
+                                if (el && i === houseActiveIndex) el.scrollIntoView({ block: 'nearest' });
+                              }}
+                              role="option"
+                              aria-selected={h.id === quickForm.houseId}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                selectHouse(h);
+                              }}
+                              onMouseEnter={() => setHouseActiveIndex(i)}
+                              className={`px-3 py-2 cursor-pointer text-white ${
+                                i === houseActiveIndex ? 'bg-blue-600/30' : ''
+                              }`}
+                            >
+                              {houseLabel(h)}
+                              {h.residents?.length > 0 && (
+                                <span className="text-slate-400"> · {h.residents[0].fullName}</span>
+                              )}
+                            </li>
+                          ))
+                        )}
+                      </ul>
+                    )}
+                  </div>
                   {housesError ? (
                     <p className="text-red-400 text-[11px]">{housesError}</p>
                   ) : availableHouses.length === 0 ? (
