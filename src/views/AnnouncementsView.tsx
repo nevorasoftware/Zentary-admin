@@ -14,8 +14,12 @@ import {
   Building,
 } from 'lucide-react';
 import { adminApi, isSafeUrl, AnnouncementItem } from '../services/adminApi';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 export const AnnouncementsView: React.FC = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -67,7 +71,7 @@ export const AnnouncementsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert('📢 Comunicado transmitido y notificado a la comunidad.');
+        toast.success('Comunicado transmitido y notificado a la comunidad.');
         setTitle('');
         setBody('');
         setImageUrl('');
@@ -77,26 +81,26 @@ export const AnnouncementsView: React.FC = () => {
         setTargetAudience('TODOS');
         fetchAnnouncements();
       } else {
-        alert((res as any).message || 'Error al publicar anuncio.');
+        toast.error((res as any).message || 'Error al publicar anuncio.');
       }
     } catch (err: any) {
-      alert('Error al publicar: ' + err.message);
+      toast.error('Error al publicar: ' + err.message);
     } finally {
       setPublishing(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('¿Estás seguro de eliminar este comunicado?')) {
+    if (await confirm({ title: 'Eliminar comunicado', message: '¿Estás seguro de eliminar este comunicado?', confirmLabel: 'Eliminar' })) {
       try {
         const res = await adminApi.deleteAnnouncement(id);
         if (res.success) {
           setAnnouncements(announcements.filter((a) => a.id !== id));
         } else {
-          alert('Error al eliminar: ' + (res.message || 'No se pudo eliminar el comunicado.'));
+          toast.error('Error al eliminar: ' + (res.message || 'No se pudo eliminar el comunicado.'));
         }
       } catch (err: any) {
-        alert('Error al eliminar: ' + err.message);
+        toast.error('Error al eliminar: ' + err.message);
       }
     }
   };

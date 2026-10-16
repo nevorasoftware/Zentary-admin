@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Package, Plus, Search, CheckCircle2, Clock, Building2, User } from 'lucide-react';
 import ModalShell from '../components/ModalShell';
+import { useToast } from '../components/Toast';
 
 interface ParcelLog {
   id: string;
@@ -44,6 +45,7 @@ const INITIAL_PARCELS: ParcelLog[] = [
 ];
 
 export const ParcelsView: React.FC = () => {
+  const toast = useToast();
   const [parcels, setParcels] = useState<ParcelLog[]>(INITIAL_PARCELS);
   const [showAddModal, setShowAddModal] = useState(false);
   const [residentName, setResidentName] = useState('');
@@ -73,7 +75,7 @@ export const ParcelsView: React.FC = () => {
     setTrackingNumber('');
     setCustomCarrier('');
     setShowAddModal(false);
-    alert('📦 Paquete registrado. Notificación enviada al celular del residente.');
+    toast.success('Paquete registrado. Notificación enviada al celular del residente.');
   };
 
   const handleMarkPickedUp = (id: string) => {
