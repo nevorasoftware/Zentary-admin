@@ -210,6 +210,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input id="edit-profile-campo-2"
                 type="email"
+                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-400 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none cursor-not-allowed opacity-70"
@@ -239,6 +240,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input id="edit-profile-campo-4"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Dejar en blanco para no cambiar"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
