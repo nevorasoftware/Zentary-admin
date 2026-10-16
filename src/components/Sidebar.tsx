@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   LayoutDashboard,
   Users,
@@ -68,6 +68,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'pqrs', label: 'Soporte y PQRS', icon: MessageSquare, badgeNum: openPqrsCount },
     { id: 'payments', label: 'Gestión de Pagos', icon: CreditCard },
   ];
+
+  // Escape cierra el menú lateral en móvil
+  useEffect(() => {
+    if (!isOpenMobile || !onCloseMobile) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCloseMobile();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpenMobile, onCloseMobile]);
 
   const handleSelect = (view: AdminViewType) => {
     onSelectView(view);

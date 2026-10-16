@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 
 import { adminApi, handleUnauthorized, isSafeUrl, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
+import ModalShell from '../components/ModalShell';
 
 
 const ALL_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -699,9 +700,9 @@ export const AmenitiesView: React.FC = () => {
 
       {/* CREATE / EDIT AMENITY MODAL FORM */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
+        <ModalShell onClose={() => setIsModalOpen(false)} labelledBy="amenities-modal-titulo" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
           <div className="bg-slate-900 border border-purple-900/60 rounded-3xl p-6 max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <h3 className="text-lg font-extrabold text-white mb-1">
+            <h3 id="amenities-modal-titulo" className="text-lg font-extrabold text-white mb-1">
               {editingAmenityId ? 'Editar Amenidad' : 'Registrar Nueva Amenidad'}
             </h3>
             <p className="text-xs text-slate-400 mb-6">
@@ -866,7 +867,7 @@ export const AmenitiesView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );

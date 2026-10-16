@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Camera, X, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 import { getAdminToken, API_BASE_URL } from '../services/adminApi';
+import ModalShell from './ModalShell';
 
 interface EditProfileModalProps {
   currentUser: {
@@ -125,11 +126,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <ModalShell onClose={onClose} labelledBy="editar-perfil-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
       <div className="glass-card max-w-lg w-full p-6 md:p-8 rounded-3xl border border-slate-700 shadow-2xl space-y-6 relative overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
+          <h3 id="editar-perfil-titulo" className="text-xl font-bold text-white flex items-center gap-2">
             <User className="w-5 h-5 text-blue-500" />
             Editar Perfil de Administrador
           </h3>
@@ -273,7 +274,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </ModalShell>
   );
 };
 

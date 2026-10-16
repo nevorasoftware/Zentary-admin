@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Package, Plus, Search, CheckCircle2, Clock, Building2, User } from 'lucide-react';
+import ModalShell from '../components/ModalShell';
 
 interface ParcelLog {
   id: string;
@@ -146,9 +147,9 @@ export const ParcelsView: React.FC = () => {
 
       {/* Modal for Parcel Registration */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setShowAddModal(false)} labelledBy="parcels-modal-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-md w-full p-6 rounded-3xl border border-slate-700 space-y-5">
-            <h3 className="text-lg font-bold text-white">Registrar Ingreso de Paquete</h3>
+            <h3 id="parcels-modal-titulo" className="text-lg font-bold text-white">Registrar Ingreso de Paquete</h3>
 
             <form onSubmit={handleRegisterParcel} className="space-y-4">
               <div>
@@ -242,7 +243,7 @@ export const ParcelsView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );

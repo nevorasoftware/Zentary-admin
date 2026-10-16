@@ -17,6 +17,7 @@ import {
   Percent,
 } from 'lucide-react';
 import { adminApi, isSafeUrl, ResidentUser, FinancialSummary } from '../services/adminApi';
+import ModalShell from '../components/ModalShell';
 
 interface PaymentRecord {
   id: string;
@@ -596,10 +597,10 @@ export const PaymentsView: React.FC = () => {
 
       {/* Modal: Emitir Cobro Masivo / Individual */}
       {showBillingModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <ModalShell onClose={() => setShowBillingModal(false)} labelledBy="payments-cobro-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-scale-in">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="payments-cobro-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <Plus className="w-5 h-5 text-blue-500" />
                 Emitir Nuevo Cobro o Cuota
               </h3>
@@ -721,15 +722,15 @@ export const PaymentsView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* Modal: Registrar Pago Manual con Comprobante */}
       {showManualPayModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+        <ModalShell onClose={() => setShowManualPayModal(false)} labelledBy="payments-pago-manual-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-scale-in">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="payments-pago-manual-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <FileCheck className="w-5 h-5 text-emerald-400" />
                 Registrar y Confirmar Pago
               </h3>
@@ -852,7 +853,7 @@ export const PaymentsView: React.FC = () => {
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );
