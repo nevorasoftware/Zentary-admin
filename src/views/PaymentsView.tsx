@@ -291,7 +291,7 @@ export const PaymentsView: React.FC = () => {
     <div className="space-y-6">
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-3xl border border-slate-800">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-blue-400" />
             Finanzas y Cuotas de Mantenimiento
@@ -301,7 +301,7 @@ export const PaymentsView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap xl:shrink-0">
           <button
             onClick={() => {
               fetchAllPayments();
@@ -316,7 +316,7 @@ export const PaymentsView: React.FC = () => {
           <button
             onClick={handleApplyLateFees}
             disabled={isApplyingLateFees}
-            className="px-4 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-sm flex items-center gap-2 transition-all whitespace-nowrap"
+            className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/40 text-amber-400 font-semibold text-xs flex items-center gap-2 transition-all whitespace-nowrap"
             title="Evaluar cobros vencidos y aplicar control de mora (5%)"
           >
             <Flame className={`w-4 h-4 ${isApplyingLateFees ? 'animate-spin' : ''}`} />
@@ -482,7 +482,7 @@ export const PaymentsView: React.FC = () => {
       <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/80 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+            <thead className="hidden md:table-header-group bg-slate-950/80 text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-800">
               <tr>
                 <th className="px-6 py-4">Vivienda / Residente</th>
                 <th className="px-6 py-4">Concepto</th>
@@ -511,16 +511,16 @@ export const PaymentsView: React.FC = () => {
                   const isPaid = p.status === 'PAID';
                   const isOverdue = p.status === 'OVERDUE';
                   return (
-                    <tr key={p.id} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="px-6 py-4">
+                    <tr key={p.id} className="hover:bg-slate-900/40 transition-colors flex flex-wrap items-center gap-x-2 gap-y-1 px-2 py-3 md:table-row md:p-0">
+                      <td className="px-3 py-1 md:px-6 md:py-4 w-full md:w-auto">
                         <div className="font-bold text-white">{p.unitNumber}</div>
                         <div className="text-xs text-slate-400">{p.residentName}</div>
                       </td>
-                      <td className="px-6 py-4 text-slate-200">
+                      <td className="px-3 py-1 md:px-6 md:py-4 text-slate-200">
                         {p.concept}
                         {p.notes && <div className="text-xs text-slate-400 italic mt-0.5">{p.notes}</div>}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-1 md:px-6 md:py-4">
                         <div className="font-bold text-white">${p.amount.toFixed(2)}</div>
                         {p.lateFee && p.lateFee > 0 ? (
                           <div className="text-xs text-rose-400 font-semibold flex items-center gap-1">
@@ -528,8 +528,8 @@ export const PaymentsView: React.FC = () => {
                           </div>
                         ) : null}
                       </td>
-                      <td className="px-6 py-4 text-slate-400 text-xs">{p.dueDate}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-3 py-1 md:px-6 md:py-4 text-slate-400 text-xs">{p.dueDate}</td>
+                      <td className="px-3 py-1 md:px-6 md:py-4">
                         {isPaid ? (
                           <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center gap-1">
                             <CheckCircle className="w-3.5 h-3.5" /> Pagado
@@ -556,7 +556,7 @@ export const PaymentsView: React.FC = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-xs">
+                      <td className="px-3 py-1 md:px-6 md:py-4 text-xs">
                         {p.paymentMethod ? (
                           <div className="text-slate-300 font-semibold">{p.paymentMethod}</div>
                         ) : (
@@ -573,7 +573,7 @@ export const PaymentsView: React.FC = () => {
                           </a>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3 py-1 md:px-6 md:py-4 text-right">
                         {p.status === 'PENDING' || p.status === 'OVERDUE' || p.status === 'PARTIAL' ? (
                           <button
                             onClick={() => openManualPaymentForRecord(p)}
