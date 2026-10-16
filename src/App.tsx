@@ -23,8 +23,27 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
+// Rutas por hash (#/usuarios): funcionan igual con `vite preview` y con un servidor estático
+const VIEW_ROUTES: Record<AdminViewType, string> = {
+  dashboard: '/',
+  access: '/usuarios',
+  amenities: '/amenidades',
+  announcements: '/anuncios',
+  visits: '/garita',
+  parcels: '/paquetes',
+  pqrs: '/soporte',
+  payments: '/pagos',
+};
+
+// Convierte el hash actual en una vista; si la ruta no existe vuelve al panel principal
+const getViewFromHash = (): AdminViewType => {
+  const route = window.location.hash.replace(/^#/, '') || '/';
+  const found = (Object.keys(VIEW_ROUTES) as AdminViewType[]).find((v) => VIEW_ROUTES[v] === route);
+  return found || 'dashboard';
+};
+
 export default function App() {
-  const [currentView, setCurrentView] = useState<AdminViewType>('dashboard');
+  const [currentView, setCurrentView] = useState<AdminViewType>(getViewFromHash);
   const [communityName, setCommunityName] = useState<string>('Residencial Zentary');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -44,6 +63,21 @@ export default function App() {
     }
     return null;
   });
+
+  // Atrás / Adelante del navegador cambian la vista sin salir de la aplicación
+  useEffect(() => {
+    const onPopState = () => setCurrentView(getViewFromHash());
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  const navigateTo = (view: AdminViewType) => {
+    const hash = `#${VIEW_ROUTES[view]}`;
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, '', hash);
+    }
+    setCurrentView(view);
+  };
 
   useEffect(() => {
     if (adminToken) {
@@ -131,12 +165,12 @@ export default function App() {
         };
       case 'access':
         return {
-          title: 'Control de Usuarios',
+          title: 'Control de Usuarios y Accesos',
           subtitle: `Registrar inquilinos y administrar accesos en ${communityName}`,
         };
       case 'amenities':
         return {
-          title: 'Administración de Amenidades',
+          title: 'Amenidades',
           subtitle: `Gestionar espacios comunes y calendario de reservas en ${communityName}`,
         };
       case 'announcements':
@@ -146,12 +180,12 @@ export default function App() {
         };
       case 'visits':
         return {
-          title: 'Garita y Pases QR',
+          title: 'Accesos de Garita / QR',
           subtitle: `Monitoreo de ingresos de visitantes y vehículos en ${communityName}`,
         };
       case 'parcels':
         return {
-          title: 'Recepción Paquetes',
+          title: 'Recepción de Paquetes',
           subtitle: `Registro de encomiendas de DHL, FedEx, UPS para ${communityName}`,
         };
       case 'pqrs':
@@ -177,7 +211,7 @@ export default function App() {
   const renderViewContent = () => {
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView onNavigate={(view) => setCurrentView(view)} />;
+        return <DashboardView onNavigate={(view) => navigateTo(view)} />;
       case 'access':
         return (
           <AccessManagementView
@@ -198,7 +232,7 @@ export default function App() {
       case 'payments':
         return <PaymentsView />;
       default:
-        return <DashboardView onNavigate={(view) => setCurrentView(view)} />;
+        return <DashboardView onNavigate={(view) => navigateTo(view)} />;
     }
   };
 
@@ -207,7 +241,7 @@ export default function App() {
       {/* Responsive Navigation Sidebar */}
       <Sidebar
         currentView={currentView}
-        onSelectView={(view) => setCurrentView(view)}
+        onSelectView={(view) => navigateTo(view)}
         openPqrsCount={openPqrsCount}
         pendingParcelsCount={pendingParcelsCount}
         isOpenMobile={isMobileMenuOpen}
