@@ -41,8 +41,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       });
 
       setStatsData((prev) => ({
-        // Mismo criterio que Control de Usuarios: cuentas con acceso activo
-        totalUsers: usersRes?.success && Array.isArray(usersRes.users) ? usersRes.users.filter((u) => u.isActive).length : prev.totalUsers,
+        // Mismo criterio que Control de Usuarios: usuarios activos sin cuentas de administración
+        totalUsers: usersRes?.success && Array.isArray(usersRes.users) ? usersRes.users.filter((u) => u.isActive && !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN'].includes(u.role)).length : prev.totalUsers,
         activeVisits: statsRes?.success ? statsRes.stats.activeVisits : prev.activeVisits,
         pendingParcels: statsRes?.success ? statsRes.stats.pendingParcels : prev.pendingParcels,
         openPqrs: statsRes?.success ? statsRes.stats.openPqrs : prev.openPqrs,
@@ -62,7 +62,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   };
 
   const stats = [
-    { title: 'Residentes Activos', value: `${statsData.totalUsers}`, change: 'Cuentas activas, igual que Control de Usuarios', hasError: errors.users, icon: Users, color: 'from-blue-600 to-indigo-600' },
+    { title: 'Residentes Activos', value: `${statsData.totalUsers}`, change: 'Usuarios activos, igual que Control de Usuarios', hasError: errors.users, icon: Users, color: 'from-blue-600 to-indigo-600' },
     { title: 'Visitas en Curso', value: `${statsData.activeVisits}`, change: '', hasError: errors.stats, icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
     { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', hasError: errors.stats, icon: Package, color: 'from-amber-600 to-orange-600' },
     { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: '', hasError: errors.stats, icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
