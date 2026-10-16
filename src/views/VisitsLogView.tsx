@@ -832,20 +832,20 @@ export const VisitsLogView: React.FC = () => {
                           <div className="text-[11px] text-slate-400">{item.resident?.fullName}</div>
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4 font-mono font-medium text-emerald-400">
-                          {item.vehiclePlate || 'A pie'}
+                          <span className="md:hidden">Placa: </span>{item.vehiclePlate || 'A pie'}
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4 text-slate-400">
-                          {item.entryDate
+                          <span className="md:hidden">Entrada: </span>{item.entryDate
                             ? new Date(item.entryDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
                             : '—'}
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4 text-slate-400">
-                          {item.exitDate
+                          <span className="md:hidden">Salida: </span>{item.exitDate
                             ? new Date(item.exitDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
                             : item.status === 'INGRESADA' ? 'Dentro' : '—'}
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4 font-medium text-slate-200">
-                          {item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : '—')}
+                          <span className="md:hidden">Duración: </span>{item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : '—')}
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4">
                           <span
