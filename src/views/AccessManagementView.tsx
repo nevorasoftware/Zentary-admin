@@ -718,7 +718,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
 
                   <td className="px-6 py-4 text-slate-400 font-mono text-xs">
-                    {user.phone ? formatPhoneElSalvador(user.phone) : 'Sin teléfono'}
+                    {user.phone
+                      ? (() => {
+                          const d = user.phone.replace(/\D/g, '');
+                          return d.length === 8 || (d.length === 11 && d.startsWith('503'))
+                            ? formatPhoneElSalvador(user.phone)
+                            : user.phone;
+                        })()
+                      : 'Sin teléfono'}
                   </td>
 
                   <td className="px-6 py-4">
