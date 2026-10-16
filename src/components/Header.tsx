@@ -29,6 +29,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempName, setTempName] = useState(communityName);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
   const isSuperAdmin = adminUser?.role === 'SUPER_ADMIN';
 
@@ -58,10 +59,10 @@ export const Header: React.FC<HeaderProps> = ({
   const handleSaveName = async () => {
     if (tempName.trim() && onUpdateCommunityName) {
       const updatedName = tempName.trim();
-      onUpdateCommunityName(updatedName);
+      setNameError(null);
 
       try {
-        await fetch(`${API_BASE_URL}/admin/community`, {
+        const res = await fetch(`${API_BASE_URL}/admin/community`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -70,8 +71,16 @@ export const Header: React.FC<HeaderProps> = ({
           },
           body: JSON.stringify({ name: updatedName }),
         });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.success === false) {
+          setNameError(data.message || 'No se pudo actualizar el nombre de la residencial.');
+          return;
+        }
+        onUpdateCommunityName(updatedName);
       } catch (err) {
         console.warn('Failed to update community name in backend:', err);
+        setNameError('No se pudo actualizar el nombre de la residencial.');
+        return;
       }
     }
     setIsEditingName(false);
@@ -116,6 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <Check className="w-3.5 h-3.5" />
                   </button>
+                  {nameError && <span className="text-red-400 text-[11px] ml-1">{nameError}</span>}
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
@@ -123,6 +133,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={() => {
                       setTempName(communityName);
+                      setNameError(null);
                       setIsEditingName(true);
                     }}
                     className="text-slate-400 hover:text-white transition-colors"
