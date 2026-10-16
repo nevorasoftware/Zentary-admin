@@ -610,10 +610,10 @@ export const PaymentsView: React.FC = () => {
 
             <form onSubmit={handleCreateBilling} className="space-y-4">
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-1" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   Destinatario
                 </label>
-                <select
+                <select id="payments-campo-1"
                   value={targetResidentId}
                   onChange={(e) => setTargetResidentId(e.target.value)}
                   required
@@ -630,10 +630,10 @@ export const PaymentsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-2" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   Concepto del Cobro
                 </label>
-                <input
+                <input id="payments-campo-2"
                   type="text"
                   placeholder="Ej: Cuota Mantenimiento Septiembre 2026"
                   value={concept}
@@ -645,12 +645,12 @@ export const PaymentsView: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label htmlFor="payments-campo-3" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                     Monto (USD)
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-slate-500 font-bold">$</span>
-                    <input
+                    <input id="payments-campo-3"
                       type="number"
                       step="0.01"
                       min="0.01"
@@ -664,10 +664,10 @@ export const PaymentsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label htmlFor="payments-campo-4" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                     Días de Gracia
                   </label>
-                  <input
+                  <input id="payments-campo-4"
                     type="number"
                     value={graceDays}
                     onChange={(e) => setGraceDays(e.target.value)}
@@ -678,10 +678,10 @@ export const PaymentsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-5" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   Fecha Límite de Pago
                 </label>
-                <input
+                <input id="payments-campo-5"
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
@@ -691,10 +691,10 @@ export const PaymentsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-6" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   Notas Adicionales (Opcional)
                 </label>
-                <input
+                <input id="payments-campo-6"
                   type="text"
                   placeholder="Incluye servicio de jardinería y vigilancia"
                   value={billingNotes}
@@ -750,10 +750,10 @@ export const PaymentsView: React.FC = () => {
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label htmlFor="payments-campo-7" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                     Residente / Vivienda
                   </label>
-                  <select
+                  <select id="payments-campo-7"
                     value={manualResidentId}
                     onChange={(e) => setManualResidentId(e.target.value)}
                     required
@@ -771,10 +771,10 @@ export const PaymentsView: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label htmlFor="payments-campo-8" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                     Monto Recibido ($)
                   </label>
-                  <input
+                  <input id="payments-campo-8"
                     type="number"
                     step="0.01"
                     min="0.01"
@@ -791,10 +791,10 @@ export const PaymentsView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                  <label htmlFor="payments-campo-9" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                     Método de Pago
                   </label>
-                  <select
+                  <select id="payments-campo-9"
                     value={manualMethod}
                     onChange={(e) => setManualMethod(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
@@ -809,10 +809,10 @@ export const PaymentsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-10" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   URL Comprobante / Referencia Bancaria
                 </label>
-                <input
+                <input id="payments-campo-10"
                   type="text"
                   placeholder="https://... o Código #REF-998231"
                   value={manualReceiptUrl}
@@ -822,10 +822,10 @@ export const PaymentsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label htmlFor="payments-campo-11" className="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">
                   Notas de Confirmación
                 </label>
-                <input
+                <input id="payments-campo-11"
                   type="text"
                   placeholder="Verificado con estado de cuenta de Banco Agrícola"
                   value={manualNotes}

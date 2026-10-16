@@ -15,6 +15,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [pendingSession, setPendingSession] = useState<{ user: any; token: string } | null>(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -64,7 +65,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    const errors: { email?: string; password?: string } = {};
+    if (!email.trim()) errors.email = 'Ingresa tu correo electrónico.';
+    if (!password) errors.password = 'Ingresa tu contraseña.';
+    setFieldErrors(errors);
+    if (errors.email || errors.password) return;
 
     setIsLoading(true);
     setErrorMessage('');
@@ -122,7 +127,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
         {/* Error Alert Banner */}
         {errorMessage && (
-          <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center">
+          <div role="alert" className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold text-center">
             ⚠️ {errorMessage}
           </div>
         )}
@@ -134,13 +139,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
             Por seguridad, debes definir una nueva contraseña antes de ingresar al panel.
           </p>
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="login-campo-1" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Nueva Contraseña
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="login-campo-1"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -150,13 +156,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="login-campo-2" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Confirmar Contraseña
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="login-campo-2"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -183,15 +190,19 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </button>
         </form>
         ) : (
-        <form onSubmit={handleLoginSubmit} className="space-y-4">
+        <form onSubmit={handleLoginSubmit} noValidate className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="login-campo-3" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Correo de Administrador
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="login-campo-3"
                 type="email"
+                autoComplete="email"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.email}
+                aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
                 placeholder="admin@zentary.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -199,16 +210,23 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 required
               />
             </div>
+            {fieldErrors.email && (
+              <p id="login-email-error" className="mt-1.5 text-xs font-semibold text-rose-300">{fieldErrors.email}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="login-campo-4" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
               Contraseña
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="login-campo-4"
                 type="password"
+                autoComplete="current-password"
+                aria-required="true"
+                aria-invalid={!!fieldErrors.password}
+                aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -216,6 +234,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 required
               />
             </div>
+            {fieldErrors.password && (
+              <p id="login-password-error" className="mt-1.5 text-xs font-semibold text-rose-300">{fieldErrors.password}</p>
+            )}
           </div>
 
           <button

@@ -717,8 +717,8 @@ export const AmenitiesView: React.FC = () => {
 
             <form onSubmit={handleSaveAmenity} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Nombre de la amenidad *</label>
-                <input
+                <label htmlFor="amenities-campo-1" className="block text-xs font-bold text-slate-300 mb-1">Nombre de la amenidad *</label>
+                <input id="amenities-campo-1"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -730,8 +730,8 @@ export const AmenitiesView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Tipo de amenidad *</label>
-                  <select
+                  <label htmlFor="amenities-campo-2" className="block text-xs font-bold text-slate-300 mb-1">Tipo de amenidad *</label>
+                  <select id="amenities-campo-2"
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                     className="w-full bg-slate-950 text-white font-medium text-xs rounded-xl px-3.5 py-2.5 border border-purple-900/60 focus:outline-none focus:border-purple-500"
@@ -745,8 +745,8 @@ export const AmenitiesView: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Precio por reserva ($) *</label>
-                  <input
+                  <label htmlFor="amenities-campo-3" className="block text-xs font-bold text-slate-300 mb-1">Precio por reserva ($) *</label>
+                  <input id="amenities-campo-3"
                     type="number"
                     step="0.01"
                     min="0"
@@ -760,8 +760,8 @@ export const AmenitiesView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Fotografía / Imagen de la amenidad *</label>
-                <div className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-purple-900/60 hover:border-purple-500/80 rounded-2xl bg-slate-950/60 transition-all">
+                <label id="amenities-imagen-label" className="block text-xs font-bold text-slate-300 mb-1">Fotografía / Imagen de la amenidad *</label>
+                <div role="group" aria-labelledby="amenities-imagen-label" className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-purple-900/60 hover:border-purple-500/80 rounded-2xl bg-slate-950/60 transition-all">
                   {isSafeUrl(imageUrl) ? (
                     <div className="relative w-full h-44 rounded-xl overflow-hidden group">
                       <img src={imageUrl} alt="Vista previa" className="w-full h-full object-cover" />
@@ -791,8 +791,8 @@ export const AmenitiesView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-2">Días disponibles *</label>
-                <div className="flex flex-wrap gap-2">
+                <label id="amenities-dias-label" className="block text-xs font-bold text-slate-300 mb-2">Días disponibles *</label>
+                <div role="group" aria-labelledby="amenities-dias-label" className="flex flex-wrap gap-2">
                   {ALL_DAYS.map((day) => {
                     const isSelected = selectedDays.includes(day);
                     return (
@@ -815,8 +815,8 @@ export const AmenitiesView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Hora Inicio</label>
-                  <input
+                  <label htmlFor="amenities-campo-4" className="block text-xs font-bold text-slate-300 mb-1">Hora Inicio</label>
+                  <input id="amenities-campo-4"
                     type="time"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
@@ -825,8 +825,8 @@ export const AmenitiesView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Hora Fin</label>
-                  <input
+                  <label htmlFor="amenities-campo-5" className="block text-xs font-bold text-slate-300 mb-1">Hora Fin</label>
+                  <input id="amenities-campo-5"
                     type="time"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
@@ -835,8 +835,8 @@ export const AmenitiesView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Tiempo Máx (Horas)</label>
-                  <input
+                  <label htmlFor="amenities-campo-6" className="block text-xs font-bold text-slate-300 mb-1">Tiempo Máx (Horas)</label>
+                  <input id="amenities-campo-6"
                     type="number"
                     min="1"
                     max="24"

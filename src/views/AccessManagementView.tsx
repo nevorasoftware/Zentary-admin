@@ -813,10 +813,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
             <form onSubmit={handleSaveCommunityDetails} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-1" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Nombre de la Residencial / Condominio *
                 </label>
-                <input
+                <input id="access-management-campo-1"
                   type="text"
                   placeholder="Ej. Residencial Zentary, Residencial Amapolas..."
                   value={commNameInput}
@@ -827,10 +827,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-2" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Dirección Principal
                 </label>
-                <input
+                <input id="access-management-campo-2"
                   type="text"
                   placeholder="Ej. Av. Las Palmas #123, Col. San Benito"
                   value={commAddressInput}
@@ -840,10 +840,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-3" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Ciudad / Municipio
                 </label>
-                <input
+                <input id="access-management-campo-3"
                   type="text"
                   placeholder="Ej. San Salvador, Santa Tecla..."
                   value={commCityInput}
@@ -898,10 +898,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
             <form onSubmit={handleRegisterTenant} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-4" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Nombre Completo del Inquilino *
                 </label>
-                <input
+                <input id="access-management-campo-4"
                   type="text"
                   placeholder="Ej. Juan Pérez"
                   value={fullName}
@@ -913,10 +913,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label htmlFor="access-management-campo-5" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                     Número de Unidad *
                   </label>
-                  <input
+                  <input id="access-management-campo-5"
                     type="text"
                     placeholder="Ej. 101-A"
                     value={unitNumber}
@@ -926,10 +926,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label htmlFor="access-management-campo-6" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                     Bloque / Manzana / Torre
                   </label>
-                  <input
+                  <input id="access-management-campo-6"
                     type="text"
                     placeholder="Ej. Torre A"
                     value={block}
@@ -940,10 +940,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-7" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Correo Electrónico *
                 </label>
-                <input
+                <input id="access-management-campo-7"
                   type="email"
                   placeholder="correo@ejemplo.com"
                   value={email}
@@ -954,10 +954,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-8" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Número de Teléfono / WhatsApp *
                 </label>
-                <input
+                <input id="access-management-campo-8"
                   type="text"
                   placeholder="Ej. +503 6198-9999"
                   value={phone}
@@ -1012,10 +1012,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
             <form onSubmit={handleSaveEditedTenant} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-9" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Nombre Completo *
                 </label>
-                <input
+                <input id="access-management-campo-9"
                   type="text"
                   value={editFullName}
                   onChange={(e) => setEditFullName(e.target.value)}
@@ -1026,10 +1026,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label htmlFor="access-management-campo-10" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                     Número de Unidad *
                   </label>
-                  <input
+                  <input id="access-management-campo-10"
                     type="text"
                     value={editUnitNumber}
                     onChange={(e) => setEditUnitNumber(e.target.value)}
@@ -1038,10 +1038,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  <label htmlFor="access-management-campo-11" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                     Bloque / Manzana / Torre
                   </label>
-                  <input
+                  <input id="access-management-campo-11"
                     type="text"
                     value={editBlock}
                     onChange={(e) => setEditBlock(e.target.value)}
@@ -1051,10 +1051,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-12" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Correo Electrónico *
                 </label>
-                <input
+                <input id="access-management-campo-12"
                   type="email"
                   placeholder="correo@ejemplo.com"
                   value={editEmail}
@@ -1065,10 +1065,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                <label htmlFor="access-management-campo-13" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
                   Teléfono / WhatsApp *
                 </label>
-                <input
+                <input id="access-management-campo-13"
                   type="text"
                   placeholder="Ej. +503 6198-9999"
                   value={editPhone}

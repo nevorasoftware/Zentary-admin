@@ -186,13 +186,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-profile-campo-1" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
               Nombre Completo *
             </label>
             <div className="relative">
               <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="edit-profile-campo-1"
                 type="text"
+                autoComplete="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:border-blue-500"
@@ -202,12 +203,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-profile-campo-2" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
               Correo Electrónico
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="edit-profile-campo-2"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -218,10 +219,10 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-profile-campo-3" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
               URL Foto de Perfil (Opcional)
             </label>
-            <input
+            <input id="edit-profile-campo-3"
               type="text"
               placeholder="https://..."
               value={avatarUrl}
@@ -231,12 +232,12 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
+            <label htmlFor="edit-profile-campo-4" className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1">
               Nueva Contraseña (Opcional)
             </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
+              <input id="edit-profile-campo-4"
                 type="password"
                 placeholder="Dejar en blanco para no cambiar"
                 value={newPassword}

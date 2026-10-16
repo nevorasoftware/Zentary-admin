@@ -142,10 +142,10 @@ export const AnnouncementsView: React.FC = () => {
         <form onSubmit={handlePublish} className="space-y-4">
           {/* Categoría */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            <label id="announcements-categoria-label" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
               Categoría
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div role="group" aria-labelledby="announcements-categoria-label" className="grid grid-cols-2 gap-2">
               {(['GENERAL', 'MANTENIMIENTO', 'URGENTE', 'EVENTO'] as const).map((cat) => (
                 <button
                   type="button"
@@ -166,10 +166,10 @@ export const AnnouncementsView: React.FC = () => {
           {/* Prioridad y Público Objetivo */}
           <div className="grid grid-cols-1 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label htmlFor="announcements-campo-1" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Prioridad
               </label>
-              <select
+              <select id="announcements-campo-1"
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as any)}
                 className="w-full bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
@@ -181,10 +181,10 @@ export const AnnouncementsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label htmlFor="announcements-campo-2" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Destinatarios
               </label>
-              <select
+              <select id="announcements-campo-2"
                 value={targetAudience}
                 onChange={(e) => setTargetAudience(e.target.value as any)}
                 className="w-full bg-slate-900 border border-slate-800 text-xs font-bold text-slate-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-500"
@@ -197,10 +197,10 @@ export const AnnouncementsView: React.FC = () => {
 
           {targetAudience === 'BLOQUE' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              <label htmlFor="announcements-campo-3" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Nombre del Bloque o Torre
               </label>
-              <input
+              <input id="announcements-campo-3"
                 type="text"
                 placeholder="Ej. Torre A o Senda 3"
                 value={targetBlock}
@@ -212,10 +212,10 @@ export const AnnouncementsView: React.FC = () => {
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="announcements-campo-4" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Título del Comunicado *
             </label>
-            <input
+            <input id="announcements-campo-4"
               type="text"
               placeholder="Ej. Limpieza de Cisterna de Agua"
               value={title}
@@ -226,10 +226,10 @@ export const AnnouncementsView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="announcements-campo-5" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Contenido del Mensaje *
             </label>
-            <textarea
+            <textarea id="announcements-campo-5"
               rows={4}
               placeholder="Escribe los detalles del anuncio que verán los residentes..."
               value={body}
@@ -240,10 +240,10 @@ export const AnnouncementsView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+            <label htmlFor="announcements-campo-6" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
               Imagen de Cabecera (Opcional)
             </label>
-            <input
+            <input id="announcements-campo-6"
               type="url"
               placeholder="https://ejemplo.com/imagen.jpg"
               value={imageUrl}

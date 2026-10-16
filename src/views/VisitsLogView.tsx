@@ -890,8 +890,8 @@ export const VisitsLogView: React.FC = () => {
             <form onSubmit={handleQuickEntrySubmit} className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-400 block font-medium">Tipo de Entrada:</label>
-                  <select
+                  <label htmlFor="visits-log-campo-1" className="text-slate-400 block font-medium">Tipo de Entrada:</label>
+                  <select id="visits-log-campo-1"
                     value={quickForm.entryType}
                     onChange={(e) => setQuickForm({ ...quickForm, entryType: e.target.value })}
                     className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2.5 focus:border-blue-500"
@@ -904,9 +904,9 @@ export const VisitsLogView: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-400 block font-medium">Vivienda Destino *:</label>
+                  <label htmlFor="visits-log-campo-2" className="text-slate-400 block font-medium">Vivienda Destino *:</label>
                   <div className="relative">
-                    <input
+                    <input id="visits-log-campo-2"
                       type="text"
                       role="combobox"
                       aria-expanded={houseListOpen}
@@ -995,8 +995,8 @@ export const VisitsLogView: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 block font-medium">Nombre de la Persona / Conductor *:</label>
-                <input
+                <label htmlFor="visits-log-campo-3" className="text-slate-400 block font-medium">Nombre de la Persona / Conductor *:</label>
+                <input id="visits-log-campo-3"
                   type="text"
                   required
                   placeholder="Ej. Repartidor Juan Morales"
@@ -1008,8 +1008,8 @@ export const VisitsLogView: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-slate-400 block font-medium">Placa del Vehículo / Moto:</label>
-                  <input
+                  <label htmlFor="visits-log-campo-4" className="text-slate-400 block font-medium">Placa del Vehículo / Moto:</label>
+                  <input id="visits-log-campo-4"
                     type="text"
                     placeholder="Ej. M 189-204"
                     value={quickForm.vehiclePlate}
@@ -1019,8 +1019,8 @@ export const VisitsLogView: React.FC = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-slate-400 block font-medium">DUI / Cédula (Opcional):</label>
-                  <input
+                  <label htmlFor="visits-log-campo-5" className="text-slate-400 block font-medium">DUI / Cédula (Opcional):</label>
+                  <input id="visits-log-campo-5"
                     type="text"
                     placeholder="Ej. 05819204-8"
                     value={quickForm.visitorDni}
@@ -1031,8 +1031,8 @@ export const VisitsLogView: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-slate-400 block font-medium">Notas / Observaciones:</label>
-                <input
+                <label htmlFor="visits-log-campo-6" className="text-slate-400 block font-medium">Notas / Observaciones:</label>
+                <input id="visits-log-campo-6"
                   type="text"
                   placeholder="Ej. Pedido de comida rápida a domicilio"
                   value={quickForm.notes}
