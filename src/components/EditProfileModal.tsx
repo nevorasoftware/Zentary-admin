@@ -80,7 +80,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
       if (!(response.ok && data.success)) {
         setIsLoading(false);
-        setFeedback({ type: 'error', text: data.message || 'Error al actualizar el perfil en la base de datos.' });
+        setFeedback({ type: 'error', text: data.message || 'Error al actualizar el perfil.' });
         return;
       }
 
@@ -113,14 +113,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
       setIsLoading(false);
 
-      setFeedback({ type: 'success', text: '¡Perfil guardado correctamente en PostgreSQL!' });
+      setFeedback({ type: 'success', text: '¡Perfil guardado correctamente!' });
       onProfileUpdated(data.user);
       setTimeout(() => {
         onClose();
       }, 1200);
     } catch (err: any) {
       setIsLoading(false);
-      setFeedback({ type: 'error', text: 'Error de conexión con el servidor en Railway.' });
+      setFeedback({ type: 'error', text: 'Error de conexión con el servidor.' });
     }
   };
 
@@ -261,7 +261,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             >
               {isLoading ? (
                 <>
-                  <Sparkles className="w-4 h-4 animate-spin" /> Guardando en PostgreSQL...
+                  <Sparkles className="w-4 h-4 animate-spin" /> Guardando...
                 </>
               ) : (
                 'Guardar Cambios'

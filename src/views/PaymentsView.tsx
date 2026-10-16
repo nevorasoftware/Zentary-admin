@@ -175,7 +175,7 @@ export const PaymentsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert((res as any).message || '💵 Cobro emitido correctamente en la base de datos.');
+        alert((res as any).message || '💵 Cobro emitido correctamente.');
         setConcept('');
         setAmount('');
         setDueDate('');
@@ -249,7 +249,7 @@ export const PaymentsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert('✅ Pago registrado y confirmado exitosamente en la base de datos.');
+        alert('✅ Pago registrado y confirmado exitosamente.');
         setShowManualPayModal(false);
         setSelectedPaymentForPay(null);
         setManualAmount('');

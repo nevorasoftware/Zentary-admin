@@ -172,7 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-          <span>Railway API</span>
+          <span>Conectado</span>
         </div>
 
         {/* Admin Avatar Button to edit profile */}

@@ -162,7 +162,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </div>
             ) : recentVisits.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-500">
-                No hay visitas registradas aún en la base de datos de PostgreSQL.
+                No hay visitas registradas aún.
               </div>
             ) : (
               recentVisits.map((v) => {

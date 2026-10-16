@@ -64,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'amenities', label: 'Amenidades', icon: Building2 },
     { id: 'announcements', label: 'Envío de Anuncios', icon: Megaphone },
     { id: 'visits', label: 'Accesos de Garita / QR', icon: ShieldCheck },
-    { id: 'parcels', label: 'Recepcionar Paquetes', icon: Package, badgeNum: pendingParcelsCount },
+    { id: 'parcels', label: 'Recepción de Paquetes', icon: Package, badgeNum: pendingParcelsCount },
     { id: 'pqrs', label: 'Soporte y PQRS', icon: MessageSquare, badgeNum: openPqrsCount },
     { id: 'payments', label: 'Gestión de Pagos', icon: CreditCard },
   ];
