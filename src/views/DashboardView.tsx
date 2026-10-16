@@ -42,7 +42,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
       setStatsData((prev) => ({
         // Mismo criterio que Control de Usuarios: usuarios activos sin cuentas de administración
-        totalUsers: usersRes?.success && Array.isArray(usersRes.users) ? usersRes.users.filter((u) => u.isActive && !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN'].includes(u.role)).length : prev.totalUsers,
+        totalUsers: usersRes?.success && Array.isArray(usersRes.users) ? usersRes.users.filter((u) => u.isActive && !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN', 'SECURITY_ADMIN'].includes(u.role)).length : prev.totalUsers,
         activeVisits: statsRes?.success ? statsRes.stats.activeVisits : prev.activeVisits,
         pendingParcels: statsRes?.success ? statsRes.stats.pendingParcels : prev.pendingParcels,
         openPqrs: statsRes?.success ? statsRes.stats.openPqrs : prev.openPqrs,
