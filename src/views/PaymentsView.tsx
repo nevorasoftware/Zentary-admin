@@ -49,7 +49,7 @@ export const PaymentsView: React.FC = () => {
   const [concept, setConcept] = useState('');
   const [amount, setAmount] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [targetResidentId, setTargetResidentId] = useState('ALL');
+  const [targetResidentId, setTargetResidentId] = useState('');
   const [graceDays, setGraceDays] = useState('3');
   const [billingNotes, setBillingNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,7 +149,19 @@ export const PaymentsView: React.FC = () => {
 
   const handleCreateBilling = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!concept || !amount || !dueDate) return;
+    if (!concept || !amount || !dueDate || !targetResidentId) return;
+
+    if (!(parseFloat(amount) > 0)) {
+      alert('El monto debe ser mayor a cero.');
+      return;
+    }
+
+    if (
+      targetResidentId === 'ALL' &&
+      !window.confirm(`Se emitirá este cobro a TODAS las viviendas (${residents.length} residentes). ¿Deseas continuar?`)
+    ) {
+      return;
+    }
 
     try {
       setIsSubmitting(true);
@@ -168,7 +180,7 @@ export const PaymentsView: React.FC = () => {
         setAmount('');
         setDueDate('');
         setBillingNotes('');
-        setTargetResidentId('ALL');
+        setTargetResidentId('');
         setShowBillingModal(false);
         fetchAllPayments();
         fetchFinancialSummary();
@@ -218,6 +230,11 @@ export const PaymentsView: React.FC = () => {
   const handleRegisterManualPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualAmount) return;
+
+    if (!(parseFloat(manualAmount) > 0)) {
+      alert('El monto debe ser mayor a cero.');
+      return;
+    }
 
     try {
       setIsManualSubmitting(true);
@@ -599,12 +616,14 @@ export const PaymentsView: React.FC = () => {
                 <select
                   value={targetResidentId}
                   onChange={(e) => setTargetResidentId(e.target.value)}
+                  required
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
                 >
-                  <option value="ALL">📢 Cobro Masivo (Emitir a TODAS las Viviendas)</option>
+                  <option value="">Seleccionar destinatario...</option>
+                  <option value="ALL">📢 Cobro masivo (todas las viviendas)</option>
                   {residents.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.fullName} - {r.house?.unitNumber ? `Casa ${r.house.unitNumber}` : r.property?.unitNumber ? `Unidad ${r.property.unitNumber}` : r.email}
+                      {r.fullName} - {r.house?.unitNumber ? `Casa ${r.house.unitNumber}` : r.property?.unitNumber ? `Unidad ${r.property.unitNumber}` : 'Sin vivienda'}
                     </option>
                   ))}
                 </select>
@@ -634,7 +653,8 @@ export const PaymentsView: React.FC = () => {
                     <input
                       type="number"
                       step="0.01"
-                      placeholder="85.00"
+                      min="0.01"
+                      placeholder="Ej: 85.00"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
                       required
@@ -742,7 +762,7 @@ export const PaymentsView: React.FC = () => {
                     <option value="">Seleccionar residente...</option>
                     {residents.map((r) => (
                       <option key={r.id} value={r.id}>
-                        {r.fullName} - {r.house?.unitNumber ? `Casa ${r.house.unitNumber}` : r.email}
+                        {r.fullName} - {r.house?.unitNumber ? `Casa ${r.house.unitNumber}` : r.property?.unitNumber ? `Unidad ${r.property.unitNumber}` : 'Sin vivienda'}
                       </option>
                     ))}
                   </select>
@@ -757,7 +777,8 @@ export const PaymentsView: React.FC = () => {
                   <input
                     type="number"
                     step="0.01"
-                    placeholder="85.00"
+                    min="0.01"
+                    placeholder="Ej: 85.00"
                     value={manualAmount}
                     onChange={(e) => setManualAmount(e.target.value)}
                     required
