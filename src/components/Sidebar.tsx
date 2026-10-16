@@ -60,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
-    { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users, badge: 'Pro' },
+    { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users },
     { id: 'amenities', label: 'Amenidades', icon: Building2 },
     { id: 'announcements', label: 'Envío de Anuncios', icon: Megaphone },
     { id: 'visits', label: 'Accesos de Garita / QR', icon: ShieldCheck },
@@ -129,6 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   key={item.id}
                   onClick={() => handleSelect(item.id)}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white shadow-lg shadow-purple-600/35 translate-x-1 border border-purple-400/30'
