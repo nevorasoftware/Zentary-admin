@@ -899,6 +899,12 @@ export const VisitsLogView: React.FC = () => {
                       role="combobox"
                       aria-expanded={houseListOpen}
                       aria-autocomplete="list"
+                      aria-controls="quick-entry-house-listbox"
+                      aria-activedescendant={
+                        houseListOpen && filteredHouses[houseActiveIndex]
+                          ? `quick-entry-house-${filteredHouses[houseActiveIndex].id}`
+                          : undefined
+                      }
                       value={houseListOpen ? houseSearch : selectedHouse ? houseLabel(selectedHouse) : ''}
                       placeholder="Buscar por número, bloque o residente..."
                       onFocus={() => {
@@ -933,6 +939,7 @@ export const VisitsLogView: React.FC = () => {
                     />
                     {houseListOpen && (
                       <ul
+                        id="quick-entry-house-listbox"
                         role="listbox"
                         className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-lg"
                       >
@@ -942,6 +949,10 @@ export const VisitsLogView: React.FC = () => {
                           filteredHouses.map((h, i) => (
                             <li
                               key={h.id}
+                              id={`quick-entry-house-${h.id}`}
+                              ref={(el) => {
+                                if (el && i === houseActiveIndex) el.scrollIntoView({ block: 'nearest' });
+                              }}
                               role="option"
                               aria-selected={h.id === quickForm.houseId}
                               onMouseDown={(e) => {
