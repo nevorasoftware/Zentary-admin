@@ -67,6 +67,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
     e.preventDefault();
     const errors: { email?: string; password?: string } = {};
     if (!email.trim()) errors.email = 'Ingresa tu correo electrónico.';
+    else if (!/^S+@S+.S+$/.test(email.trim())) errors.email = 'Ingresa un correo electrónico válido.';
     if (!password) errors.password = 'Ingresa tu contraseña.';
     setFieldErrors(errors);
     if (errors.email || errors.password) return;
