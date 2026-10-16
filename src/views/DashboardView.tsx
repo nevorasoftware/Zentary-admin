@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, ShieldCheck, Package, MessageSquare, DollarSign, ArrowUpRight, TrendingUp, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Users, ShieldCheck, Package, MessageSquare, DollarSign, ArrowUpRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
 
 interface DashboardViewProps {
@@ -16,21 +16,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     collectionRate: 0,
   });
   const [recentVisits, setRecentVisits] = React.useState<any[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [errors, setErrors] = React.useState({ stats: false, users: false, summary: false, visits: false });
 
   React.useEffect(() => {
     fetchDashboardMetrics();
   }, []);
 
   const fetchDashboardMetrics = async () => {
+    setIsLoading(true);
     try {
-      const [statsRes, summaryRes, visitsRes] = await Promise.all([
+      const [statsRes, usersRes, summaryRes, visitsRes] = await Promise.all([
         adminApi.getDashboardStats().catch(() => null),
+        adminApi.getUsers('').catch(() => null),
         adminApi.getFinancialSummary().catch(() => null),
         adminApi.getVisits().catch(() => null),
       ]);
 
+      setErrors({
+        stats: !statsRes?.success,
+        users: !(usersRes?.success && Array.isArray(usersRes.users)),
+        summary: !summaryRes?.success,
+        visits: !visitsRes?.success,
+      });
+
       setStatsData((prev) => ({
-        totalUsers: statsRes?.success ? statsRes.stats.totalResidents : prev.totalUsers,
+        // Mismo criterio que Control de Usuarios: usuarios activos sin cuentas de administración
+        totalUsers: usersRes?.success && Array.isArray(usersRes.users) ? usersRes.users.filter((u) => u.isActive && !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN'].includes(u.role)).length : prev.totalUsers,
         activeVisits: statsRes?.success ? statsRes.stats.activeVisits : prev.activeVisits,
         pendingParcels: statsRes?.success ? statsRes.stats.pendingParcels : prev.pendingParcels,
         openPqrs: statsRes?.success ? statsRes.stats.openPqrs : prev.openPqrs,
@@ -43,15 +55,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       }
     } catch (err) {
       console.warn('Dashboard fetch error:', err);
+      setErrors({ stats: true, users: true, summary: true, visits: true });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const stats = [
-    { title: 'Residentes Activos', value: `${statsData.totalUsers}`, change: 'Base de Datos PostgreSQL', icon: Users, color: 'from-blue-600 to-indigo-600' },
-    { title: 'Visitas en Curso', value: `${statsData.activeVisits}`, change: 'Pases Garita / QR', icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
-    { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', icon: Package, color: 'from-amber-600 to-orange-600' },
-    { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: 'Atención residente', icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
-    { title: 'Cobros Recaudados', value: statsData.totalPayments, change: `${Math.round(statsData.collectionRate)}% recolectado`, icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
+    { title: 'Residentes Activos', value: `${statsData.totalUsers}`, change: 'Usuarios activos, igual que Control de Usuarios', hasError: errors.users, icon: Users, color: 'from-blue-600 to-indigo-600' },
+    { title: 'Visitas en Curso', value: `${statsData.activeVisits}`, change: '', hasError: errors.stats, icon: ShieldCheck, color: 'from-emerald-600 to-teal-600' },
+    { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', hasError: errors.stats, icon: Package, color: 'from-amber-600 to-orange-600' },
+    { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: '', hasError: errors.stats, icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
+    { title: 'Cobros Recaudados', value: statsData.totalPayments, change: `${Math.round(statsData.collectionRate)}% recolectado`, hasError: errors.summary, icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
   ];
 
   return (
@@ -98,10 +113,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                   <Icon className="w-4 h-4 text-white" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-white mt-3">{item.value}</p>
-              <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1 font-medium">
-                <TrendingUp className="w-3 h-3" /> {item.change}
-              </p>
+              {isLoading ? (
+                <div className="mt-3 h-8 w-16 rounded-lg bg-slate-800 animate-pulse" />
+              ) : item.hasError ? (
+                <>
+                  <p className="text-sm font-semibold text-rose-400 mt-3">No se pudo cargar</p>
+                  <button onClick={fetchDashboardMetrics} className="text-xs font-semibold text-blue-400 hover:text-blue-300 mt-1">
+                    Reintentar
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-2xl font-bold text-white mt-3">{item.value}</p>
+                  {item.change && <p className="text-xs text-slate-400 mt-1">{item.change}</p>}
+                </>
+              )}
             </div>
           );
         })}
@@ -114,7 +140,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="flex items-center justify-between border-b border-slate-800 pb-4">
             <div>
               <h3 className="text-lg font-bold text-white">Ingresos Recientes en Garita</h3>
-              <p className="text-xs text-slate-400">Pases QR y accesos validados hoy</p>
+              <p className="text-xs text-slate-400">Últimos accesos registrados, con fecha y hora de entrada</p>
             </div>
             <button
               onClick={() => onNavigate('visits')}
@@ -125,7 +151,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           </div>
 
           <div className="divide-y divide-slate-800">
-            {recentVisits.length === 0 ? (
+            {isLoading ? (
+              <div className="py-8 text-center text-xs text-slate-500 animate-pulse">Cargando ingresos recientes...</div>
+            ) : errors.visits ? (
+              <div className="py-8 text-center text-xs text-rose-400">
+                No se pudieron cargar los ingresos recientes.{' '}
+                <button onClick={fetchDashboardMetrics} className="font-semibold text-blue-400 hover:text-blue-300">
+                  Reintentar
+                </button>
+              </div>
+            ) : recentVisits.length === 0 ? (
               <div className="py-8 text-center text-xs text-slate-500">
                 No hay visitas registradas aún en la base de datos de PostgreSQL.
               </div>
@@ -133,7 +168,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               recentVisits.map((v) => {
                 const visitorName = v.visitorName || v.visitor || 'Visitante';
                 const residentName = v.resident?.fullName || v.resident || 'Residente';
-                const plate = v.vehiclePlate || v.plate || 'Sin Placa';
+                const plate = v.vehiclePlate || v.plate;
                 const status = v.status || 'IN_PROGRESS';
                 const enCurso = status === 'INGRESADA' || status === 'IN_PROGRESS';
 
@@ -145,7 +180,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-white">{visitorName}</p>
-                        <p className="text-xs text-slate-400">Visita a: {residentName} • Placa: {plate}</p>
+                        <p className="text-xs text-slate-400">Visita a: {residentName}{plate ? ` • Placa: ${plate}` : ''}</p>
+                        {v.entryDate && (
+                          <p className="text-xs text-slate-500">
+                            Entrada: {new Date(v.entryDate).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
