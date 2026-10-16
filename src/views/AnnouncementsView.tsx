@@ -164,7 +164,7 @@ export const AnnouncementsView: React.FC = () => {
           </div>
 
           {/* Prioridad y Público Objetivo */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
                 Prioridad
@@ -244,12 +244,53 @@ export const AnnouncementsView: React.FC = () => {
               Imagen de Cabecera (Opcional)
             </label>
             <input
-              type="text"
-              placeholder="https://images.unsplash.com/..."
+              type="url"
+              placeholder="https://ejemplo.com/imagen.jpg"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500"
             />
+            <p className="text-[11px] text-slate-500 mt-1.5">
+              Pega el enlace (URL) de una imagen ya publicada. Por ahora no es posible subir archivos.
+            </p>
+          </div>
+
+          {/* Vista previa */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
+              Vista previa
+            </label>
+            <div className="p-4 rounded-2xl border border-slate-800 bg-slate-900/60 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getCategoryBadge(category).bg}`}
+                >
+                  {getCategoryBadge(category).label}
+                </span>
+                {getPriorityBadge(priority)}
+                {targetAudience === 'BLOQUE' && targetBlock && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    {targetBlock}
+                  </span>
+                )}
+              </div>
+              <div>
+                <h4 className="text-base font-bold text-white mb-1.5 break-words">
+                  {title || 'Título del comunicado'}
+                </h4>
+                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-line break-words">
+                  {body || 'El contenido del mensaje aparecerá aquí.'}
+                </p>
+              </div>
+              {imageUrl.trim() &&
+                (isSafeUrl(imageUrl.trim()) ? (
+                  <div className="rounded-2xl overflow-hidden max-h-48 border border-slate-800">
+                    <img src={imageUrl.trim()} alt="Vista previa de la imagen" className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-rose-400">La URL de la imagen no es válida.</p>
+                ))}
+            </div>
           </div>
 
           <button
