@@ -259,7 +259,19 @@ export const VisitsLogView: React.FC = () => {
     }
   };
 
-  const houseLabel = (h: any) => `${h.block ? `${h.block} - ` : ''}Casa ${h.unitNumber}`;
+  const blockLabel = (b: string) => b.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
+  const houseLabel = (h: any) => `${h.block ? `${blockLabel(h.block)} - ` : ''}Casa ${h.unitNumber}`;
+  const historyStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      INGRESADA: 'Dentro',
+      COMPLETED: 'Salida registrada',
+      PENDIENTE_REGISTRO: 'Pendiente de registro',
+      DATOS_COMPLETADOS: 'Datos completados',
+    };
+    if (labels[status]) return labels[status];
+    const text = (status || '').replace(/_/g, ' ').toLowerCase();
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  };
   const selectedHouse = availableHouses.find((h) => h.id === quickForm.houseId);
   const filteredHouses = availableHouses.filter((h) => {
     const q = houseSearch.trim().toLowerCase();
@@ -451,7 +463,7 @@ export const VisitsLogView: React.FC = () => {
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <QrCode className="w-5 h-5 text-emerald-400" />
-              Validación Inmediata de Pase QR (Criptográfico HMAC-SHA256)
+              Validación inmediata de pase QR
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
               Escanea el código QR presentado en la app móvil o escribe el código de pase FastPass.
@@ -772,6 +784,10 @@ export const VisitsLogView: React.FC = () => {
             />
           </div>
 
+          <p className="text-xs text-slate-400">
+            {historyVisits.length} {historyVisits.length === 1 ? 'registro' : 'registros'}
+          </p>
+
           {/* Historical Table */}
           <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
@@ -806,7 +822,7 @@ export const VisitsLogView: React.FC = () => {
                         <td className="py-3.5 px-4 font-semibold text-white">
                           <div>{item.visitorName}</div>
                           <div className="text-[11px] text-slate-500 font-normal">
-                            {item.documentNumber || item.visitorDni || 'Sin doc'}
+                            {[item.documentNumber, item.visitorDni].find((d) => d && String(d).trim() && String(d).trim() !== '0') || 'Sin doc'}
                           </div>
                         </td>
                         <td className="py-3.5 px-4">
@@ -821,15 +837,15 @@ export const VisitsLogView: React.FC = () => {
                         <td className="py-3.5 px-4 text-slate-400">
                           {item.entryDate
                             ? new Date(item.entryDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                            : 'N/A'}
+                            : '—'}
                         </td>
                         <td className="py-3.5 px-4 text-slate-400">
                           {item.exitDate
                             ? new Date(item.exitDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                            : item.status === 'INGRESADA' ? 'Dentro' : 'N/A'}
+                            : item.status === 'INGRESADA' ? 'Dentro' : '—'}
                         </td>
                         <td className="py-3.5 px-4 font-medium text-slate-200">
-                          {item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : 'N/A')}
+                          {item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : '—')}
                         </td>
                         <td className="py-3.5 px-4">
                           <span
@@ -841,11 +857,7 @@ export const VisitsLogView: React.FC = () => {
                                 : 'bg-slate-800 text-slate-400 border-slate-700'
                             }`}
                           >
-                            {item.status === 'INGRESADA'
-                              ? 'DENTRO'
-                              : item.status === 'COMPLETED'
-                              ? 'SALIDA REGISTRADA'
-                              : item.status}
+                            {historyStatusLabel(item.status)}
                           </span>
                         </td>
                       </tr>
