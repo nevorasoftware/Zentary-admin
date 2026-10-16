@@ -117,11 +117,11 @@ export const AnnouncementsView: React.FC = () => {
   const getPriorityBadge = (p?: string) => {
     switch (p) {
       case 'URGENTE':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/40">🚨 URGENTE</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/40">🚨 URGENTE</span>;
       case 'IMPORTANTE':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/40">⚠️ IMPORTANTE</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/40">⚠️ IMPORTANTE</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">NORMAL</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">NORMAL</span>;
     }
   };
 
@@ -151,7 +151,7 @@ export const AnnouncementsView: React.FC = () => {
                   type="button"
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
+                  className={`max-sm:min-h-11 py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
                     category === cat
                       ? 'bg-blue-600 text-white border-blue-500 shadow-md'
                       : 'bg-slate-900/60 text-slate-400 border-slate-800 hover:border-slate-700'
@@ -220,7 +220,7 @@ export const AnnouncementsView: React.FC = () => {
               placeholder="Ej. Limpieza de Cisterna de Agua"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-all"
+              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500 transition-all"
               required
             />
           </div>
@@ -234,7 +234,7 @@ export const AnnouncementsView: React.FC = () => {
               placeholder="Escribe los detalles del anuncio que verán los residentes..."
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-all resize-none"
+              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-all resize-none"
               required
             />
           </div>
@@ -250,7 +250,7 @@ export const AnnouncementsView: React.FC = () => {
               onChange={(e) => setImageUrl(e.target.value)}
               className="w-full bg-slate-900/80 border border-slate-800 text-xs text-slate-100 rounded-xl px-3 py-2 focus:outline-none focus:border-blue-500"
             />
-            <p className="text-[11px] text-slate-500 mt-1.5">
+            <p className="text-xs text-slate-400 mt-1.5">
               Pega el enlace (URL) de una imagen ya publicada. Por ahora no es posible subir archivos.
             </p>
           </div>
@@ -269,7 +269,7 @@ export const AnnouncementsView: React.FC = () => {
                 </span>
                 {getPriorityBadge(priority)}
                 {targetAudience === 'BLOQUE' && targetBlock && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     {targetBlock}
                   </span>
                 )}
@@ -288,7 +288,7 @@ export const AnnouncementsView: React.FC = () => {
                     <img src={imageUrl.trim()} alt="Vista previa de la imagen" className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <p className="text-[11px] text-rose-400">La URL de la imagen no es válida.</p>
+                  <p className="text-xs text-rose-400">La URL de la imagen no es válida.</p>
                 ))}
             </div>
           </div>
@@ -296,7 +296,7 @@ export const AnnouncementsView: React.FC = () => {
           <button
             type="submit"
             disabled={publishing}
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all"
+            className="max-sm:min-h-11 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all"
           >
             {publishing ? (
               <span className="animate-spin">⏳</span>
@@ -317,17 +317,17 @@ export const AnnouncementsView: React.FC = () => {
             <BellRing className="w-4 h-4 text-amber-400" />
             Cartelera Digital Vigente ({announcements.length})
           </h3>
-          <span className="text-xs text-slate-500">Sincronizado</span>
+          <span className="text-xs text-slate-400">Sincronizado</span>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-slate-500 text-sm">Cargando comunicados...</div>
+          <div className="text-center py-12 text-slate-400 text-sm">Cargando comunicados...</div>
         ) : loadError ? (
           <div className="text-center py-12 text-rose-300 text-sm font-semibold glass-card rounded-3xl p-8 border border-rose-500/30">
             ⚠️ {loadError}
           </div>
         ) : announcements.length === 0 ? (
-          <div className="text-center py-12 text-slate-500 text-sm glass-card rounded-3xl p-8 border border-slate-800">
+          <div className="text-center py-12 text-slate-400 text-sm glass-card rounded-3xl p-8 border border-slate-800">
             No hay comunicados publicados aún.
           </div>
         ) : (
@@ -351,15 +351,15 @@ export const AnnouncementsView: React.FC = () => {
                       </span>
                       {getPriorityBadge(a.priority)}
                       {a.targetBlock && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                           {a.targetBlock}
                         </span>
                       )}
                     </div>
 
-                    <button
+                    <button aria-label="Eliminar comunicado"
                       onClick={() => handleDelete(a.id)}
-                      className="text-slate-500 hover:text-rose-400 transition-colors p-1"
+                      className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-rose-400 transition-colors p-1"
                       title="Eliminar comunicado"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -377,7 +377,7 @@ export const AnnouncementsView: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-800/60">
+                  <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-slate-800/60">
                     <span>Publicado por: {a.author?.fullName || 'Administración Zentary'}</span>
                     <span>
                       {new Date(a.createdAt).toLocaleDateString('es-ES', {

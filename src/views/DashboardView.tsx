@@ -87,13 +87,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="mt-6 flex flex-wrap gap-4">
             <button
               onClick={() => onNavigate('access')}
-              className="px-5 py-2.5 rounded-xl bg-white text-blue-700 font-bold text-sm hover:bg-blue-50 transition-colors shadow-md"
+              className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-white text-blue-700 font-bold text-sm hover:bg-blue-50 transition-colors shadow-md"
             >
               Gestionar Accesos
             </button>
             <button
               onClick={() => onNavigate('announcements')}
-              className="px-5 py-2.5 rounded-xl bg-blue-800/60 text-white border border-white/20 font-semibold text-sm hover:bg-blue-800 transition-colors"
+              className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-blue-800/60 text-white border border-white/20 font-semibold text-sm hover:bg-blue-800 transition-colors"
             >
               Publicar Anuncio
             </button>
@@ -118,7 +118,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               ) : item.hasError ? (
                 <>
                   <p className="text-sm font-semibold text-rose-400 mt-3">No se pudo cargar</p>
-                  <button onClick={fetchDashboardMetrics} className="text-xs font-semibold text-blue-400 hover:text-blue-300 mt-1">
+                  <button onClick={fetchDashboardMetrics} className="max-sm:min-h-11 text-xs font-semibold text-blue-400 hover:text-blue-300 mt-1">
                     Reintentar
                   </button>
                 </>
@@ -144,7 +144,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
             <button
               onClick={() => onNavigate('visits')}
-              className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
+              className="max-sm:min-h-11 text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1"
             >
               Ver todo <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
@@ -152,16 +152,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
           <div className="divide-y divide-slate-800">
             {isLoading ? (
-              <div className="py-8 text-center text-xs text-slate-500 animate-pulse">Cargando ingresos recientes...</div>
+              <div className="py-8 text-center text-xs text-slate-400 animate-pulse">Cargando ingresos recientes...</div>
             ) : errors.visits ? (
               <div className="py-8 text-center text-xs text-rose-400">
                 No se pudieron cargar los ingresos recientes.{' '}
-                <button onClick={fetchDashboardMetrics} className="font-semibold text-blue-400 hover:text-blue-300">
+                <button onClick={fetchDashboardMetrics} className="max-sm:min-h-11 font-semibold text-blue-400 hover:text-blue-300">
                   Reintentar
                 </button>
               </div>
             ) : recentVisits.length === 0 ? (
-              <div className="py-8 text-center text-xs text-slate-500">
+              <div className="py-8 text-center text-xs text-slate-400">
                 No hay visitas registradas aún.
               </div>
             ) : (
@@ -182,7 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                         <p className="text-sm font-semibold text-white">{visitorName}</p>
                         <p className="text-xs text-slate-400">Visita a: {residentName}{plate ? ` • Placa: ${plate}` : ''}</p>
                         {v.entryDate && (
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-400">
                             Entrada: {new Date(v.entryDate).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                           </p>
                         )}
@@ -215,7 +215,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
           <div className="space-y-3">
             <button
               onClick={() => onNavigate('access')}
-              className="w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
+              className="max-sm:min-h-11 w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
             >
               <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold">
                 <Users className="w-5 h-5" />
@@ -228,7 +228,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
             <button
               onClick={() => onNavigate('announcements')}
-              className="w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
+              className="max-sm:min-h-11 w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
             >
               <div className="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold">
                 <AlertCircle className="w-5 h-5" />
@@ -241,7 +241,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
             <button
               onClick={() => onNavigate('parcels')}
-              className="w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
+              className="max-sm:min-h-11 w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
             >
               <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">
                 <Package className="w-5 h-5" />

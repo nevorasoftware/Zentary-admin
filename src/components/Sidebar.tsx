@@ -86,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const avatar = adminUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+  const avatar = adminUser?.avatarUrl || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
   const name = adminUser?.fullName || 'Administración Zentary';
   const email = adminUser?.email || 'admin@zentary.com';
 
@@ -122,9 +122,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Mobile Close Button */}
-            <button
+            <button aria-label="Cerrar menú"
               onClick={onCloseMobile}
-              className="lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-purple-900/40"
+              className="max-sm:min-h-11 max-sm:min-w-11 lg:hidden p-2 text-slate-400 hover:text-white rounded-lg hover:bg-purple-900/40"
             >
               <X className="w-5 h-5" />
             </button>
@@ -140,7 +140,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={item.id}
                   onClick={() => handleSelect(item.id)}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 ${
+                  className={`max-sm:min-h-11 w-full flex items-center justify-between px-4 py-3 rounded-2xl font-bold text-sm transition-all duration-200 ${
                     isActive
                       ? 'bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white shadow-lg shadow-purple-600/35 translate-x-1 border border-purple-400/30'
                       : 'text-slate-300 hover:text-white hover:bg-purple-900/30'
@@ -162,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}
 
                   {item.badge && (
-                    <span className="px-2 py-0.5 text-[10px] uppercase font-black tracking-wider rounded bg-[#FFCF36] text-[#0A0F1F]">
+                    <span className="px-2 py-0.5 text-xs uppercase font-black tracking-wider rounded bg-[#FFCF36] text-[#0A0F1F]">
                       {item.badge}
                     </span>
                   )}
@@ -175,9 +175,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Admin Profile Footer */}
         <div className="p-4 m-4 rounded-2xl bg-slate-900/80 border border-purple-900/50">
           <div className="flex items-center gap-3">
-            <button
+            <button aria-label="Editar perfil"
               onClick={onOpenEditProfile}
-              className="relative group focus:outline-none"
+              className="max-sm:min-h-11 max-sm:min-w-11 relative group focus:outline-none"
               title="Editar Perfil"
             >
               <img
@@ -196,9 +196,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </p>
               <p className="text-xs text-slate-400 truncate">{email}</p>
             </div>
-            <button
+            <button aria-label="Cerrar sesión"
               onClick={onLogout}
-              className="text-slate-400 hover:text-rose-400 p-1.5 transition-colors rounded-lg hover:bg-purple-900/40"
+              className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-rose-400 p-1.5 transition-colors rounded-lg hover:bg-purple-900/40"
               title="Cerrar sesión"
             >
               <LogOut className="w-5 h-5" />

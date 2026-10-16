@@ -356,7 +356,7 @@ export const VisitsLogView: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-white">Garita de Seguridad Digital</h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 EN VIVO
               </span>
             </div>
@@ -380,19 +380,19 @@ export const VisitsLogView: React.FC = () => {
           {/* Quick Entry Button */}
           <button
             onClick={() => setIsQuickEntryOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all whitespace-nowrap"
+            className="max-sm:min-h-11 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-blue-600/30 transition-all whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Ingreso Rápido
           </button>
 
           {/* Manual Refresh */}
-          <button
+          <button aria-label="Refrescar datos de garita"
             onClick={() => {
               fetchGaritaData();
               if (activeTab === 'history') fetchHistoryData();
             }}
             disabled={loading}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
+            className="max-sm:min-h-11 max-sm:min-w-11 p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all"
             title="Refrescar datos de garita"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-emerald-400' : ''}`} />
@@ -405,14 +405,14 @@ export const VisitsLogView: React.FC = () => {
         {/* Metric 1: Dentro */}
         <div className="glass-card p-3 sm:p-5 rounded-3xl border border-slate-800 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Dentro del Complejo</span>
+            <span className="text-xs sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Dentro del Complejo</span>
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
           </div>
           <div className="mt-2 flex items-baseline gap-3">
             <span className="text-3xl sm:text-4xl font-extrabold text-white">{summary.totalInside}</span>
             <span className="hidden sm:inline text-xs text-emerald-400 font-medium">visitantes / vehículos</span>
           </div>
-          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">En estancia activa con entrada registrada</p>
+          <p className="hidden sm:block text-xs text-slate-400 mt-2">En estancia activa con entrada registrada</p>
         </div>
 
         {/* Metric 2: Excedidos */}
@@ -424,7 +424,7 @@ export const VisitsLogView: React.FC = () => {
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Sobretiempo / Excedidos</span>
+            <span className="text-xs sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Sobretiempo / Excedidos</span>
             <AlertTriangle
               className={`w-5 h-5 ${summary.totalExceeded > 0 ? 'text-rose-400 animate-bounce' : 'text-slate-600'}`}
             />
@@ -441,20 +441,20 @@ export const VisitsLogView: React.FC = () => {
               {summary.totalExceeded === 1 ? 'visitante excedido' : 'visitantes excedidos'}
             </span>
           </div>
-          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">Superaron el tiempo máximo permitido</p>
+          <p className="hidden sm:block text-xs text-slate-400 mt-2">Superaron el tiempo máximo permitido</p>
         </div>
 
         {/* Metric 3: Esperados Hoy */}
         <div className="glass-card p-3 sm:p-5 rounded-3xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Esperados Hoy</span>
+            <span className="text-xs sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Esperados Hoy</span>
             <Clock className="w-5 h-5 text-blue-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-3">
             <span className="text-3xl sm:text-4xl font-extrabold text-white">{summary.totalExpectedToday}</span>
             <span className="hidden sm:inline text-xs text-blue-400 font-medium">visitas programadas</span>
           </div>
-          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">Con FastPass pendiente de ingreso</p>
+          <p className="hidden sm:block text-xs text-slate-400 mt-2">Con FastPass pendiente de ingreso</p>
         </div>
       </div>
 
@@ -478,12 +478,12 @@ export const VisitsLogView: React.FC = () => {
               placeholder="Escanea o pega token ZNT2..."
               value={qrInput}
               onChange={(e) => setQrInput(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 font-mono w-full md:w-72"
+              className="bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 font-mono w-full md:w-72"
             />
             <button
               type="submit"
               disabled={scanning || !qrInput.trim()}
-              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs whitespace-nowrap shadow-lg shadow-emerald-600/30 transition-all"
+              className="max-sm:min-h-11 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs whitespace-nowrap shadow-lg shadow-emerald-600/30 transition-all"
             >
               {scanning ? 'Verificando...' : 'Verificar QR'}
             </button>
@@ -497,7 +497,7 @@ export const VisitsLogView: React.FC = () => {
               <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
               <span>{scanError}</span>
             </div>
-            <button onClick={() => setScanError(null)} className="text-rose-400 hover:text-white">
+            <button aria-label="Cerrar aviso" onClick={() => setScanError(null)} className="max-sm:min-h-11 max-sm:min-w-11 text-rose-400 hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -513,9 +513,9 @@ export const VisitsLogView: React.FC = () => {
                   Pase Válido y Autorizado
                 </span>
               </div>
-              <button
+              <button aria-label="Cerrar"
                 onClick={() => setScannedResult(null)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white p-1 rounded-lg"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -523,19 +523,19 @@ export const VisitsLogView: React.FC = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-slate-500 block">Visitante:</span>
+                <span className="text-slate-400 block">Visitante:</span>
                 <span className="font-bold text-white text-sm">{scannedResult.visitorName}</span>
                 <span className="text-slate-400 block mt-0.5">DUI/Doc: {scannedResult.documentNumber || scannedResult.visitorDni || 'N/A'}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 block">Destino (Vivienda):</span>
+                <span className="text-slate-400 block">Destino (Vivienda):</span>
                 <span className="font-bold text-blue-400 text-sm">{scannedResult.propertyUnit}</span>
                 <span className="text-slate-400 block mt-0.5">Residente: {scannedResult.residentName}</span>
               </div>
 
               <div>
-                <span className="text-slate-500 block">Vehículo:</span>
+                <span className="text-slate-400 block">Vehículo:</span>
                 <span className="font-bold text-white text-sm">
                   {scannedResult.hasVehicle ? scannedResult.vehiclePlate : 'Peatonal / A pie'}
                 </span>
@@ -545,7 +545,7 @@ export const VisitsLogView: React.FC = () => {
               </div>
 
               <div>
-                <span className="text-slate-500 block">Estadía Autorizada:</span>
+                <span className="text-slate-400 block">Estadía Autorizada:</span>
                 <span className="font-bold text-white text-sm">{scannedResult.maxDurationHours || 4} Horas</span>
                 <span className="text-slate-400 block mt-0.5">Garita: {currentGate}</span>
               </div>
@@ -554,14 +554,14 @@ export const VisitsLogView: React.FC = () => {
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 onClick={() => setScannedResult(null)}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-all"
+                className="max-sm:min-h-11 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-all"
               >
                 Descartar
               </button>
               <button
                 onClick={() => handleConfirmEntry(scannedResult.id)}
                 disabled={confirmingEntry}
-                className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
+                className="max-sm:min-h-11 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
               >
                 <LogIn className="w-4 h-4" />
                 {confirmingEntry ? 'Registrando...' : 'Confirmar Entrada e Ingreso'}
@@ -575,7 +575,7 @@ export const VisitsLogView: React.FC = () => {
       <div className="flex items-center gap-2 border-b border-slate-800 pb-1">
         <button
           onClick={() => setActiveTab('monitor')}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`max-sm:min-h-11 px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
             activeTab === 'monitor'
               ? 'bg-slate-800 text-white border border-slate-700 shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -587,7 +587,7 @@ export const VisitsLogView: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('history')}
-          className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+          className={`max-sm:min-h-11 px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
             activeTab === 'history'
               ? 'bg-slate-800 text-white border border-slate-700 shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -608,7 +608,7 @@ export const VisitsLogView: React.FC = () => {
                 <Clock className="w-5 h-5 text-emerald-400" />
                 Visitantes Actualmente Dentro del Complejo ({activeVisits.length})
               </h3>
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-slate-400">
                 Actualizado en tiempo real con cronómetros individuales
               </span>
             </div>
@@ -621,7 +621,7 @@ export const VisitsLogView: React.FC = () => {
               <div className="glass-card p-12 rounded-3xl border border-slate-800 text-center space-y-3">
                 <ShieldCheck className="w-12 h-12 text-slate-600 mx-auto" />
                 <h4 className="text-base font-bold text-slate-300">No hay visitantes dentro en este momento</h4>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
                   Todos los visitantes autorizados han registrado su salida o aún no han ingresado por la garita.
                 </p>
               </div>
@@ -647,7 +647,7 @@ export const VisitsLogView: React.FC = () => {
                       {/* Card Header: Badge & Elapsed Time */}
                       <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${
+                          className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold uppercase border ${
                             item.severity === 'EXCEEDED'
                               ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
                               : item.severity === 'WARNING'
@@ -673,11 +673,11 @@ export const VisitsLogView: React.FC = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <h4 className="font-bold text-white text-base leading-tight">{item.visitorName}</h4>
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-xs text-slate-400">
                               DUI: {item.visitorDni || 'No registrado'}
                             </span>
                           </div>
-                          <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                          <span className="px-2 py-0.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
                             {item.entryType}
                           </span>
                         </div>
@@ -687,7 +687,7 @@ export const VisitsLogView: React.FC = () => {
                             <Car className="w-4 h-4 text-emerald-400" />
                             <strong className="text-white font-mono">{item.vehiclePlate || 'A pie'}</strong>
                           </span>
-                          <span className="text-slate-500">•</span>
+                          <span className="text-slate-400">•</span>
                           <span className="text-slate-400">
                             Entrada: {new Date(item.entryDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
                           </span>
@@ -708,7 +708,7 @@ export const VisitsLogView: React.FC = () => {
 
                       {/* Progress Bar of Time Used */}
                       <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
                           <span>Límite: {item.maxDurationHours}h</span>
                           <span>{percentUsed}% consumido</span>
                         </div>
@@ -729,7 +729,7 @@ export const VisitsLogView: React.FC = () => {
                       {/* Action Button: Check-out */}
                       <button
                         onClick={() => handleRegisterExit(item.id, item.visitorName)}
-                        className="w-full py-2.5 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-rose-400 hover:text-rose-300 font-bold text-xs border border-rose-500/20 hover:border-rose-500/40 flex items-center justify-center gap-2 transition-all shadow-md"
+                        className="max-sm:min-h-11 w-full py-2.5 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-rose-400 hover:text-rose-300 font-bold text-xs border border-rose-500/20 hover:border-rose-500/40 flex items-center justify-center gap-2 transition-all shadow-md"
                       >
                         <LogOut className="w-4 h-4" /> Marcar Salida de Garita
                       </button>
@@ -781,7 +781,7 @@ export const VisitsLogView: React.FC = () => {
               placeholder="Buscar en el historial por visitante, residente, placa o casa..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all"
+              className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all"
             />
           </div>
 
@@ -813,7 +813,7 @@ export const VisitsLogView: React.FC = () => {
                     </tr>
                   ) : historyVisits.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-8 text-center text-slate-500">
+                      <td colSpan={7} className="py-8 text-center text-slate-400">
                         No se encontraron registros de visitas con los criterios seleccionados.
                       </td>
                     </tr>
@@ -822,7 +822,7 @@ export const VisitsLogView: React.FC = () => {
                       <tr key={item.id} className="hover:bg-slate-800/40 transition-colors flex flex-wrap items-center gap-x-2 gap-y-1 px-2 py-3 md:table-row md:p-0">
                         <td className="py-1 px-2 md:py-3.5 md:px-4 font-semibold text-white w-full md:w-auto">
                           <div>{item.visitorName}</div>
-                          <div className="text-[11px] text-slate-500 font-normal">
+                          <div className="text-xs text-slate-400 font-normal">
                             {[item.documentNumber, item.visitorDni].find((d) => d && String(d).trim() && String(d).trim() !== '0') || 'Sin doc'}
                           </div>
                         </td>
@@ -830,7 +830,7 @@ export const VisitsLogView: React.FC = () => {
                           <div className="font-medium text-blue-400">
                             {item.house?.unitNumber || item.resident?.house?.unitNumber || 'Vivienda'}
                           </div>
-                          <div className="text-[11px] text-slate-400">{item.resident?.fullName}</div>
+                          <div className="text-xs text-slate-400">{item.resident?.fullName}</div>
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4 font-mono font-medium text-emerald-400">
                           <span className="md:hidden">Placa: </span>{item.vehiclePlate || 'A pie'}
@@ -850,7 +850,7 @@ export const VisitsLogView: React.FC = () => {
                         </td>
                         <td className="py-1 px-2 md:py-3.5 md:px-4">
                           <span
-                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                               item.status === 'INGRESADA'
                                 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                 : item.status === 'COMPLETED'
@@ -880,9 +880,9 @@ export const VisitsLogView: React.FC = () => {
                 <Plus className="w-5 h-5 text-blue-400" />
                 <h3 id="visits-log-ingreso-rapido-titulo" className="text-base font-bold text-white">Ingreso Directo en Garita</h3>
               </div>
-              <button
+              <button aria-label="Cerrar"
                 onClick={() => setIsQuickEntryOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
+                className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white p-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -988,9 +988,9 @@ export const VisitsLogView: React.FC = () => {
                     )}
                   </div>
                   {housesError ? (
-                    <p className="text-red-400 text-[11px]">{housesError}</p>
+                    <p className="text-red-400 text-xs">{housesError}</p>
                   ) : availableHouses.length === 0 ? (
-                    <p className="text-amber-400 text-[11px]">No hay viviendas registradas en el residencial.</p>
+                    <p className="text-amber-400 text-xs">No hay viviendas registradas en el residencial.</p>
                   ) : null}
                 </div>
               </div>
@@ -1046,14 +1046,14 @@ export const VisitsLogView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsQuickEntryOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={quickSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center gap-2"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md flex items-center gap-2"
                 >
                   <LogIn className="w-4 h-4" />
                   {quickSubmitting ? 'Registrando...' : 'Confirmar Ingreso Inmediato'}

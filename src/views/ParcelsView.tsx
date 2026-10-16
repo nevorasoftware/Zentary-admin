@@ -98,7 +98,7 @@ export const ParcelsView: React.FC = () => {
 
         <button
           onClick={() => setShowAddModal(true)}
-          className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all whitespace-nowrap"
+          className="max-sm:min-h-11 px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all whitespace-nowrap"
         >
           <Plus className="w-5 h-5" /> Registrar Paquete
         </button>
@@ -113,7 +113,7 @@ export const ParcelsView: React.FC = () => {
                 {p.carrier === 'OTRO' ? p.customCarrier || 'OTRO' : p.carrier.replace('_', ' ')}
               </span>
               <span
-                className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                   p.status === 'PENDING' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'
                 }`}
               >
@@ -136,7 +136,7 @@ export const ParcelsView: React.FC = () => {
             {p.status === 'PENDING' && (
               <button
                 onClick={() => handleMarkPickedUp(p.id)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold text-xs border border-emerald-500/30 flex items-center justify-center gap-2 transition-all"
+                className="max-sm:min-h-11 w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-400 font-semibold text-xs border border-emerald-500/30 flex items-center justify-center gap-2 transition-all"
               >
                 <CheckCircle2 className="w-4 h-4" /> Marcar como Retirado
               </button>
@@ -230,13 +230,13 @@ export const ParcelsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-md"
                 >
                   Registrar Paquete
                 </button>

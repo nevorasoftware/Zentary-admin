@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsEditingName(false);
   };
 
-  const avatar = adminUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
+  const avatar = adminUser?.avatarUrl || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E';
 
   return (
     <header className="min-h-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 md:px-8 py-2 md:py-3 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-2 md:gap-4">
@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileMenu}
-          className="lg:hidden p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 hover:text-white"
+          className="max-sm:min-h-11 max-sm:min-w-11 lg:hidden p-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 hover:text-white"
           aria-label="Abrir menú"
         >
           <Menu className="w-6 h-6" />
@@ -121,13 +121,13 @@ export const Header: React.FC<HeaderProps> = ({
                   />
                   <button
                     onClick={handleSaveName}
-                    className="p-1 hover:text-emerald-400"
+                    className="max-sm:min-h-11 max-sm:min-w-11 p-1 hover:text-emerald-400"
                     title="Guardar nombre"
                     aria-label="Guardar nombre de la residencial"
                   >
                     <Check className="w-3.5 h-3.5" />
                   </button>
-                  {nameError && <span className="text-red-400 text-[11px] ml-1">{nameError}</span>}
+                  {nameError && <span className="text-red-400 text-xs ml-1">{nameError}</span>}
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
@@ -138,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
                       setNameError(null);
                       setIsEditingName(true);
                     }}
-                    className="text-slate-400 hover:text-white transition-colors"
+                    className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white transition-colors"
                     title="Cambiar nombre del condominio/residencial"
                     aria-label="Editar nombre de la residencial"
                   >
@@ -176,9 +176,9 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Admin Avatar Button to edit profile */}
-        <button
+        <button aria-label="Editar perfil de administrador"
           onClick={onOpenEditProfile}
-          className="p-1 rounded-full border border-blue-500/30 hover:border-blue-400 transition-all"
+          className="max-sm:min-h-11 max-sm:min-w-11 p-1 rounded-full border border-blue-500/30 hover:border-blue-400 transition-all"
           title="Editar Perfil de Administrador"
         >
           <img src={avatar} alt="Admin Avatar" className="w-8 h-8 rounded-full object-cover" />

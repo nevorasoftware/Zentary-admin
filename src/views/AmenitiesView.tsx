@@ -198,7 +198,7 @@ export const AmenitiesView: React.FC = () => {
     setEditingAmenityId(null);
     setName('');
     setType('Salón');
-    setImageUrl('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600');
+    setImageUrl('');
     setPrice('0.00');
     setMaxReservationTime('4');
     setSelectedDays(ALL_DAYS);
@@ -368,7 +368,7 @@ export const AmenitiesView: React.FC = () => {
         <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-xl border border-purple-900/50">
           <button
             onClick={() => setActiveTab('amenities')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
+            className={`max-sm:min-h-11 px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
               activeTab === 'amenities'
                 ? 'bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white shadow'
                 : 'text-slate-400 hover:text-white'
@@ -378,7 +378,7 @@ export const AmenitiesView: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
+            className={`max-sm:min-h-11 px-4 py-2 rounded-lg text-xs font-extrabold transition-all ${
               activeTab === 'calendar'
                 ? 'bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white shadow'
                 : 'text-slate-400 hover:text-white'
@@ -398,7 +398,7 @@ export const AmenitiesView: React.FC = () => {
             </p>
             <button
               onClick={openCreateModal}
-              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#1877F2] to-[#6203FF] hover:from-blue-600 hover:to-purple-700 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all border border-purple-400/30"
+              className="max-sm:min-h-11 flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#1877F2] to-[#6203FF] hover:from-blue-600 hover:to-purple-700 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all border border-purple-400/30"
             >
               <Plus className="w-4 h-4 text-[#FFCF36]" />
               Nueva Amenidad
@@ -416,21 +416,21 @@ export const AmenitiesView: React.FC = () => {
               <p className="text-sm font-bold text-rose-300 mb-3">⚠️ {loadError}</p>
               <button
                 onClick={fetchAmenities}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all"
+                className="max-sm:min-h-11 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs rounded-xl transition-all"
               >
                 Reintentar
               </button>
             </div>
           ) : amenities.length === 0 ? (
             <div className="text-center py-16 bg-slate-900/60 rounded-2xl border border-purple-900/30">
-              <Building2 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+              <Building2 className="w-12 h-12 text-slate-400 mx-auto mb-3" />
               <h3 className="text-base font-bold text-white mb-1">No hay amenidades registradas</h3>
               <p className="text-xs text-slate-400 mb-4">
                 Registra el salón de eventos, piscina o áreas comunes para tus residentes.
               </p>
               <button
                 onClick={openCreateModal}
-                className="px-4 py-2 bg-[#1877F2] text-white text-xs font-bold rounded-xl"
+                className="max-sm:min-h-11 px-4 py-2 bg-[#1877F2] text-white text-xs font-bold rounded-xl"
               >
                 Crear Primera Amenidad
               </button>
@@ -446,7 +446,7 @@ export const AmenitiesView: React.FC = () => {
                     {/* Image Header */}
                     <div className="relative h-44 bg-slate-950 overflow-hidden">
                       <img
-                        src={isSafeUrl(item.imageUrl) ? item.imageUrl : 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=600'}
+                        src={isSafeUrl(item.imageUrl) ? item.imageUrl : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E'}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -491,16 +491,16 @@ export const AmenitiesView: React.FC = () => {
                       {item._count?.reservations || 0} reservas realizadas
                     </span>
                     <div className="flex items-center gap-2">
-                      <button
+                      <button aria-label="Editar amenidad"
                         onClick={() => openEditModal(item)}
-                        className="p-2 text-slate-300 hover:text-white bg-purple-900/30 hover:bg-purple-800/50 rounded-xl transition-all"
+                        className="max-sm:min-h-11 max-sm:min-w-11 p-2 text-slate-300 hover:text-white bg-purple-900/30 hover:bg-purple-800/50 rounded-xl transition-all"
                         title="Editar Amenidad"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button
+                      <button aria-label="Eliminar amenidad"
                         onClick={() => handleDeleteAmenity(item.id)}
-                        className="p-2 text-rose-400 hover:text-rose-200 bg-rose-950/40 hover:bg-rose-900/50 rounded-xl transition-all"
+                        className="max-sm:min-h-11 max-sm:min-w-11 p-2 text-rose-400 hover:text-rose-200 bg-rose-950/40 hover:bg-rose-900/50 rounded-xl transition-all"
                         title="Eliminar Amenidad"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -539,9 +539,9 @@ export const AmenitiesView: React.FC = () => {
 
             {/* Week Selector */}
             <div className="flex items-center gap-3">
-              <button
+              <button aria-label="Semana anterior"
                 onClick={() => changeWeek(-7)}
-                className="p-2 bg-slate-950 hover:bg-purple-900/40 text-slate-300 rounded-xl transition-all"
+                className="max-sm:min-h-11 max-sm:min-w-11 p-2 bg-slate-950 hover:bg-purple-900/40 text-slate-300 rounded-xl transition-all"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -551,12 +551,12 @@ export const AmenitiesView: React.FC = () => {
                   {weekDates[0].toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} -{' '}
                   {weekDates[6].toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
-                <span className="text-[10px] font-bold text-[#FFCF36]">Semana de Reservación</span>
+                <span className="text-xs font-bold text-[#FFCF36]">Semana de Reservación</span>
               </div>
 
-              <button
+              <button aria-label="Semana siguiente"
                 onClick={() => changeWeek(7)}
-                className="p-2 bg-slate-950 hover:bg-purple-900/40 text-slate-300 rounded-xl transition-all"
+                className="max-sm:min-h-11 max-sm:min-w-11 p-2 bg-slate-950 hover:bg-purple-900/40 text-slate-300 rounded-xl transition-all"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -590,7 +590,7 @@ export const AmenitiesView: React.FC = () => {
                   {/* Reservations List */}
                   <div className="space-y-3 flex-1">
                     {dayReservations.length === 0 ? (
-                      <p className="text-[11px] text-slate-500 text-center py-8 font-medium">Sin reservas</p>
+                      <p className="text-xs text-slate-400 text-center py-8 font-medium">Sin reservas</p>
                     ) : (
                       dayReservations.map((res) => {
                         const isConfirmed = res.reservationStatus === 'CONFIRMED';
@@ -608,7 +608,7 @@ export const AmenitiesView: React.FC = () => {
                             }`}
                           >
                             <div className="flex justify-between items-center font-extrabold">
-                              <span className="text-white text-[11px] truncate">
+                              <span className="text-white text-xs truncate">
                                 {res.amenity?.name || 'Amenidad'}
                               </span>
                               <span
@@ -634,20 +634,20 @@ export const AmenitiesView: React.FC = () => {
                               </span>
                             </div>
 
-                            <div className="text-[11px] font-bold text-purple-300">
+                            <div className="text-xs font-bold text-purple-300">
                               ⏰ {res.startTime} - {res.endTime}
                             </div>
 
-                            <div className="text-[11px] text-slate-300 font-semibold truncate">
+                            <div className="text-xs text-slate-300 font-semibold truncate">
                               👤 {res.resident?.fullName || 'Residente'}
                             </div>
                             {res.resident?.property && (
-                              <div className="text-[10px] text-slate-400 font-bold">
+                              <div className="text-xs text-slate-400 font-bold">
                                 🏠 {res.resident.property.unitNumber}
                               </div>
                             )}
 
-                            <div className="pt-1 border-t border-white/10 flex justify-between items-center text-[10px]">
+                            <div className="pt-1 border-t border-white/10 flex justify-between items-center text-xs">
                               <span className="text-slate-400">
                                 {res.price === 0 ? 'Gratis' : `$${res.price.toFixed(2)}`}
                               </span>
@@ -663,7 +663,7 @@ export const AmenitiesView: React.FC = () => {
                             </div>
 
                             {res.rejectionReason && (
-                              <div className="text-[10px] text-rose-300 font-semibold italic">
+                              <div className="text-xs text-rose-300 font-semibold italic">
                                 Motivo: {res.rejectionReason}
                               </div>
                             )}
@@ -673,14 +673,14 @@ export const AmenitiesView: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleApproveReservation(res.id)}
-                                  className="flex-1 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] text-center transition-all"
+                                  className="max-sm:min-h-11 flex-1 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs text-center transition-all"
                                 >
                                   ✓ Aprobar
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleRejectReservation(res.id)}
-                                  className="flex-1 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-[10px] text-center transition-all"
+                                  className="max-sm:min-h-11 flex-1 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 font-bold text-xs text-center transition-all"
                                 >
                                   ✕ Rechazar
                                 </button>
@@ -756,7 +756,7 @@ export const AmenitiesView: React.FC = () => {
                     placeholder="0.00"
                     className="w-full bg-slate-950 text-white font-medium text-xs rounded-xl px-3.5 py-2.5 border border-purple-900/60 focus:outline-none focus:border-purple-500"
                   />
-                  <span className="text-[10px] text-slate-400 mt-1 block">Colocar 0 para reservación gratuita.</span>
+                  <span className="text-xs text-slate-400 mt-1 block">Colocar 0 para reservación gratuita.</span>
                 </div>
               </div>
 
@@ -774,7 +774,7 @@ export const AmenitiesView: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => setImageUrl('')}
-                          className="px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all"
+                          className="max-sm:min-h-11 px-3.5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all"
                         >
                           Eliminar
                         </button>
@@ -784,7 +784,7 @@ export const AmenitiesView: React.FC = () => {
                     <label className="flex flex-col items-center justify-center cursor-pointer w-full py-6">
                       <ImageIcon className="w-9 h-9 text-purple-400 mb-2" />
                       <span className="text-xs font-bold text-white mb-1">Cargar Fotografía desde tu Dispositivo</span>
-                      <span className="text-[10px] text-slate-400">Archivos soportados: JPG, PNG, WEBP</span>
+                      <span className="text-xs text-slate-400">Archivos soportados: JPG, PNG, WEBP</span>
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageFileSelect} />
                     </label>
                   )}
@@ -801,7 +801,7 @@ export const AmenitiesView: React.FC = () => {
                         type="button"
                         key={day}
                         onClick={() => handleDayToggle(day)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                        className={`max-sm:min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                           isSelected
                             ? 'bg-[#1877F2] text-white border-blue-400'
                             : 'bg-slate-950 text-slate-400 border-purple-900/40 hover:text-white'
@@ -853,14 +853,14 @@ export const AmenitiesView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl"
+                  className="max-sm:min-h-11 px-4 py-2.5 text-xs font-bold text-slate-400 hover:text-white rounded-xl"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-5 py-2.5 bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white text-xs font-extrabold rounded-xl shadow-lg"
+                  className="max-sm:min-h-11 px-5 py-2.5 bg-gradient-to-r from-[#1877F2] to-[#6203FF] text-white text-xs font-extrabold rounded-xl shadow-lg"
                 >
                   {isSaving ? 'Guardando...' : editingAmenityId ? 'Actualizar Amenidad' : 'Crear Amenidad'}
                 </button>
