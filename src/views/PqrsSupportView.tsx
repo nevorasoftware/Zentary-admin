@@ -163,28 +163,28 @@ export const PqrsSupportView: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'OPEN':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">ABIERTA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">ABIERTA</span>;
       case 'IN_PROGRESS':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">EN PROCESO</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">EN PROCESO</span>;
       case 'RESOLVED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">RESUELTA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">RESUELTA</span>;
       case 'CLOSED':
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">CERRADA</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-500/10 text-slate-400 border border-slate-500/30">CERRADA</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">{status}</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">{status}</span>;
     }
   };
 
   const getPriorityBadge = (p?: string) => {
     switch (p) {
       case 'URGENTE':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">URGENTE</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">URGENTE</span>;
       case 'ALTA':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">ALTA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">ALTA</span>;
       case 'BAJA':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-slate-800 text-slate-400 border border-slate-700">BAJA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">BAJA</span>;
       default:
-        return <span className="px-2 py-0.5 rounded text-[9px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIA</span>;
     }
   };
 
@@ -214,9 +214,9 @@ export const PqrsSupportView: React.FC = () => {
             </h2>
             <p className="text-xs text-slate-400">Peticiones, quejas, reclamos y sugerencias</p>
           </div>
-          <button
+          <button aria-label="Recargar tickets"
             onClick={fetchTickets}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="max-sm:min-h-11 max-sm:min-w-11 p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
             title="Recargar tickets"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -229,7 +229,7 @@ export const PqrsSupportView: React.FC = () => {
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all whitespace-nowrap ${
+              className={`max-sm:min-h-11 px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
                 statusFilter === s
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-900 text-slate-400 hover:text-white'
@@ -250,7 +250,7 @@ export const PqrsSupportView: React.FC = () => {
           {loadError ? (
             <div className="text-center py-10 text-rose-300 text-sm font-semibold">⚠️ {loadError}</div>
           ) : filteredTickets.length === 0 ? (
-            <div className="text-center py-10 text-slate-500 text-sm">{statusFilter === 'ALL'
+            <div className="text-center py-10 text-slate-400 text-sm">{statusFilter === 'ALL'
                 ? 'No hay tickets registrados'
                 : `No hay tickets con estado ${statusLabels[statusFilter]}`}
             </div>
@@ -271,7 +271,7 @@ export const PqrsSupportView: React.FC = () => {
                     setSelectedTicketId(t.id);
                     setShowDetailMobile(true);
                   }}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                  className={`max-sm:min-h-11 w-full text-left p-4 rounded-2xl border transition-all ${
                     isSelected
                       ? 'bg-blue-600/20 border-blue-500 shadow-md'
                       : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
@@ -279,7 +279,7 @@ export const PqrsSupportView: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-1.5 gap-2">
                     <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                      <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">
                         {t.category}
                       </span>
                       {getPriorityBadge(t.priority)}
@@ -302,7 +302,7 @@ export const PqrsSupportView: React.FC = () => {
         <div className={`lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 flex-col h-full ${showDetailMobile ? 'flex' : 'hidden lg:flex'}`}>
           <button
             onClick={() => setShowDetailMobile(false)}
-            className="lg:hidden self-start mb-3 text-xs font-bold text-blue-400 hover:text-blue-300"
+            className="max-sm:min-h-11 lg:hidden self-start mb-3 text-xs font-bold text-blue-400 hover:text-blue-300"
           >
             ← Volver a la lista
           </button>
@@ -323,7 +323,7 @@ export const PqrsSupportView: React.FC = () => {
                     (Casa {activeTicket.house.unitNumber} {activeTicket.house.block || ''})
                   </span>
                 )}
-                {activeTicket.resident?.email && <span className="ml-2 text-slate-500">• {activeTicket.resident.email}</span>}
+                {activeTicket.resident?.email && <span className="ml-2 text-slate-400">• {activeTicket.resident.email}</span>}
               </p>
             </div>
 
@@ -392,15 +392,15 @@ export const PqrsSupportView: React.FC = () => {
                           : 'bg-slate-800 text-slate-100 border border-slate-700 rounded-bl-none'
                       }`}
                     >
-                      <p className="text-[11px] font-bold opacity-75 mb-1">{senderName}</p>
+                      <p className="text-xs font-bold opacity-75 mb-1">{senderName}</p>
                       <p className="whitespace-pre-wrap">{m.message || (m as any).text}</p>
-                      <p className="text-[10px] text-right opacity-60 mt-2">{formattedTime}</p>
+                      <p className="text-xs text-right opacity-60 mt-2">{formattedTime}</p>
                     </div>
                   </div>
                 );
               })
             ) : (
-              <div className="text-center py-8 text-slate-500 text-xs">Sin respuestas aún</div>
+              <div className="text-center py-8 text-slate-400 text-xs">Sin respuestas aún</div>
             )}
           </div>
 
@@ -412,12 +412,12 @@ export const PqrsSupportView: React.FC = () => {
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               disabled={isSending}
-              className="flex-1 bg-slate-900 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 disabled:opacity-50"
+              className="flex-1 bg-slate-900 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={isSending || !replyText.trim()}
-              className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md flex items-center gap-2 disabled:opacity-50"
+              className="max-sm:min-h-11 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-md flex items-center gap-2 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
               {isSending ? 'Enviando...' : 'Responder'}

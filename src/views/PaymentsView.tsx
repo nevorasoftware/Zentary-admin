@@ -303,12 +303,12 @@ export const PaymentsView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap xl:flex-nowrap xl:shrink-0">
-          <button
+          <button aria-label="Actualizar datos"
             onClick={() => {
               fetchAllPayments();
               fetchFinancialSummary();
             }}
-            className="p-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all"
+            className="max-sm:min-h-11 max-sm:min-w-11 p-3 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 transition-all"
             title="Actualizar datos"
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
@@ -317,7 +317,7 @@ export const PaymentsView: React.FC = () => {
           <button
             onClick={handleApplyLateFees}
             disabled={isApplyingLateFees}
-            className="px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/40 text-amber-400 font-semibold text-xs flex items-center gap-2 transition-all whitespace-nowrap"
+            className="max-sm:min-h-11 px-4 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-500/40 text-amber-400 font-semibold text-xs flex items-center gap-2 transition-all whitespace-nowrap"
             title="Evaluar cobros vencidos y aplicar control de mora (5%)"
           >
             <Flame className={`w-4 h-4 ${isApplyingLateFees ? 'animate-spin' : ''}`} />
@@ -334,14 +334,14 @@ export const PaymentsView: React.FC = () => {
               setManualNotes('');
               setShowManualPayModal(true);
             }}
-            className="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
+            className="max-sm:min-h-11 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
           >
             <FileCheck className="w-4 h-4" /> Registrar Pago Manual
           </button>
 
           <button
             onClick={() => setShowBillingModal(true)}
-            className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
+            className="max-sm:min-h-11 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
           >
             <Plus className="w-4 h-4" /> Emitir Cuota
           </button>
@@ -455,7 +455,7 @@ export const PaymentsView: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setSelectedStatusFilter(tab.id as any)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`max-sm:min-h-11 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 selectedStatusFilter === tab.id
                   ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                   : 'text-slate-400 hover:text-white'
@@ -474,7 +474,7 @@ export const PaymentsView: React.FC = () => {
             placeholder="Buscar por residente, casa o concepto..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500"
+            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-blue-500"
           />
         </div>
       </div>
@@ -503,7 +503,7 @@ export const PaymentsView: React.FC = () => {
                 </tr>
               ) : filteredPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
                     No se encontraron cobros registrados con los criterios seleccionados.
                   </td>
                 </tr>
@@ -561,7 +561,7 @@ export const PaymentsView: React.FC = () => {
                         {p.paymentMethod ? (
                           <div className="text-slate-300 font-semibold">{p.paymentMethod}</div>
                         ) : (
-                          <span className="text-slate-500">—</span>
+                          <span className="text-slate-400">—</span>
                         )}
                         {isSafeUrl(p.receiptUrl) && (
                           <a
@@ -578,12 +578,12 @@ export const PaymentsView: React.FC = () => {
                         {p.status === 'PENDING' || p.status === 'OVERDUE' || p.status === 'PARTIAL' ? (
                           <button
                             onClick={() => openManualPaymentForRecord(p)}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 font-bold text-xs transition-all"
+                            className="max-sm:min-h-11 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-300 font-bold text-xs transition-all"
                           >
                             Registrar Pago
                           </button>
                         ) : (
-                          <span className="text-xs text-slate-500">{isPaid ? 'Confirmado' : '—'}</span>
+                          <span className="text-xs text-slate-400">{isPaid ? 'Confirmado' : '—'}</span>
                         )}
                       </td>
                     </tr>
@@ -604,7 +604,7 @@ export const PaymentsView: React.FC = () => {
                 <Plus className="w-5 h-5 text-blue-500" />
                 Emitir Nuevo Cobro o Cuota
               </h3>
-              <button onClick={() => setShowBillingModal(false)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setShowBillingModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 ✕
               </button>
             </div>
@@ -650,7 +650,7 @@ export const PaymentsView: React.FC = () => {
                     Monto (USD)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-slate-500 font-bold">$</span>
+                    <span className="absolute left-3 top-2.5 text-slate-400 font-bold">$</span>
                     <input id="payments-campo-3"
                       type="number"
                       step="0.01"
@@ -708,14 +708,14 @@ export const PaymentsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowBillingModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-sm font-bold"
+                  className="max-sm:min-h-11 px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-sm font-bold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-600/30 flex items-center gap-2"
                 >
                   {isSubmitting ? 'Emitiendo...' : 'Confirmar Emisión'}
                 </button>
@@ -734,7 +734,7 @@ export const PaymentsView: React.FC = () => {
                 <FileCheck className="w-5 h-5 text-emerald-400" />
                 Registrar y Confirmar Pago
               </h3>
-              <button onClick={() => setShowManualPayModal(false)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setShowManualPayModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 ✕
               </button>
             </div>
@@ -743,10 +743,10 @@ export const PaymentsView: React.FC = () => {
               {selectedPaymentForPay ? (
                 <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs text-slate-300 space-y-1">
                   <div>
-                    <span className="text-slate-500">Cobro:</span> <strong className="text-white">{selectedPaymentForPay.concept}</strong>
+                    <span className="text-slate-400">Cobro:</span> <strong className="text-white">{selectedPaymentForPay.concept}</strong>
                   </div>
                   <div>
-                    <span className="text-slate-500">Vivienda:</span> {selectedPaymentForPay.unitNumber} ({selectedPaymentForPay.residentName})
+                    <span className="text-slate-400">Vivienda:</span> {selectedPaymentForPay.unitNumber} ({selectedPaymentForPay.residentName})
                   </div>
                 </div>
               ) : (
@@ -787,7 +787,7 @@ export const PaymentsView: React.FC = () => {
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500 read-only:opacity-60 read-only:cursor-not-allowed"
                   />
                   {selectedPaymentForPay && (
-                    <p className="text-xs text-slate-500 mt-1">Se debe registrar el monto total del cobro.</p>
+                    <p className="text-xs text-slate-400 mt-1">Se debe registrar el monto total del cobro.</p>
                   )}
                 </div>
 
@@ -839,14 +839,14 @@ export const PaymentsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowManualPayModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-sm font-bold"
+                  className="max-sm:min-h-11 px-4 py-2.5 rounded-xl border border-slate-700 text-slate-300 hover:text-white text-sm font-bold"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isManualSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2"
                 >
                   {isManualSubmitting ? 'Guardando...' : 'Confirmar y Liquidar'}
                 </button>

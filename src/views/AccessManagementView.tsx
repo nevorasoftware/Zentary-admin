@@ -617,7 +617,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
         <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
           <button
             onClick={() => setShowCommunityModal(true)}
-            className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
+            className="max-sm:min-h-11 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
             title="Editar nombre, dirección y ubicación de la Residencial"
           >
             <Building2 className="w-4.5 h-4.5 text-amber-400" />
@@ -626,7 +626,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
+            className="max-sm:min-h-11 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center gap-2 transition-all whitespace-nowrap"
           >
             <UserPlus className="w-5 h-5" /> Registrar Nuevo Inquilino
           </button>
@@ -642,14 +642,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             placeholder="Buscar por nombre, correo (ej. misaelgrande@gmail.com) o unidad (119D)..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
+            className="w-full bg-slate-900/80 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-2xl pl-12 pr-4 py-3.5 focus:outline-none focus:border-blue-500 transition-all shadow-inner"
           />
         </div>
 
         <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 w-full md:w-auto justify-center">
           <button
             onClick={() => setFilterStatus('ALL')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`max-sm:min-h-11 px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'ALL' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -657,7 +657,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           </button>
           <button
             onClick={() => setFilterStatus('ACTIVE')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`max-sm:min-h-11 px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'ACTIVE' ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -665,7 +665,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           </button>
           <button
             onClick={() => setFilterStatus('INACTIVE')}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
+            className={`max-sm:min-h-11 px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all ${
               filterStatus === 'INACTIVE' ? 'bg-rose-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -678,7 +678,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
-            <thead className="hidden md:table-header-group bg-slate-950/60 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
+            <thead className="hidden md:table-header-group bg-slate-950/60 text-slate-400 uppercase text-xs font-bold tracking-wider border-b border-slate-800">
               <tr>
                 <th className="px-6 py-4">Inquilino / Residente</th>
                 <th className="px-6 py-4">Unidad</th>
@@ -694,7 +694,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-3 py-1 md:px-6 md:py-4 w-full md:w-auto">
                     <div className="flex items-center gap-3">
                       <img
-                        src={user.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
+                        src={user.avatarUrl || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E'}
                         alt={user.fullName}
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-800"
                       />
@@ -713,7 +713,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                           {user.property.unitNumber} {user.property.block ? `(${user.property.block})` : ''}
                         </span>
                       ) : (
-                        <span className="text-slate-500 italic">Sin unidad</span>
+                        <span className="text-slate-400 italic">Sin unidad</span>
                       )}
                     </div>
                   </td>
@@ -731,11 +731,11 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
                   <td className="px-3 py-1 md:px-6 md:py-4">
                     {user.mustChangePassword ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         <Key className="w-3.5 h-3.5" /> Cambio Pendiente
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
                         <Check className="w-3.5 h-3.5 text-emerald-400" /> Clave Lista
                       </span>
                     )}
@@ -747,7 +747,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                       onClick={() => handleResendCredentialsForUser(user)}
                       disabled={!user.property?.unitNumber}
                       title={!user.property?.unitNumber ? 'Sin unidad: edita el usuario e indica su unidad para reenviar credenciales' : undefined}
-                      className="px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="max-sm:min-h-11 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RotateCcw className="w-3.5 h-3.5" /> Reenviar Credenciales
                     </button>
@@ -756,9 +756,9 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-3 py-1 md:px-6 md:py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {/* Editar Inquilino Button */}
-                      <button
+                      <button aria-label="Editar información del inquilino"
                         onClick={() => handleOpenEditModal(user)}
-                        className="p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-all"
+                        className="max-sm:min-h-11 max-sm:min-w-11 p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-all"
                         title="Editar información del inquilino"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -767,7 +767,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                       {/* Bloquear / Habilitar Acceso Button */}
                       <button
                         onClick={() => handleToggleAccess(user.id)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-md ${
+                        className={`max-sm:min-h-11 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-md ${
                           user.isActive
                             ? 'bg-slate-800 text-rose-400 hover:bg-rose-600 hover:text-white border border-rose-500/30'
                             : 'bg-emerald-600 text-white hover:bg-emerald-500'
@@ -807,7 +807,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <Building2 className="w-5 h-5 text-amber-400" />
                 Mantenimiento de Residencial / Comunidad
               </h3>
-              <button onClick={() => setShowCommunityModal(false)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setShowCommunityModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -866,14 +866,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCommunityModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSavingCommunity}
-                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center gap-2"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
                   {isSavingCommunity ? 'Guardando...' : 'Guardar Datos de Residencial'}
                 </button>
@@ -892,7 +892,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <UserPlus className="w-5 h-5 text-blue-500" />
                 Registrar Nuevo Inquilino / Residente
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setShowAddModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -981,13 +981,13 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md"
                 >
                   Registrar Inquilino y Continuar al Envío
                 </button>
@@ -1006,7 +1006,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <Edit3 className="w-5 h-5 text-blue-500" />
                 Editar Información de Inquilino
               </h3>
-              <button onClick={() => setEditingUser(null)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setEditingUser(null)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1083,13 +1083,13 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setEditingUser(null)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
+                  className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md"
                 >
                   Guardar Cambios
                 </button>
@@ -1108,7 +1108,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 <Check className="w-5 h-5 text-emerald-400" />
                 {createdTenantInfo.isResend ? 'Reenviar Credenciales' : '¡Inquilino Creado Exitosamente!'}
               </h3>
-              <button onClick={() => setCreatedTenantInfo(null)} className="text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={() => setCreatedTenantInfo(null)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1127,15 +1127,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               {createdTenantInfo.genericPassword ? (
               <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-amber-500/30 flex items-center justify-between">
                 <div>
-                  <p className="text-[11px] uppercase tracking-wider text-amber-400 font-bold">Contraseña Genérica Asignada</p>
+                  <p className="text-xs uppercase tracking-wider text-amber-400 font-bold">Contraseña Genérica Asignada</p>
                   <p className="font-mono text-base font-bold text-white mt-0.5">{createdTenantInfo.genericPassword}</p>
                 </div>
-                <button
+                <button aria-label="Copiar contraseña"
                   onClick={() => {
                     navigator.clipboard.writeText(createdTenantInfo.genericPassword);
                     showToast('📋 Contraseña copiada al portapapeles.', 'info');
                   }}
-                  className="p-2 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
+                  className="max-sm:min-h-11 max-sm:min-w-11 p-2 text-slate-400 hover:text-white bg-slate-800 rounded-lg"
                   title="Copiar contraseña"
                 >
                   <Copy className="w-4 h-4" />
@@ -1198,7 +1198,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               <button
                 onClick={() => handleSendWhatsAppApi(createdTenantInfo.phone, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.email, createdTenantInfo.id)}
                 disabled={isSendingWhatsApp || !createdTenantInfo.phone}
-                className="py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="max-sm:min-h-11 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <MessageSquare className="w-4 h-4" />
                 {isSendingWhatsApp ? 'Enviando WhatsApp...' : createdTenantInfo.phone ? 'Enviar por WhatsApp' : 'Sin teléfono para WhatsApp'}
@@ -1207,7 +1207,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               <button
                 onClick={() => handleSendGmailApi(createdTenantInfo.email, createdTenantInfo.fullName, createdTenantInfo.unitNumber, createdTenantInfo.id)}
                 disabled={isSendingEmail}
-                className="py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                className="max-sm:min-h-11 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
               >
                 <Mail className="w-4 h-4" />
                 {isSendingEmail ? 'Enviando correo...' : 'Enviar por Correo Electrónico'}
@@ -1216,7 +1216,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
             <button
               onClick={() => setCreatedTenantInfo(null)}
-              className="w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-white border border-slate-800 rounded-xl"
+              className="max-sm:min-h-11 w-full py-2.5 text-xs font-semibold text-slate-400 hover:text-white border border-slate-800 rounded-xl"
             >
               Cerrar y Volver a la Lista
             </button>

@@ -26,7 +26,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   const [email, setEmail] = useState(currentUser.email || '');
   const [phone, setPhone] = useState(currentUser.phone || '');
   const [avatarUrl, setAvatarUrl] = useState(
-    currentUser.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150'
+    currentUser.avatarUrl || 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E'
   );
   const [newPassword, setNewPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -134,7 +134,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <User className="w-5 h-5 text-blue-500" />
             Editar Perfil de Administrador
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <button aria-label="Cerrar" onClick={onClose} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -181,7 +181,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 className="hidden"
               />
             </div>
-            <p className="text-[11px] text-slate-400 text-center">
+            <p className="text-xs text-slate-400 text-center">
               Haz clic en la imagen para subir una foto desde tu computadora o pega un enlace abajo.
             </p>
           </div>
@@ -254,14 +254,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="py-2.5 px-4 rounded-xl border border-slate-700 text-slate-400 hover:text-white text-xs font-bold"
+              className="max-sm:min-h-11 py-2.5 px-4 rounded-xl border border-slate-700 text-slate-400 hover:text-white text-xs font-bold"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="py-2.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center gap-2 disabled:opacity-50"
+              className="max-sm:min-h-11 py-2.5 px-5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/20 flex items-center gap-2 disabled:opacity-50"
             >
               {isLoading ? (
                 <>

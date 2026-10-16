@@ -151,7 +151,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 placeholder="••••••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
                 required
               />
             </div>
@@ -168,7 +168,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 placeholder="••••••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
                 required
               />
             </div>
@@ -176,7 +176,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
+            className="max-sm:min-h-11 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -207,7 +207,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 placeholder="admin@zentary.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
                 required
               />
             </div>
@@ -231,7 +231,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-500 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
+                className="w-full bg-slate-900/90 border border-slate-800 text-sm text-slate-100 placeholder-slate-400 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition-all"
                 required
               />
             </div>
@@ -243,7 +243,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
+            className="max-sm:min-h-11 w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-600/25 flex items-center justify-center gap-2 transition-all disabled:opacity-50 mt-2"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
         </form>
         )}
 
-        <div className="pt-2 text-center text-[11px] text-slate-500 border-t border-slate-800/80 flex items-center justify-center gap-1.5">
+        <div className="pt-2 text-center text-xs text-slate-400 border-t border-slate-800/80 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
           <span>Acceso cifrado y protegido</span>
         </div>
