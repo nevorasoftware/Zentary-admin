@@ -650,11 +650,13 @@ export const AmenitiesView: React.FC = () => {
                               <span className="text-slate-400">
                                 {res.price === 0 ? 'Gratis' : `$${res.price.toFixed(2)}`}
                               </span>
-                              <span className="font-bold">
+                              <span className={`font-bold ${res.paymentStatus === 'FAILED' ? 'text-rose-400' : ''}`}>
                                 {res.paymentStatus === 'PAID'
                                   ? '💳 Pagado'
                                   : res.paymentStatus === 'NOT_REQUIRED'
                                   ? '✓ $0'
+                                  : res.paymentStatus === 'FAILED'
+                                  ? '⚠️ Pago rechazado'
                                   : '⏳ Pendiente Pago'}
                               </span>
                             </div>
