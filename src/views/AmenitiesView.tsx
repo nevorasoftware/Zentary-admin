@@ -18,6 +18,8 @@ import {
 
 import { adminApi, handleUnauthorized, isSafeUrl, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 
 const ALL_DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -69,6 +71,8 @@ interface Reservation {
 }
 
 export const AmenitiesView: React.FC = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState<'amenities' | 'calendar'>('amenities');
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -168,13 +172,13 @@ export const AmenitiesView: React.FC = () => {
     try {
       const res = await adminApi.updateReservationStatus(resId, 'CONFIRMED');
       if (res.success) {
-        alert('✓ Reserva aprobada exitosamente.');
+        toast.success('Reserva aprobada exitosamente.');
         fetchWeeklyReservations();
       } else {
-        alert('Error al aprobar reserva: ' + (res.message || 'No se pudo aprobar la reserva.'));
+        toast.error('Error al aprobar reserva: ' + (res.message || 'No se pudo aprobar la reserva.'));
       }
     } catch (err: any) {
-      alert('Error al aprobar reserva: ' + err.message);
+      toast.error('Error al aprobar reserva: ' + err.message);
     }
   };
 
@@ -184,13 +188,13 @@ export const AmenitiesView: React.FC = () => {
     try {
       const res = await adminApi.updateReservationStatus(resId, 'REJECTED', reason || undefined);
       if (res.success) {
-        alert('Reserva rechazada.');
+        toast.success('Reserva rechazada.');
         fetchWeeklyReservations();
       } else {
-        alert('Error al rechazar reserva: ' + (res.message || 'No se pudo rechazar la reserva.'));
+        toast.error('Error al rechazar reserva: ' + (res.message || 'No se pudo rechazar la reserva.'));
       }
     } catch (err: any) {
-      alert('Error al rechazar reserva: ' + err.message);
+      toast.error('Error al rechazar reserva: ' + err.message);
     }
   };
 
@@ -297,7 +301,7 @@ export const AmenitiesView: React.FC = () => {
   };
 
   const handleDeleteAmenity = async (id: string) => {
-    if (!confirm('¿Estás seguro de eliminar esta amenidad? Se eliminarán las configuraciones asociadas.')) {
+    if (!(await confirm({ title: 'Eliminar amenidad', message: '¿Estás seguro de eliminar esta amenidad? Se eliminarán las configuraciones asociadas.', confirmLabel: 'Eliminar' }))) {
       return;
     }
     try {

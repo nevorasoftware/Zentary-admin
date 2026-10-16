@@ -12,8 +12,10 @@ import {
   Flame,
 } from 'lucide-react';
 import { adminApi, ADMIN_ROLES, PqrsTicketItem, ResidentUser } from '../services/adminApi';
+import { useToast } from '../components/Toast';
 
 export const PqrsSupportView: React.FC = () => {
+  const toast = useToast();
   const [tickets, setTickets] = useState<PqrsTicketItem[]>([]);
   const [staffUsers, setStaffUsers] = useState<ResidentUser[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,7 +158,7 @@ export const PqrsSupportView: React.FC = () => {
         setTimeout(() => setNotificationStatus(null), 4000);
       }
     } catch (err: any) {
-      alert('Error al asignar staff: ' + err.message);
+      toast.error('Error al asignar staff: ' + err.message);
     }
   };
 

@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 interface ActiveVisitItem {
   id: string;
@@ -55,6 +57,8 @@ interface ExpectedVisitItem {
 }
 
 export const VisitsLogView: React.FC = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   // Tabs: 'monitor' (Garita Operativa) | 'history' (Auditoría Forense)
   const [activeTab, setActiveTab] = useState<'monitor' | 'history'>('monitor');
 
@@ -233,10 +237,10 @@ export const VisitsLogView: React.FC = () => {
         setScannedResult(null);
         fetchGaritaData();
       } else {
-        alert(res.message || 'No fue posible registrar el ingreso.');
+        toast.error(res.message || 'No fue posible registrar el ingreso.');
       }
     } catch (err: any) {
-      alert(`Error al confirmar ingreso: ${err.message}`);
+      toast.error(`Error al confirmar ingreso: ${err.message}`);
     } finally {
       setConfirmingEntry(false);
     }
@@ -244,7 +248,7 @@ export const VisitsLogView: React.FC = () => {
 
   // Register Exit (Check-out)
   const handleRegisterExit = async (visitId: string, visitorName: string) => {
-    if (!confirm(`¿Confirmar la salida de ${visitorName}?`)) return;
+    if (!(await confirm({ title: 'Registrar salida', message: `¿Confirmar la salida de ${visitorName}?`, confirmLabel: 'Confirmar salida' }))) return;
 
     try {
       const res = await adminApi.registerExit(visitId);
@@ -253,10 +257,10 @@ export const VisitsLogView: React.FC = () => {
         fetchGaritaData();
         if (activeTab === 'history') fetchHistoryData();
       } else {
-        alert(res.message || 'Error al registrar salida.');
+        toast.error(res.message || 'Error al registrar salida.');
       }
     } catch (err: any) {
-      alert(`Error al registrar salida: ${err.message}`);
+      toast.error(`Error al registrar salida: ${err.message}`);
     }
   };
 
@@ -290,11 +294,11 @@ export const VisitsLogView: React.FC = () => {
   const handleQuickEntrySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickForm.visitorName.trim()) {
-      alert('El nombre del visitante o conductor es obligatorio.');
+      toast.error('El nombre del visitante o conductor es obligatorio.');
       return;
     }
     if (!quickForm.houseId || !availableHouses.some((h) => h.id === quickForm.houseId)) {
-      alert('Selecciona una vivienda destino válida.');
+      toast.error('Selecciona una vivienda destino válida.');
       return;
     }
 
@@ -320,10 +324,10 @@ export const VisitsLogView: React.FC = () => {
         });
         fetchGaritaData();
       } else {
-        alert(res.message || 'Error al procesar ingreso rápido.');
+        toast.error(res.message || 'Error al procesar ingreso rápido.');
       }
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     } finally {
       setQuickSubmitting(false);
     }

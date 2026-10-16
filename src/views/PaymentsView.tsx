@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { adminApi, isSafeUrl, ResidentUser, FinancialSummary } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 interface PaymentRecord {
   id: string;
@@ -37,6 +39,8 @@ interface PaymentRecord {
 }
 
 export const PaymentsView: React.FC = () => {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [financialSummary, setFinancialSummary] = useState<FinancialSummary | null>(null);
   const [residents, setResidents] = useState<ResidentUser[]>([]);
@@ -153,13 +157,13 @@ export const PaymentsView: React.FC = () => {
     if (!concept || !amount || !dueDate || !targetResidentId) return;
 
     if (!(parseFloat(amount) > 0)) {
-      alert('El monto debe ser mayor a cero.');
+      toast.error('El monto debe ser mayor a cero.');
       return;
     }
 
     if (
       targetResidentId === 'ALL' &&
-      !window.confirm(`Se emitirá este cobro a TODAS las viviendas (${residents.length} residentes). ¿Deseas continuar?`)
+      !(await confirm({ title: 'Emitir cobro masivo', message: `Se emitirá este cobro a TODAS las viviendas (${residents.length} residentes). ¿Deseas continuar?`, confirmLabel: 'Emitir cobro' }))
     ) {
       return;
     }
@@ -176,7 +180,7 @@ export const PaymentsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert((res as any).message || '💵 Cobro emitido correctamente.');
+        toast.success((res as any).message || 'Cobro emitido correctamente.');
         setConcept('');
         setAmount('');
         setDueDate('');
@@ -186,17 +190,17 @@ export const PaymentsView: React.FC = () => {
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert((res as any).message || 'Error al emitir cobro.');
+        toast.error((res as any).message || 'Error al emitir cobro.');
       }
     } catch (err: any) {
-      alert('Error al emitir cobro: ' + err.message);
+      toast.error('Error al emitir cobro: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleApplyLateFees = async () => {
-    if (!confirm('¿Deseas ejecutar el Control de Mora? Se evaluarán todos los cobros vencidos y se aplicará un 5% de recargo.')) {
+    if (!(await confirm({ title: 'Control de mora', message: '¿Deseas ejecutar el Control de Mora? Se evaluarán todos los cobros vencidos y se aplicará un 5% de recargo.', confirmLabel: 'Ejecutar' }))) {
       return;
     }
 
@@ -209,10 +213,10 @@ export const PaymentsView: React.FC = () => {
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert('No se pudo aplicar el control de mora.');
+        toast.error('No se pudo aplicar el control de mora.');
       }
     } catch (err: any) {
-      alert('Error en control de mora: ' + err.message);
+      toast.error('Error en control de mora: ' + err.message);
     } finally {
       setIsApplyingLateFees(false);
     }
@@ -233,7 +237,7 @@ export const PaymentsView: React.FC = () => {
     if (!manualAmount) return;
 
     if (!(parseFloat(manualAmount) > 0)) {
-      alert('El monto debe ser mayor a cero.');
+      toast.error('El monto debe ser mayor a cero.');
       return;
     }
 
@@ -250,7 +254,7 @@ export const PaymentsView: React.FC = () => {
       });
 
       if (res.success) {
-        alert('✅ Pago registrado y confirmado exitosamente.');
+        toast.success('Pago registrado y confirmado exitosamente.');
         setShowManualPayModal(false);
         setSelectedPaymentForPay(null);
         setManualAmount('');
@@ -259,12 +263,12 @@ export const PaymentsView: React.FC = () => {
         fetchAllPayments();
         fetchFinancialSummary();
       } else {
-        alert(res.message || 'Error al registrar pago manual.');
+        toast.error(res.message || 'Error al registrar pago manual.');
         fetchAllPayments();
         fetchFinancialSummary();
       }
     } catch (err: any) {
-      alert('Error: ' + err.message);
+      toast.error('Error: ' + err.message);
       fetchAllPayments();
       fetchFinancialSummary();
     } finally {
