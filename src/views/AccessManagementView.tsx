@@ -94,7 +94,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       if (res.ok && data.success && Array.isArray(data.users)) {
         setUsersError(null);
         // La cuenta del administrador no se lista como inquilino
-        setUsers(data.users.filter((u: { role: string }) => !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN'].includes(u.role)));
+        setUsers(data.users.filter((u: { role: string }) => !['ADMIN', 'RESIDENTIAL_ADMIN', 'SUPER_ADMIN', 'SECURITY_ADMIN'].includes(u.role)));
       } else {
         setUsersError(data.message || 'No se pudo cargar la lista de usuarios.');
       }
