@@ -476,8 +476,8 @@ export const AmenitiesView: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2 text-slate-400">
                           <Sparkles className="w-4 h-4 text-[#FFCF36]" />
-                          <span>
-                            Días: <strong className="text-slate-200">{item.availableDays}</strong>
+                          <span className="break-words min-w-0">
+                            Días: <strong className="text-slate-200">{item.availableDays.split(',').join(', ')}</strong>
                           </span>
                         </div>
                       </div>
@@ -783,7 +783,7 @@ export const AmenitiesView: React.FC = () => {
                     <label className="flex flex-col items-center justify-center cursor-pointer w-full py-6">
                       <ImageIcon className="w-9 h-9 text-purple-400 mb-2" />
                       <span className="text-xs font-bold text-white mb-1">Cargar Fotografía desde tu Dispositivo</span>
-                      <span className="text-[10px] text-slate-400">Archivos soportados: JPG, PNG, WEBP (Se guardará directamente en la base de datos)</span>
+                      <span className="text-[10px] text-slate-400">Archivos soportados: JPG, PNG, WEBP</span>
                       <input type="file" accept="image/*" className="hidden" onChange={handleImageFileSelect} />
                     </label>
                   )}

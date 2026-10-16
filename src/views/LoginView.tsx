@@ -58,7 +58,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       }
     } catch (err: any) {
       setIsLoading(false);
-      setErrorMessage('Error de conexión con el servidor de autenticación en Railway.');
+      setErrorMessage('Error de conexión con el servidor de autenticación.');
     }
   };
 
@@ -94,7 +94,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       }
     } catch (err: any) {
       setIsLoading(false);
-      setErrorMessage('Error de conexión con el servidor de autenticación en Railway.');
+      setErrorMessage('Error de conexión con el servidor de autenticación.');
     }
   };
 
@@ -239,7 +239,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
         <div className="pt-2 text-center text-[11px] text-slate-500 border-t border-slate-800/80 flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-          <span>Acceso cifrado y protegido por PostgreSQL en Railway</span>
+          <span>Acceso cifrado y protegido</span>
         </div>
       </div>
     </div>

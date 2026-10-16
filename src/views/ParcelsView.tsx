@@ -99,7 +99,7 @@ export const ParcelsView: React.FC = () => {
           onClick={() => setShowAddModal(true)}
           className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold text-sm shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all whitespace-nowrap"
         >
-          <Plus className="w-5 h-5" /> Registración de Paquete
+          <Plus className="w-5 h-5" /> Registrar Paquete
         </button>
       </div>
 
@@ -109,7 +109,7 @@ export const ParcelsView: React.FC = () => {
           <div key={p.id} className="glass-card p-5 rounded-2xl border border-slate-800 hover:border-slate-700 transition-all space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                {p.carrier === 'OTRO' ? p.customCarrier || 'OTRO' : p.carrier}
+                {p.carrier === 'OTRO' ? p.customCarrier || 'OTRO' : p.carrier.replace('_', ' ')}
               </span>
               <span
                 className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${

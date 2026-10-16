@@ -317,7 +317,7 @@ export const AnnouncementsView: React.FC = () => {
             <BellRing className="w-4 h-4 text-amber-400" />
             Cartelera Digital Vigente ({announcements.length})
           </h3>
-          <span className="text-xs text-slate-500">Sincronizado con base de datos</span>
+          <span className="text-xs text-slate-500">Sincronizado</span>
         </div>
 
         {loading ? (
