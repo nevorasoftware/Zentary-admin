@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
   const avatar = adminUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
 
   return (
-    <header className="min-h-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 md:px-8 py-3 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-4">
+    <header className="min-h-20 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 md:px-8 py-2 md:py-3 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-2 md:gap-4">
       {/* Title & Mobile Hamburger Button */}
       <div className="flex items-center gap-3">
         <button

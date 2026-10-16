@@ -19,6 +19,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { ResidentUser, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
+import ModalShell from '../components/ModalShell';
 
 interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
@@ -799,10 +800,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
       {/* Modal: Mantenimiento de la Residencial (Tabla Community) */}
       {showCommunityModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setShowCommunityModal(false)} labelledBy="access-management-comunidad-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-amber-500/30 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="access-management-comunidad-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-amber-400" />
                 Mantenimiento de Residencial / Comunidad
               </h3>
@@ -879,15 +880,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* Modal: Formulario para Registrar Nuevo Inquilino */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setShowAddModal(false)} labelledBy="access-management-registrar-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="access-management-registrar-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-blue-500" />
                 Registrar Nuevo Inquilino / Residente
               </h3>
@@ -993,15 +994,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* Modal: Editar Inquilino */}
       {editingUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setEditingUser(null)} labelledBy="access-management-editar-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="access-management-editar-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-blue-500" />
                 Editar Información de Inquilino
               </h3>
@@ -1095,15 +1096,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </ModalShell>
       )}
 
       {/* Modal: Confirmación Éxito & Envío por WhatsApp / Gmail API */}
       {createdTenantInfo && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={() => setCreatedTenantInfo(null)} labelledBy="access-management-credenciales-titulo" className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-emerald-500/40 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <h3 id="access-management-credenciales-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <Check className="w-5 h-5 text-emerald-400" />
                 {createdTenantInfo.isResend ? 'Reenviar Credenciales' : '¡Inquilino Creado Exitosamente!'}
               </h3>
@@ -1220,7 +1221,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
               Cerrar y Volver a la Lista
             </button>
           </div>
-        </div>
+        </ModalShell>
       )}
     </div>
   );
