@@ -19,6 +19,7 @@ export const PqrsSupportView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
+  const [showDetailMobile, setShowDetailMobile] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -204,7 +205,7 @@ export const PqrsSupportView: React.FC = () => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[calc(100vh-140px)]">
       {/* Ticket List Column */}
-      <div className="glass-card p-5 rounded-3xl border border-slate-800 flex flex-col h-full space-y-3">
+      <div className={`glass-card p-5 rounded-3xl border border-slate-800 flex-col h-full space-y-3 ${showDetailMobile ? 'hidden lg:flex' : 'flex'}`}>
         <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
@@ -266,7 +267,10 @@ export const PqrsSupportView: React.FC = () => {
               return (
                 <button
                   key={t.id}
-                  onClick={() => setSelectedTicketId(t.id)}
+                  onClick={() => {
+                    setSelectedTicketId(t.id);
+                    setShowDetailMobile(true);
+                  }}
                   className={`w-full text-left p-4 rounded-2xl border transition-all ${
                     isSelected
                       ? 'bg-blue-600/20 border-blue-500 shadow-md'
@@ -295,7 +299,13 @@ export const PqrsSupportView: React.FC = () => {
 
       {/* Ticket Chat & Details Column */}
       {activeTicket ? (
-        <div className="lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 flex flex-col h-full">
+        <div className={`lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 flex-col h-full ${showDetailMobile ? 'flex' : 'hidden lg:flex'}`}>
+          <button
+            onClick={() => setShowDetailMobile(false)}
+            className="lg:hidden self-start mb-3 text-xs font-bold text-blue-400 hover:text-blue-300"
+          >
+            ← Volver a la lista
+          </button>
           {/* Ticket Top Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4 mb-4">
             <div>
@@ -415,7 +425,7 @@ export const PqrsSupportView: React.FC = () => {
           </form>
         </div>
       ) : (
-        <div className="lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 flex items-center justify-center">
+        <div className="lg:col-span-2 glass-card p-6 rounded-3xl border border-slate-800 hidden lg:flex items-center justify-center">
           <p className="text-slate-400">Selecciona un ticket para ver la conversación</p>
         </div>
       )}

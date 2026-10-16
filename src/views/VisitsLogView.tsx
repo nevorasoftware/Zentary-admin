@@ -400,72 +400,72 @@ export const VisitsLogView: React.FC = () => {
       </div>
 
       {/* KPI Metrics: DENTRO, EXCEDIDOS, ESPERADOS HOY */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {/* Metric 1: Dentro */}
-        <div className="glass-card p-5 rounded-3xl border border-slate-800 relative overflow-hidden">
+        <div className="glass-card p-3 sm:p-5 rounded-3xl border border-slate-800 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Dentro del Complejo</span>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Dentro del Complejo</span>
             <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
           </div>
           <div className="mt-2 flex items-baseline gap-3">
-            <span className="text-4xl font-extrabold text-white">{summary.totalInside}</span>
-            <span className="text-xs text-emerald-400 font-medium">visitantes / vehículos</span>
+            <span className="text-3xl sm:text-4xl font-extrabold text-white">{summary.totalInside}</span>
+            <span className="hidden sm:inline text-xs text-emerald-400 font-medium">visitantes / vehículos</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">En estancia activa con entrada registrada</p>
+          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">En estancia activa con entrada registrada</p>
         </div>
 
         {/* Metric 2: Excedidos */}
         <div
-          className={`glass-card p-5 rounded-3xl border transition-all ${
+          className={`glass-card p-3 sm:p-5 rounded-3xl border transition-all ${
             summary.totalExceeded > 0
               ? 'border-rose-500/50 bg-rose-950/20'
               : 'border-slate-800'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Sobretiempo / Excedidos</span>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Sobretiempo / Excedidos</span>
             <AlertTriangle
               className={`w-5 h-5 ${summary.totalExceeded > 0 ? 'text-rose-400 animate-bounce' : 'text-slate-600'}`}
             />
           </div>
           <div className="mt-2 flex items-baseline gap-3">
             <span
-              className={`text-4xl font-extrabold ${
+              className={`text-3xl sm:text-4xl font-extrabold ${
                 summary.totalExceeded > 0 ? 'text-rose-400' : 'text-slate-400'
               }`}
             >
               {summary.totalExceeded}
             </span>
-            <span className="text-xs text-rose-400/80 font-medium">
+            <span className="hidden sm:inline text-xs text-rose-400/80 font-medium">
               {summary.totalExceeded === 1 ? 'visitante excedido' : 'visitantes excedidos'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">Superaron el tiempo máximo permitido</p>
+          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">Superaron el tiempo máximo permitido</p>
         </div>
 
         {/* Metric 3: Esperados Hoy */}
-        <div className="glass-card p-5 rounded-3xl border border-slate-800">
+        <div className="glass-card p-3 sm:p-5 rounded-3xl border border-slate-800">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">Esperados Hoy</span>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-400 tracking-wider uppercase">Esperados Hoy</span>
             <Clock className="w-5 h-5 text-blue-400" />
           </div>
           <div className="mt-2 flex items-baseline gap-3">
-            <span className="text-4xl font-extrabold text-white">{summary.totalExpectedToday}</span>
-            <span className="text-xs text-blue-400 font-medium">visitas programadas</span>
+            <span className="text-3xl sm:text-4xl font-extrabold text-white">{summary.totalExpectedToday}</span>
+            <span className="hidden sm:inline text-xs text-blue-400 font-medium">visitas programadas</span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-2">Con FastPass pendiente de ingreso</p>
+          <p className="hidden sm:block text-[11px] text-slate-500 mt-2">Con FastPass pendiente de ingreso</p>
         </div>
       </div>
 
       {/* QR Scanner & Verification Box */}
-      <div className="glass-card p-6 rounded-3xl border border-slate-800 space-y-4">
+      <div className="glass-card p-4 sm:p-6 rounded-3xl border border-slate-800 space-y-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h3 className="text-base font-bold text-white flex items-center gap-2">
               <QrCode className="w-5 h-5 text-emerald-400" />
               Validación inmediata de pase QR
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="hidden sm:block text-xs text-slate-400 mt-0.5">
               Escanea el código QR presentado en la app móvil o escribe el código de pase FastPass.
             </p>
           </div>
@@ -792,7 +792,7 @@ export const VisitsLogView: React.FC = () => {
           <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider">
+                <thead className="hidden md:table-header-group bg-slate-900/90 text-slate-400 font-bold border-b border-slate-800 uppercase tracking-wider">
                   <tr>
                     <th className="py-3.5 px-4">Visitante</th>
                     <th className="py-3.5 px-4">Destino / Residente</th>
@@ -818,36 +818,36 @@ export const VisitsLogView: React.FC = () => {
                     </tr>
                   ) : (
                     historyVisits.map((item) => (
-                      <tr key={item.id} className="hover:bg-slate-800/40 transition-colors">
-                        <td className="py-3.5 px-4 font-semibold text-white">
+                      <tr key={item.id} className="hover:bg-slate-800/40 transition-colors flex flex-wrap items-center gap-x-2 gap-y-1 px-2 py-3 md:table-row md:p-0">
+                        <td className="py-1 px-2 md:py-3.5 md:px-4 font-semibold text-white w-full md:w-auto">
                           <div>{item.visitorName}</div>
                           <div className="text-[11px] text-slate-500 font-normal">
                             {[item.documentNumber, item.visitorDni].find((d) => d && String(d).trim() && String(d).trim() !== '0') || 'Sin doc'}
                           </div>
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-1 px-2 md:py-3.5 md:px-4">
                           <div className="font-medium text-blue-400">
                             {item.house?.unitNumber || item.resident?.house?.unitNumber || 'Vivienda'}
                           </div>
                           <div className="text-[11px] text-slate-400">{item.resident?.fullName}</div>
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-medium text-emerald-400">
-                          {item.vehiclePlate || 'A pie'}
+                        <td className="py-1 px-2 md:py-3.5 md:px-4 font-mono font-medium text-emerald-400">
+                          <span className="md:hidden">Placa: </span>{item.vehiclePlate || 'A pie'}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-400">
-                          {item.entryDate
+                        <td className="py-1 px-2 md:py-3.5 md:px-4 text-slate-400">
+                          <span className="md:hidden">Entrada: </span>{item.entryDate
                             ? new Date(item.entryDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
                             : '—'}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-400">
-                          {item.exitDate
+                        <td className="py-1 px-2 md:py-3.5 md:px-4 text-slate-400">
+                          <span className="md:hidden">Salida: </span>{item.exitDate
                             ? new Date(item.exitDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
                             : item.status === 'INGRESADA' ? 'Dentro' : '—'}
                         </td>
-                        <td className="py-3.5 px-4 font-medium text-slate-200">
-                          {item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : '—')}
+                        <td className="py-1 px-2 md:py-3.5 md:px-4 font-medium text-slate-200">
+                          <span className="md:hidden">Duración: </span>{item.durationMinutes ? formatDuration(item.durationMinutes) : (item.status === 'INGRESADA' ? 'En curso' : '—')}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-1 px-2 md:py-3.5 md:px-4">
                           <span
                             className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                               item.status === 'INGRESADA'

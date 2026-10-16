@@ -613,7 +613,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
           <button
             onClick={() => setShowCommunityModal(true)}
             className="px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
@@ -677,7 +677,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
-            <thead className="bg-slate-950/60 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
+            <thead className="hidden md:table-header-group bg-slate-950/60 text-slate-400 uppercase text-[11px] font-bold tracking-wider border-b border-slate-800">
               <tr>
                 <th className="px-6 py-4">Inquilino / Residente</th>
                 <th className="px-6 py-4">Unidad</th>
@@ -689,8 +689,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             </thead>
             <tbody className="divide-y divide-slate-800/80">
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="px-6 py-4">
+                <tr key={user.id} className="hover:bg-slate-800/40 transition-colors flex flex-wrap items-center gap-x-2 gap-y-1 px-2 py-3 md:table-row md:p-0">
+                  <td className="px-3 py-1 md:px-6 md:py-4 w-full md:w-auto">
                     <div className="flex items-center gap-3">
                       <img
                         src={user.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150'}
@@ -704,7 +704,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 font-medium">
+                  <td className="px-3 py-1 md:px-6 md:py-4 font-medium">
                     <div className="flex items-center gap-2">
                       <Building2 className="w-4 h-4 text-blue-400" />
                       {user.property?.unitNumber ? (
@@ -717,7 +717,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                     </div>
                   </td>
 
-                  <td className="px-6 py-4 text-slate-400 font-mono text-xs">
+                  <td className="px-3 py-1 md:px-6 md:py-4 text-slate-400 font-mono text-xs">
                     {user.phone
                       ? (() => {
                           const d = user.phone.replace(/\D/g, '');
@@ -728,7 +728,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                       : 'Sin teléfono'}
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1 md:px-6 md:py-4">
                     {user.mustChangePassword ? (
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         <Key className="w-3.5 h-3.5" /> Cambio Pendiente
@@ -741,7 +741,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   </td>
 
                   {/* Reenviar Credenciales Button */}
-                  <td className="px-6 py-4">
+                  <td className="px-3 py-1 md:px-6 md:py-4">
                     <button
                       onClick={() => handleResendCredentialsForUser(user)}
                       disabled={!user.property?.unitNumber}
@@ -752,7 +752,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                     </button>
                   </td>
 
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-3 py-1 md:px-6 md:py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {/* Editar Inquilino Button */}
                       <button
