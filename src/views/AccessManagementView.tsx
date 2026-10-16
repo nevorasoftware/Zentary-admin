@@ -756,7 +756,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-3 py-1 md:px-6 md:py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {/* Editar Inquilino Button */}
-                      <button aria-label="Editar inquilino"
+                      <button aria-label="Editar información del inquilino"
                         onClick={() => handleOpenEditModal(user)}
                         className="max-sm:min-h-11 max-sm:min-w-11 p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-all"
                         title="Editar información del inquilino"

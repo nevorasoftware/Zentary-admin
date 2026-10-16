@@ -446,7 +446,7 @@ export const AmenitiesView: React.FC = () => {
                     {/* Image Header */}
                     <div className="relative h-44 bg-slate-950 overflow-hidden">
                       <img
-                        src={isSafeUrl(item.imageUrl) ? item.imageUrl : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3Ccircle cx=%2712%27 cy=%279%27 r=%274%27 fill=%27%2394a3b8%27/%3E%3Cpath d=%27M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z%27 fill=%27%2394a3b8%27/%3E%3C/svg%3E'}
+                        src={isSafeUrl(item.imageUrl) ? item.imageUrl : 'data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 fill=%27%231e293b%27/%3E%3C/svg%3E'}
                         alt={item.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -491,14 +491,14 @@ export const AmenitiesView: React.FC = () => {
                       {item._count?.reservations || 0} reservas realizadas
                     </span>
                     <div className="flex items-center gap-2">
-                      <button aria-label="Editar amenidad"
+                      <button aria-label="Editar Amenidad"
                         onClick={() => openEditModal(item)}
                         className="max-sm:min-h-11 max-sm:min-w-11 p-2 text-slate-300 hover:text-white bg-purple-900/30 hover:bg-purple-800/50 rounded-xl transition-all"
                         title="Editar Amenidad"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
-                      <button aria-label="Eliminar amenidad"
+                      <button aria-label="Eliminar Amenidad"
                         onClick={() => handleDeleteAmenity(item.id)}
                         className="max-sm:min-h-11 max-sm:min-w-11 p-2 text-rose-400 hover:text-rose-200 bg-rose-950/40 hover:bg-rose-900/50 rounded-xl transition-all"
                         title="Eliminar Amenidad"
@@ -612,7 +612,7 @@ export const AmenitiesView: React.FC = () => {
                                 {res.amenity?.name || 'Amenidad'}
                               </span>
                               <span
-                                className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                                className={`px-2 py-0.5 rounded text-xs font-black uppercase ${
                                   isConfirmed
                                     ? 'bg-emerald-500 text-slate-950'
                                     : isPending

@@ -176,7 +176,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Admin Avatar Button to edit profile */}
-        <button aria-label="Editar perfil de administrador"
+        <button aria-label="Editar Perfil de Administrador"
           onClick={onOpenEditProfile}
           className="max-sm:min-h-11 max-sm:min-w-11 p-1 rounded-full border border-blue-500/30 hover:border-blue-400 transition-all"
           title="Editar Perfil de Administrador"

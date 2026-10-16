@@ -178,13 +178,13 @@ export const PqrsSupportView: React.FC = () => {
   const getPriorityBadge = (p?: string) => {
     switch (p) {
       case 'URGENTE':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">URGENTE</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-black bg-rose-500/20 text-rose-400 border border-rose-500/30">URGENTE</span>;
       case 'ALTA':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">ALTA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">ALTA</span>;
       case 'BAJA':
-        return <span className="px-2 py-0.5 rounded text-[9px] font-medium bg-slate-800 text-slate-400 border border-slate-700">BAJA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-medium bg-slate-800 text-slate-400 border border-slate-700">BAJA</span>;
       default:
-        return <span className="px-2 py-0.5 rounded text-[9px] font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIA</span>;
+        return <span className="px-2 py-0.5 rounded text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">MEDIA</span>;
     }
   };
 

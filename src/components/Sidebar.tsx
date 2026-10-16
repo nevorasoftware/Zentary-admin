@@ -175,7 +175,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Admin Profile Footer */}
         <div className="p-4 m-4 rounded-2xl bg-slate-900/80 border border-purple-900/50">
           <div className="flex items-center gap-3">
-            <button aria-label="Editar perfil"
+            <button aria-label="Editar Perfil"
               onClick={onOpenEditProfile}
               className="max-sm:min-h-11 max-sm:min-w-11 relative group focus:outline-none"
               title="Editar Perfil"
