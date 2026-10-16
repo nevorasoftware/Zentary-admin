@@ -117,11 +117,13 @@ export const Header: React.FC<HeaderProps> = ({
                     onChange={(e) => setTempName(e.target.value)}
                     className="bg-slate-950 text-white text-xs px-2 py-0.5 rounded border border-blue-500 focus:outline-none"
                     autoFocus
+                    aria-label="Nombre de la residencial"
                   />
                   <button
                     onClick={handleSaveName}
                     className="p-1 hover:text-emerald-400"
                     title="Guardar nombre"
+                    aria-label="Guardar nombre de la residencial"
                   >
                     <Check className="w-3.5 h-3.5" />
                   </button>
@@ -138,6 +140,7 @@ export const Header: React.FC<HeaderProps> = ({
                     }}
                     className="text-slate-400 hover:text-white transition-colors"
                     title="Cambiar nombre del condominio/residencial"
+                    aria-label="Editar nombre de la residencial"
                   >
                     <Edit3 className="w-3 h-3" />
                   </button>
