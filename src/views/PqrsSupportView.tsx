@@ -79,7 +79,6 @@ export const PqrsSupportView: React.FC = () => {
     setNotificationStatus(null);
 
     const messageContent = replyText.trim();
-    setReplyText('');
 
     try {
       const res = await adminApi.sendPqrsMessage(activeTicket.id, messageContent);
@@ -95,11 +94,14 @@ export const PqrsSupportView: React.FC = () => {
               : t
           )
         );
+        setReplyText('');
         setNotificationStatus('📲 Respuesta enviada y notificación push emitida al residente.');
+      } else {
+        setNotificationStatus('⚠️ Error al enviar respuesta. Tu mensaje se conservó, inténtalo de nuevo.');
       }
     } catch (err) {
       console.error('Error sending reply:', err);
-      setNotificationStatus('⚠️ Error al enviar respuesta.');
+      setNotificationStatus('⚠️ Error al enviar respuesta. Tu mensaje se conservó, inténtalo de nuevo.');
     } finally {
       setIsSending(false);
       setTimeout(() => setNotificationStatus(null), 5000);
@@ -185,6 +187,13 @@ export const PqrsSupportView: React.FC = () => {
     }
   };
 
+  const statusLabels: Record<string, string> = {
+    OPEN: 'ABIERTA',
+    IN_PROGRESS: 'EN PROCESO',
+    RESOLVED: 'RESUELTA',
+    CLOSED: 'CERRADA',
+  };
+
   const filteredTickets = tickets.filter((t) => {
     if (statusFilter === 'ALL') return true;
     return t.status === statusFilter;
@@ -200,7 +209,7 @@ export const PqrsSupportView: React.FC = () => {
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-purple-400" />
-              PQRS & Soporte (Fase 3)
+              PQRS & Soporte
             </h2>
             <p className="text-xs text-slate-400">Peticiones, quejas, reclamos y sugerencias</p>
           </div>
@@ -214,7 +223,7 @@ export const PqrsSupportView: React.FC = () => {
         </div>
 
         {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto pb-1">
+        <div className="flex items-center gap-1 flex-wrap pb-1">
           {['ALL', 'OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'].map((s) => (
             <button
               key={s}
@@ -225,7 +234,7 @@ export const PqrsSupportView: React.FC = () => {
                   : 'bg-slate-900 text-slate-400 hover:text-white'
               }`}
             >
-              {s === 'ALL' ? 'Todos' : s}
+              {s === 'ALL' ? 'Todos' : statusLabels[s]}
             </button>
           ))}
         </div>
@@ -240,7 +249,10 @@ export const PqrsSupportView: React.FC = () => {
           {loadError ? (
             <div className="text-center py-10 text-rose-300 text-sm font-semibold">⚠️ {loadError}</div>
           ) : filteredTickets.length === 0 ? (
-            <div className="text-center py-10 text-slate-500 text-sm">No hay tickets registrados</div>
+            <div className="text-center py-10 text-slate-500 text-sm">{statusFilter === 'ALL'
+                ? 'No hay tickets registrados'
+                : `No hay tickets con estado ${statusLabels[statusFilter]}`}
+            </div>
           ) : (
             filteredTickets.map((t) => {
               const isSelected = activeTicket && t.id === activeTicket.id;
@@ -306,8 +318,6 @@ export const PqrsSupportView: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {getStatusBadge(activeTicket.status)}
-
               {/* Status Change Selector */}
               <select
                 value={activeTicket.status}
@@ -355,7 +365,13 @@ export const PqrsSupportView: React.FC = () => {
             {activeTicket.messages && activeTicket.messages.length > 0 ? (
               activeTicket.messages.map((m, idx) => {
                 const senderName = m.sender?.fullName || (m.isStaff ? 'Administración Zentary' : activeTicket.resident?.fullName || 'Residente');
-                const formattedTime = new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const formattedTime = new Date(m.createdAt).toLocaleString([], {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
 
                 return (
                   <div key={m.id || idx} className={`flex flex-col ${m.isStaff ? 'items-end' : 'items-start'}`}>

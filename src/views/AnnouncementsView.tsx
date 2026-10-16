@@ -132,7 +132,7 @@ export const AnnouncementsView: React.FC = () => {
         <div className="border-b border-slate-800 pb-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Megaphone className="w-5 h-5 text-blue-500" />
-            Crear Comunicado Residencial (Fase 3)
+            Crear Comunicado Residencial
           </h2>
           <p className="text-xs text-slate-400 mt-1">
             Los comunicados se difunden vía notificaciones push a la aplicación móvil y se fijan en la cartelera digital.
