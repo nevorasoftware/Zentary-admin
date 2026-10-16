@@ -27,5 +27,8 @@
   },
   "overrides": {
     "compression": "^1.8.2"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }
