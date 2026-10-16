@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Building2, Edit3, Check, Menu } from 'lucide-react';
+import { Building2, Edit3, Check, Menu } from 'lucide-react';
 import { getAdminToken, API_BASE_URL, getTenantHeaders, getSelectedTenantId, TENANT_STORAGE_KEY } from '../services/adminApi';
 
 interface HeaderProps {
@@ -154,20 +154,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Quick Search & Actions */}
       <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-        <div className="relative flex-1 sm:w-64">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Buscar residentes, pases..."
-            className="w-full bg-slate-800/80 border border-slate-700/80 text-xs md:text-sm text-slate-200 placeholder-slate-400 rounded-xl pl-9 pr-3 py-2 focus:outline-none focus:border-blue-500 transition-all"
-          />
-        </div>
-
-        <button className="p-2 md:p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80 text-slate-300 hover:text-white transition-all relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-blue-500 rounded-full ring-2 ring-slate-900 animate-pulse" />
-        </button>
-
         {isSuperAdmin && (
           <select
             value={getSelectedTenantId()}
