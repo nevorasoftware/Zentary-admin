@@ -20,6 +20,7 @@ import { adminApi, isSafeUrl, ResidentUser, FinancialSummary } from '../services
 import ModalShell from '../components/ModalShell';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
+import PaymentGatewayCard from '../components/PaymentGatewayCard';
 
 interface PaymentRecord {
   id: string;
@@ -482,6 +483,8 @@ export const PaymentsView: React.FC = () => {
           />
         </div>
       </div>
+
+      <PaymentGatewayCard />
 
       {/* Payments Table */}
       <div className="glass-card rounded-3xl border border-slate-800 overflow-hidden">

@@ -119,6 +119,15 @@ export interface FinancialSummary {
   recentPayments?: any[];
 }
 
+export interface PaymentGatewayInfo {
+  source: 'tenant' | 'company';
+  clientId: string | null;
+  enabled: boolean;
+  hasSecret: boolean;
+  lastTestAt: string | null;
+  lastTestOk: boolean | null;
+}
+
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
 
 export const getAdminToken = (): string => {
@@ -406,6 +415,29 @@ class AdminApiService {
 
   async getHouses(): Promise<{ success: boolean; houses: any[] }> {
     return this.request('/houses');
+  }
+
+  // Pasarela de pagos por residencial (el secreto nunca se devuelve)
+  async getPaymentGateway(): Promise<{ success: boolean; gateway?: PaymentGatewayInfo; message?: string }> {
+    return this.request('/tenants/current/payment-gateway');
+  }
+
+  async savePaymentGateway(data: { clientId: string; clientSecret: string; enabled: boolean }): Promise<{ success: boolean; gateway?: PaymentGatewayInfo; message?: string }> {
+    return this.request('/tenants/current/payment-gateway', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deletePaymentGateway(): Promise<{ success: boolean; gateway?: PaymentGatewayInfo; message?: string }> {
+    return this.request('/tenants/current/payment-gateway', { method: 'DELETE' });
+  }
+
+  async testPaymentGateway(data?: { clientId: string; clientSecret: string }): Promise<{ success: boolean; ok?: boolean; message?: string }> {
+    return this.request('/tenants/current/payment-gateway/test', {
+      method: 'POST',
+      body: JSON.stringify(data || {}),
+    });
   }
 }
 
