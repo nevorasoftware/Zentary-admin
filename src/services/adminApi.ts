@@ -229,6 +229,20 @@ class AdminApiService {
     return this.request(`/admin/users?role=${role}`);
   }
 
+  async registerTenant(data: { fullName: string; email: string; phone?: string; houseId: string }) {
+    return this.request('/admin/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async releaseResident(userId: string, data: { newUserId?: string; newOwner?: { name: string; phone?: string; email?: string }; reason?: string }) {
+    return this.request(`/admin/users/${userId}/release`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async toggleUserAccess(userId: string, isActive: boolean) {
     return this.request(`/admin/users/${userId}/access`, {
       method: 'PATCH',

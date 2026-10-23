@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { ResidentUser, adminApi, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import CambiarResidenteModal from '../components/CambiarResidenteModal';
 import { HouseCombobox } from '../components/HouseCombobox';
 
 interface ExtendedUser extends ResidentUser {
@@ -65,6 +66,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   // Tenant Edit Modal States
   const [editingUser, setEditingUser] = useState<ExtendedUser | null>(null);
+  const [changingUser, setChangingUser] = useState<ExtendedUser | null>(null);
   const [editFullName, setEditFullName] = useState('');
   const [editUnitNumber, setEditUnitNumber] = useState('');
   const [editBlock, setEditBlock] = useState('');
@@ -794,6 +796,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                         <Edit3 className="w-4 h-4" />
                       </button>
 
+                      {/* Cambiar Residente Button */}
+                      {user.house?.id && user.isActive && (
+                        <button
+                          onClick={() => setChangingUser(user)}
+                          className="max-sm:min-h-11 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 text-xs font-bold transition-all"
+                        >
+                          Cambiar residente
+                        </button>
+                      )}
+
                       {/* Bloquear / Habilitar Acceso Button */}
                       <button
                         onClick={() => handleToggleAccess(user.id)}
@@ -1119,6 +1131,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
             </form>
           </div>
         </ModalShell>
+      )}
+
+      {changingUser && changingUser.house?.id && (
+        <CambiarResidenteModal
+          houseId={changingUser.house.id}
+          houseLabel={`${changingUser.house.unitNumber}${changingUser.house.block ? ` (${changingUser.house.block})` : ''}`}
+          residents={[{ id: changingUser.id, fullName: changingUser.fullName, email: changingUser.email }]}
+          onClose={() => setChangingUser(null)}
+          onDone={fetchUsersFromBackend}
+        />
       )}
 
       {/* Modal: Confirmación Éxito & Envío por WhatsApp / Gmail API */}
