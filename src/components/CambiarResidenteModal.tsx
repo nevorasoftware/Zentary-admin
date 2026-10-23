@@ -34,12 +34,18 @@ interface BajaPendiente {
 }
 const bajasPendientes = new Map<string, BajaPendiente>();
 
+// Se vacía al cerrar sesión para no conservar credenciales temporales en memoria
+export const limpiarBajasPendientes = () => bajasPendientes.clear();
+
 // Cambio de residente: 1) registra al nuevo en la vivienda, 2) da de baja al anterior.
 export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, residents, onClose, onDone }) => {
   const toast = useToast();
   const confirm = useConfirm();
-  const [previousId, setPreviousId] = useState(residents[0]?.id || '');
-  const pendiente = bajasPendientes.get(residents[0]?.id || '');
+  const pendienteId = residents.find((r) => bajasPendientes.has(r.id))?.id;
+  const [previousId, setPreviousId] = useState(pendienteId ?? residents[0]?.id ?? '');
+  const pendiente = bajasPendientes.get(pendienteId ?? residents[0]?.id ?? '');
+  // Residentes ya registrados como reemplazo en una baja pendiente: no pueden darse de baja
+  const nuevosPendientes = new Set(Array.from(bajasPendientes.values()).map((b) => b.newUserId));
   const [fullName, setFullName] = useState(pendiente?.fullName || '');
   const [email, setEmail] = useState(pendiente?.email || '');
   const [phone, setPhone] = useState(pendiente?.phone || '');
@@ -49,6 +55,7 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
   const [newUser, setNewUser] = useState<{ id: string; password: string } | null>(pendiente ? { id: pendiente.newUserId, password: pendiente.password } : null);
   const [releaseError, setReleaseError] = useState(pendiente?.error || '');
   const [finished, setFinished] = useState(false);
+  const [emailSent, setEmailSent] = useState(true);
 
   const previous = residents.find((r) => r.id === previousId);
 
@@ -68,7 +75,7 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!previous) return;
+    if (!previous || nuevosPendientes.has(previous.id)) return;
     if (!fullName.trim() || !email.trim()) {
       toast.error('El nombre y el correo del nuevo residente son obligatorios.');
       return;
@@ -100,6 +107,7 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
       }
       const info = { id: created.tenant.id as string, password: created.credentialsInfo?.genericPassword || '' };
       setNewUser(info);
+      setEmailSent(created.emailSent !== false);
       try {
         await release(info.id);
         setFinished(true);
@@ -163,7 +171,9 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
               </div>
             )}
             {finished && (
-              <p className="text-sm text-slate-300">Se dio de baja a {previous?.fullName}. El nuevo residente recibe sus credenciales por correo.</p>
+              <p className="text-sm text-slate-300">Se dio de baja a {previous?.fullName}. {emailSent
+                ? 'El nuevo residente recibe sus credenciales por correo.'
+                : 'No se pudo enviar el correo al nuevo residente: comparte la contraseña temporal con él.'}</p>
             )}
             <button
               type="button"
@@ -179,7 +189,7 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
               <label htmlFor="cambiar-residente-actual" className={LABEL}>Residente actual</label>
               {residents.length > 1 ? (
                 <select id="cambiar-residente-actual" value={previousId} onChange={(e) => setPreviousId(e.target.value)} className={INPUT}>
-                  {residents.map((r) => (
+                  {residents.filter((r) => !nuevosPendientes.has(r.id)).map((r) => (
                     <option key={r.id} value={r.id}>{r.fullName}</option>
                   ))}
                 </select>
@@ -215,7 +225,7 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || nuevosPendientes.has(previousId)}
                 className="max-sm:min-h-11 flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-sm font-bold"
               >
                 {saving ? 'Procesando...' : 'Cambiar residente'}
