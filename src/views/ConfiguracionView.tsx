@@ -3,6 +3,7 @@ import { Settings, Save, Trash2 } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
+import { ParkingZonesSection } from '../components/ParkingZonesSection';
 import { TenantFormFields, TenantFormValues, EMPTY_TENANT_FORM, tenantToForm } from '../components/TenantFormFields';
 
 const HOUSE_TYPE_OPTIONS = [
@@ -268,6 +269,7 @@ export const ConfiguracionView: React.FC = () => {
       </section>
 
       <PrefijosSection />
+      <ParkingZonesSection />
     </div>
   );
 };
