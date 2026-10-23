@@ -437,6 +437,43 @@ class AdminApiService {
   async getHouses(): Promise<{ success: boolean; houses: any[] }> {
     return this.request('/houses');
   }
+
+  async createHouse(data: { unitNumber?: string; prefixId?: string; number?: string; block?: string }): Promise<{ success: boolean; message?: string; house?: any }> {
+    return this.request('/houses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateHouse(id: string, data: { unitNumber?: string; prefixId?: string | null; number?: string; block?: string | null }): Promise<{ success: boolean; message?: string }> {
+    return this.request(`/houses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // House prefixes (prefijos de vivienda)
+  async getHousePrefixes(): Promise<{ success: boolean; prefixes: any[] }> {
+    return this.request('/house-prefixes');
+  }
+
+  async createHousePrefix(data: { code: string; label?: string; houseType?: string }): Promise<{ success: boolean; message?: string; prefix?: any }> {
+    return this.request('/house-prefixes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateHousePrefix(id: string, data: { code?: string; label?: string; houseType?: string; isActive?: boolean }): Promise<{ success: boolean; message?: string }> {
+    return this.request(`/house-prefixes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteHousePrefix(id: string): Promise<{ success: boolean; message?: string; deactivated?: boolean }> {
+    return this.request(`/house-prefixes/${id}`, { method: 'DELETE' });
+  }
 }
 
 export const adminApi = new AdminApiService();

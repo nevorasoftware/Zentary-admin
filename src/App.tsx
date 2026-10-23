@@ -10,6 +10,7 @@ import PqrsSupportView from './views/PqrsSupportView';
 import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
 import ConfiguracionView from './views/ConfiguracionView';
+import ViviendasView from './views/ViviendasView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
@@ -34,6 +35,7 @@ const VIEW_ROUTES: Record<AdminViewType, string> = {
   parcels: '/paquetes',
   pqrs: '/soporte',
   payments: '/pagos',
+  viviendas: '/viviendas',
   configuracion: '/configuracion',
 };
 
@@ -200,6 +202,11 @@ export default function App() {
           title: 'Gestión de Pagos',
           subtitle: `Emisión de cuotas y seguimiento de transacciones en ${communityName}`,
         };
+      case 'viviendas':
+        return {
+          title: 'Viviendas',
+          subtitle: `Viviendas de ${communityName}`,
+        };
       case 'configuracion':
         return {
           title: 'Configuración',
@@ -238,6 +245,8 @@ export default function App() {
         return <PqrsSupportView />;
       case 'payments':
         return <PaymentsView />;
+      case 'viviendas':
+        return <ViviendasView />;
       case 'configuracion':
         return <ConfiguracionView />;
       default:
