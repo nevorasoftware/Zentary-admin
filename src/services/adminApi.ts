@@ -119,6 +119,77 @@ export interface FinancialSummary {
   recentPayments?: any[];
 }
 
+export interface TenantInfo {
+  id: string;
+  name: string;
+  address?: string | null;
+  city?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  whatsapp?: string | null;
+  country?: string;
+  timezone?: string;
+}
+
+export interface HouseImportTotals {
+  filas: number;
+  creadas: number;
+  actualizadas: number;
+  sinCambios: number;
+  errores: number;
+  viviendasCreadas: number;
+  usuariosCreados: number;
+}
+
+export interface HouseImportRow {
+  fila: number;
+  codigo: string;
+  vivienda: 'creada' | 'actualizada' | 'sin_cambios' | 'error';
+  usuario: 'creado' | 'actualizado' | 'sin_cambios' | 'ninguno' | 'error';
+  mensaje: string;
+  usuarioId?: string;
+  correo?: string;
+  nombre?: string;
+}
+
+export interface ParkingZoneItem {
+  id: string;
+  name: string;
+  capacity: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface ParkingReservationItem {
+  id: string;
+  visitId: string;
+  zoneId: string;
+  zoneName: string | null;
+  status: 'RESERVADO' | 'OCUPADO' | string;
+  holdFrom: string;
+  holdUntil: string;
+  occupiedAt?: string | null;
+  plate?: string | null;
+}
+
+export interface ParkingZoneStatus {
+  id: string;
+  name: string;
+  capacity: number;
+  isActive: boolean;
+  occupied: number;
+  reserved: number;
+  upcoming: number;
+  free: number;
+}
+
+export interface ParkingStatus {
+  success: boolean;
+  holdMinutes: number;
+  zones: ParkingZoneStatus[];
+  reservations: ParkingReservationItem[];
+}
+
 export interface PaymentGatewayInfo {
   source: 'tenant' | 'company';
   clientId: string | null;
@@ -205,10 +276,42 @@ class AdminApiService {
     return this.request(`/admin/users?role=${role}`);
   }
 
+  async registerTenant(data: { fullName: string; email: string; phone?: string; houseId: string }) {
+    return this.request('/admin/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async releaseResident(userId: string, data: { newUserId?: string; newOwner?: { name: string; phone?: string; email?: string }; reason?: string }) {
+    return this.request(`/admin/users/${userId}/release`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async toggleUserAccess(userId: string, isActive: boolean) {
     return this.request(`/admin/users/${userId}/access`, {
       method: 'PATCH',
       body: JSON.stringify({ isActive }),
+    });
+  }
+
+  async getCurrentTenant(): Promise<{ success: boolean; code?: string; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants/current');
+  }
+
+  async updateCurrentTenant(data: Partial<Omit<TenantInfo, 'id' | 'name'>>): Promise<{ success: boolean; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants/current', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async createTenant(data: Partial<TenantInfo>): Promise<{ success: boolean; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 
@@ -381,7 +484,7 @@ class AdminApiService {
     });
   }
 
-  async confirmEntry(visitId: string, data?: { gateName?: string; vehiclePlate?: string; notes?: string }): Promise<{ success: boolean; message?: string; visit?: any }> {
+  async confirmEntry(visitId: string, data?: { gateName?: string; vehiclePlate?: string; notes?: string }): Promise<{ success: boolean; message?: string; visit?: any; parkingWarning?: string }> {
     return this.request(`/visits/${visitId}/confirm-entry`, {
       method: 'POST',
       body: JSON.stringify(data || {}),
@@ -406,7 +509,7 @@ class AdminApiService {
     notes?: string;
     gateName?: string;
     maxDurationHours?: number;
-  }): Promise<{ success: boolean; message?: string; visit?: any }> {
+  }): Promise<{ success: boolean; message?: string; visit?: any; parkingWarning?: string }> {
     return this.request('/visits/quick-entry', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -415,6 +518,119 @@ class AdminApiService {
 
   async getHouses(): Promise<{ success: boolean; houses: any[] }> {
     return this.request('/houses');
+  }
+
+  async createHouse(data: { unitNumber?: string; prefixId?: string; number?: string; block?: string }): Promise<{ success: boolean; message?: string; house?: any }> {
+    return this.request('/houses', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateHouse(id: string, data: { unitNumber?: string; prefixId?: string | null; number?: string; block?: string | null }): Promise<{ success: boolean; message?: string }> {
+    return this.request(`/houses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  // Importación / exportación CSV de viviendas y residentes
+  async exportHousesCsv(): Promise<Blob> {
+    const token = this.getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/houses/export`, {
+      headers: { ...getTenantHeaders(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    if (response.status === 401) handleUnauthorized();
+    if (!response.ok) {
+      let message = 'No se pudo exportar el archivo.';
+      try { message = (await response.json()).message || message; } catch { /* respuesta sin JSON */ }
+      throw new Error(message);
+    }
+    return response.blob();
+  }
+
+  async importHousesCsv(csv: string, dryRun: boolean, fileName?: string): Promise<{ success: boolean; message?: string; dryRun?: boolean; totals?: HouseImportTotals; rows?: HouseImportRow[] }> {
+    const token = this.getAuthToken();
+    const query = new URLSearchParams();
+    if (dryRun) query.set('dryRun', '1');
+    if (fileName) query.set('fileName', fileName);
+    const response = await fetch(`${API_BASE_URL}/houses/import?${query.toString()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/csv; charset=utf-8', ...getTenantHeaders(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: csv,
+    });
+    if (response.status === 401) handleUnauthorized();
+    // El 413 y los errores de proxy pueden no traer JSON válido
+    let data: any = null;
+    try { data = await response.json(); } catch { /* respuesta sin JSON */ }
+    if (!response.ok || !data) {
+      return { success: false, message: data?.message || (response.status === 413 ? 'El archivo supera el máximo de 2 MB.' : 'No se pudo procesar el archivo.') };
+    }
+    return data;
+  }
+
+  async resendCredentials(userId: string, unitNumber?: string): Promise<{ success: boolean; message?: string }> {
+    return this.request('/admin/tenants/resend-credentials', {
+      method: 'POST',
+      body: JSON.stringify({ userId, unitNumber }),
+    });
+  }
+
+  // House prefixes (prefijos de vivienda)
+  async getHousePrefixes(): Promise<{ success: boolean; prefixes: any[] }> {
+    return this.request('/house-prefixes');
+  }
+
+  async createHousePrefix(data: { code: string; label?: string; houseType?: string }): Promise<{ success: boolean; message?: string; prefix?: any }> {
+    return this.request('/house-prefixes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateHousePrefix(id: string, data: { code?: string; label?: string; houseType?: string; isActive?: boolean }): Promise<{ success: boolean; message?: string }> {
+    return this.request(`/house-prefixes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteHousePrefix(id: string): Promise<{ success: boolean; message?: string; deactivated?: boolean }> {
+    return this.request(`/house-prefixes/${id}`, { method: 'DELETE' });
+  }
+
+  // Parqueos de visita
+  async getParkingZones(): Promise<{ success: boolean; message?: string; zones: ParkingZoneItem[]; holdMinutes: number }> {
+    return this.request('/parking/zones');
+  }
+
+  async getParkingStatus(): Promise<ParkingStatus> {
+    return this.request('/parking/status');
+  }
+
+  async createParkingZone(data: { name: string; capacity: number }): Promise<{ success: boolean; message?: string; zone?: ParkingZoneItem }> {
+    return this.request('/parking/zones', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateParkingZone(id: string, data: Partial<Pick<ParkingZoneItem, 'name' | 'capacity' | 'isActive'>>): Promise<{ success: boolean; message?: string; zone?: ParkingZoneItem }> {
+    return this.request(`/parking/zones/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteParkingZone(id: string): Promise<{ success: boolean; message?: string; deactivated?: boolean; deleted?: boolean }> {
+    return this.request(`/parking/zones/${id}`, { method: 'DELETE' });
+  }
+
+  async updateParkingConfig(holdMinutes: number): Promise<{ success: boolean; message?: string; holdMinutes?: number }> {
+    return this.request('/parking/config', {
+      method: 'PUT',
+      body: JSON.stringify({ holdMinutes }),
+    });
   }
 
   // Pasarela de pagos por residencial (el secreto nunca se devuelve)

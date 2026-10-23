@@ -9,8 +9,11 @@ import ParcelsView from './views/ParcelsView';
 import PqrsSupportView from './views/PqrsSupportView';
 import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
+import ConfiguracionView from './views/ConfiguracionView';
+import ViviendasView from './views/ViviendasView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
+import { limpiarBajasPendientes } from './components/CambiarResidenteModal';
 import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
 
 // Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
@@ -33,6 +36,8 @@ const VIEW_ROUTES: Record<AdminViewType, string> = {
   parcels: '/paquetes',
   pqrs: '/soporte',
   payments: '/pagos',
+  viviendas: '/viviendas',
+  configuracion: '/configuracion',
 };
 
 // Convierte el hash actual en una vista; si la ruta no existe vuelve al panel principal
@@ -136,6 +141,7 @@ export default function App() {
     localStorage.removeItem('zentary_admin_token');
     localStorage.removeItem('zentary_admin_user');
     try { localStorage.removeItem('zentary_selected_tenant'); } catch { /* noop */ }
+    limpiarBajasPendientes();
     setAdminToken(null);
     setAdminUser(null);
   };
@@ -198,6 +204,16 @@ export default function App() {
           title: 'Gestión de Pagos',
           subtitle: `Emisión de cuotas y seguimiento de transacciones en ${communityName}`,
         };
+      case 'viviendas':
+        return {
+          title: 'Viviendas',
+          subtitle: `Viviendas de ${communityName}`,
+        };
+      case 'configuracion':
+        return {
+          title: 'Configuración',
+          subtitle: `Datos generales, país y zona horaria de ${communityName}`,
+        };
       default:
         return {
           title: 'Panel Administrativo',
@@ -231,6 +247,10 @@ export default function App() {
         return <PqrsSupportView />;
       case 'payments':
         return <PaymentsView />;
+      case 'viviendas':
+        return <ViviendasView />;
+      case 'configuracion':
+        return <ConfiguracionView />;
       default:
         return <DashboardView onNavigate={(view) => navigateTo(view)} />;
     }

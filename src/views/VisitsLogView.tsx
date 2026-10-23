@@ -20,8 +20,9 @@ import {
   Radio,
   Eye,
 } from 'lucide-react';
-import { adminApi } from '../services/adminApi';
+import { adminApi, ParkingStatus, ParkingReservationItem } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { HouseCombobox } from '../components/HouseCombobox';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 
@@ -67,6 +68,8 @@ export const VisitsLogView: React.FC = () => {
   const [activeVisits, setActiveVisits] = useState<ActiveVisitItem[]>([]);
   const [expectedVisits, setExpectedVisits] = useState<ExpectedVisitItem[]>([]);
   const [historyVisits, setHistoryVisits] = useState<any[]>([]);
+  // Parqueos de visita: null si el backend aún no los soporta o no hay zonas
+  const [parkingStatus, setParkingStatus] = useState<ParkingStatus | null>(null);
 
   // Loading and Filtering
   const [loading, setLoading] = useState(false);
@@ -96,9 +99,6 @@ export const VisitsLogView: React.FC = () => {
   });
   const [availableHouses, setAvailableHouses] = useState<any[]>([]);
   const [housesError, setHousesError] = useState('');
-  const [houseSearch, setHouseSearch] = useState('');
-  const [houseListOpen, setHouseListOpen] = useState(false);
-  const [houseActiveIndex, setHouseActiveIndex] = useState(0);
   const [quickSubmitting, setQuickSubmitting] = useState(false);
 
   // Success Feedback Toast
@@ -113,6 +113,7 @@ export const VisitsLogView: React.FC = () => {
 
   // Fetch Garita real-time data
   const fetchGaritaData = async () => {
+    fetchParkingStatus();
     try {
       setLoading(true);
       setLoadError('');
@@ -130,6 +131,32 @@ export const VisitsLogView: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch parking status (degrada en silencio si el backend no tiene el endpoint)
+  const fetchParkingStatus = async () => {
+    try {
+      const res = await adminApi.getParkingStatus();
+      setParkingStatus(res.success && res.zones ? res : null);
+    } catch (err) {
+      setParkingStatus(null);
+    }
+  };
+
+  const parkingByVisit = (visitId: string): ParkingReservationItem | undefined =>
+    parkingStatus?.reservations?.find((r) => r.visitId === visitId);
+
+  const renderParkingBadge = (visitId: string) => {
+    const r = parkingByVisit(visitId);
+    if (!r) return null;
+    return (
+      <p className="text-blue-400">
+        Parqueo: <strong>{r.zoneName || 'Zona'}</strong>
+        {r.status === 'OCUPADO'
+          ? ' (ocupado)'
+          : ` (reservado hasta ${new Date(r.holdUntil).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })})`}
+      </p>
+    );
   };
 
   // Fetch history data
@@ -234,6 +261,7 @@ export const VisitsLogView: React.FC = () => {
 
       if (res.success) {
         showToast(`✅ Ingreso registrado para ${scannedResult?.visitorName}`);
+        if (res.parkingWarning) toast.info(res.parkingWarning);
         setScannedResult(null);
         fetchGaritaData();
       } else {
@@ -264,8 +292,6 @@ export const VisitsLogView: React.FC = () => {
     }
   };
 
-  const blockLabel = (b: string) => b.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-  const houseLabel = (h: any) => `${h.block ? `${blockLabel(h.block)} - ` : ''}Casa ${h.unitNumber}`;
   const historyStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       INGRESADA: 'Dentro',
@@ -276,18 +302,6 @@ export const VisitsLogView: React.FC = () => {
     if (labels[status]) return labels[status];
     const text = (status || '').replace(/_/g, ' ').toLowerCase();
     return text.charAt(0).toUpperCase() + text.slice(1);
-  };
-  const selectedHouse = availableHouses.find((h) => h.id === quickForm.houseId);
-  const filteredHouses = availableHouses.filter((h) => {
-    const q = houseSearch.trim().toLowerCase();
-    if (!q) return true;
-    const residents = (h.residents || []).map((r: any) => r.fullName || '').join(' ');
-    return `${houseLabel(h)} ${residents}`.toLowerCase().includes(q);
-  });
-  const selectHouse = (h: any) => {
-    setQuickForm({ ...quickForm, houseId: h.id });
-    setHouseSearch('');
-    setHouseListOpen(false);
   };
 
   // Submit Quick Entry (Direct Gate Check-in)
@@ -311,6 +325,7 @@ export const VisitsLogView: React.FC = () => {
 
       if (res.success) {
         showToast(`✅ Ingreso directo registrado para ${quickForm.visitorName}`);
+        if (res.parkingWarning) toast.info(res.parkingWarning);
         setIsQuickEntryOpen(false);
         setQuickForm({
           visitorName: '',
@@ -605,6 +620,32 @@ export const VisitsLogView: React.FC = () => {
       {/* TAB 1: GARITA OPERATIVA & ESTADO DE PERMANENCIA */}
       {activeTab === 'monitor' && (
         <div className="space-y-6">
+          {/* Parqueos de visita: estado por zona */}
+          {parkingStatus && parkingStatus.zones.some((z) => z.isActive) && (
+            <section aria-labelledby="visits-log-parqueos-titulo" className="glass-card p-6 rounded-3xl border border-slate-800 space-y-4">
+              <h3 id="visits-log-parqueos-titulo" className="text-base font-bold text-white flex items-center gap-2">
+                <Car className="w-5 h-5 text-blue-400" />
+                Parqueos
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {parkingStatus.zones.filter((z) => z.isActive).map((zone) => (
+                  <div key={zone.id} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white text-sm">{zone.name}</span>
+                      <span className={zone.free === 0 ? 'font-extrabold text-rose-400' : 'font-extrabold text-emerald-400'}>
+                        {zone.free} {zone.free === 1 ? 'libre' : 'libres'} de {zone.capacity}
+                      </span>
+                    </div>
+                    <p className="text-slate-400">
+                      Ocupados: <strong className="text-slate-200">{zone.occupied}</strong> · Reservados: <strong className="text-slate-200">{zone.reserved}</strong>
+                      {zone.upcoming > 0 && <> · Próximos: <strong className="text-slate-200">{zone.upcoming}</strong></>}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Active Visitors Inside List */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -708,6 +749,7 @@ export const VisitsLogView: React.FC = () => {
                           <span>Residente:</span>
                           <span className="font-semibold text-white">{item.residentName}</span>
                         </div>
+                        {renderParkingBadge(item.id)}
                       </div>
 
                       {/* Progress Bar of Time Used */}
@@ -766,6 +808,7 @@ export const VisitsLogView: React.FC = () => {
                     {exp.vehiclePlate && (
                       <p className="text-emerald-400 font-mono">Placa: {exp.vehiclePlate}</p>
                     )}
+                    {renderParkingBadge(exp.id)}
                   </div>
                 ))}
               </div>
@@ -910,87 +953,12 @@ export const VisitsLogView: React.FC = () => {
 
                 <div className="space-y-1">
                   <label htmlFor="visits-log-campo-2" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Vivienda Destino *:</label>
-                  <div className="relative">
-                    <input id="visits-log-campo-2"
-                      type="text"
-                      role="combobox"
-                      aria-expanded={houseListOpen}
-                      aria-autocomplete="list"
-                      aria-controls="quick-entry-house-listbox"
-                      aria-activedescendant={
-                        houseListOpen && filteredHouses[houseActiveIndex]
-                          ? `quick-entry-house-${filteredHouses[houseActiveIndex].id}`
-                          : undefined
-                      }
-                      value={houseListOpen ? houseSearch : selectedHouse ? houseLabel(selectedHouse) : ''}
-                      placeholder="Buscar por número, bloque o residente..."
-                      onFocus={() => {
-                        setHouseSearch('');
-                        setHouseActiveIndex(0);
-                        setHouseListOpen(true);
-                      }}
-                      onBlur={() => setHouseListOpen(false)}
-                      onChange={(e) => {
-                        setHouseSearch(e.target.value);
-                        setHouseActiveIndex(0);
-                        setHouseListOpen(true);
-                        if (quickForm.houseId) setQuickForm({ ...quickForm, houseId: '' });
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'ArrowDown') {
-                          e.preventDefault();
-                          setHouseListOpen(true);
-                          setHouseActiveIndex((i) => Math.min(i + 1, filteredHouses.length - 1));
-                        } else if (e.key === 'ArrowUp') {
-                          e.preventDefault();
-                          setHouseActiveIndex((i) => Math.max(i - 1, 0));
-                        } else if (e.key === 'Enter' && houseListOpen) {
-                          e.preventDefault();
-                          if (filteredHouses[houseActiveIndex]) selectHouse(filteredHouses[houseActiveIndex]);
-                        } else if (e.key === 'Escape' && houseListOpen) {
-                          e.stopPropagation();
-                          setHouseListOpen(false);
-                        }
-                      }}
-                      className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-                    />
-                    {houseListOpen && (
-                      <ul
-                        id="quick-entry-house-listbox"
-                        role="listbox"
-                        className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-lg"
-                      >
-                        {filteredHouses.length === 0 ? (
-                          <li className="px-3 py-2 text-slate-400">No se encontraron viviendas.</li>
-                        ) : (
-                          filteredHouses.map((h, i) => (
-                            <li
-                              key={h.id}
-                              id={`quick-entry-house-${h.id}`}
-                              ref={(el) => {
-                                if (el && i === houseActiveIndex) el.scrollIntoView({ block: 'nearest' });
-                              }}
-                              role="option"
-                              aria-selected={h.id === quickForm.houseId}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                selectHouse(h);
-                              }}
-                              onMouseEnter={() => setHouseActiveIndex(i)}
-                              className={`px-3 py-2 cursor-pointer text-white ${
-                                i === houseActiveIndex ? 'bg-blue-600/30' : ''
-                              }`}
-                            >
-                              {houseLabel(h)}
-                              {h.residents?.length > 0 && (
-                                <span className="text-slate-400"> · {h.residents[0].fullName}</span>
-                              )}
-                            </li>
-                          ))
-                        )}
-                      </ul>
-                    )}
-                  </div>
+                  <HouseCombobox
+                    id="visits-log-campo-2"
+                    houses={availableHouses}
+                    value={quickForm.houseId}
+                    onChange={(houseId) => setQuickForm({ ...quickForm, houseId })}
+                  />
                   {housesError ? (
                     <p className="text-red-400 text-xs">{housesError}</p>
                   ) : availableHouses.length === 0 ? (

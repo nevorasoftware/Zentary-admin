@@ -8,6 +8,8 @@ import {
   MessageSquare,
   CreditCard,
   Building2,
+  Home,
+  Settings,
   LogOut,
   X,
 } from 'lucide-react';
@@ -20,7 +22,9 @@ export type AdminViewType =
   | 'parcels'
   | 'pqrs'
   | 'payments'
-  | 'amenities';
+  | 'amenities'
+  | 'viviendas'
+  | 'configuracion';
 
 interface MenuItem {
   id: AdminViewType;
@@ -67,6 +71,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'parcels', label: 'Recepción de Paquetes', icon: Package, badgeNum: pendingParcelsCount },
     { id: 'pqrs', label: 'Soporte y PQRS', icon: MessageSquare, badgeNum: openPqrsCount },
     { id: 'payments', label: 'Gestión de Pagos', icon: CreditCard },
+    { id: 'viviendas', label: 'Viviendas', icon: Home },
+    { id: 'configuracion', label: 'Configuración', icon: Settings },
   ];
 
   // Escape cierra el menú lateral en móvil
