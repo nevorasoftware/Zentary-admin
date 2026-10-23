@@ -9,6 +9,7 @@ import ParcelsView from './views/ParcelsView';
 import PqrsSupportView from './views/PqrsSupportView';
 import PaymentsView from './views/PaymentsView';
 import AmenitiesView from './views/AmenitiesView';
+import ConfiguracionView from './views/ConfiguracionView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
@@ -33,6 +34,7 @@ const VIEW_ROUTES: Record<AdminViewType, string> = {
   parcels: '/paquetes',
   pqrs: '/soporte',
   payments: '/pagos',
+  configuracion: '/configuracion',
 };
 
 // Convierte el hash actual en una vista; si la ruta no existe vuelve al panel principal
@@ -198,6 +200,11 @@ export default function App() {
           title: 'Gestión de Pagos',
           subtitle: `Emisión de cuotas y seguimiento de transacciones en ${communityName}`,
         };
+      case 'configuracion':
+        return {
+          title: 'Configuración',
+          subtitle: `Datos generales, país y zona horaria de ${communityName}`,
+        };
       default:
         return {
           title: 'Panel Administrativo',
@@ -231,6 +238,8 @@ export default function App() {
         return <PqrsSupportView />;
       case 'payments':
         return <PaymentsView />;
+      case 'configuracion':
+        return <ConfiguracionView />;
       default:
         return <DashboardView onNavigate={(view) => navigateTo(view)} />;
     }

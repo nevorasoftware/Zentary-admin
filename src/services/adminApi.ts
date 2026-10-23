@@ -119,6 +119,18 @@ export interface FinancialSummary {
   recentPayments?: any[];
 }
 
+export interface TenantInfo {
+  id: string;
+  name: string;
+  address?: string | null;
+  city?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  whatsapp?: string | null;
+  country?: string;
+  timezone?: string;
+}
+
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
 
 export const getAdminToken = (): string => {
@@ -200,6 +212,24 @@ class AdminApiService {
     return this.request(`/admin/users/${userId}/access`, {
       method: 'PATCH',
       body: JSON.stringify({ isActive }),
+    });
+  }
+
+  async getCurrentTenant(): Promise<{ success: boolean; code?: string; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants/current');
+  }
+
+  async updateCurrentTenant(data: Partial<Omit<TenantInfo, 'id' | 'name'>>): Promise<{ success: boolean; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants/current', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async createTenant(data: Partial<TenantInfo>): Promise<{ success: boolean; message?: string; tenant: TenantInfo }> {
+    return this.request('/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 
