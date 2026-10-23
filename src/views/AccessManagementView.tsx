@@ -55,6 +55,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [unitNumber, setUnitNumber] = useState('');
   const [block, setBlock] = useState('');
   const [houseId, setHouseId] = useState('');
+  const [houseError, setHouseError] = useState('');
+  const [editHouseError, setEditHouseError] = useState('');
   const [houses, setHouses] = useState<any[]>([]);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -248,6 +250,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   const handleRegisterTenant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!unitNumber) {
+      setHouseError('Selecciona o crea una vivienda');
+      return;
+    }
     if (!fullName || !unitNumber || !email) return;
 
     if (!isValidEmail(email)) {
@@ -333,6 +339,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setUnitNumber('');
     setBlock('');
     setHouseId('');
+    setHouseError('');
     setEmail('');
     setPhone('');
     setShowAddModal(false);
@@ -344,12 +351,17 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditUnitNumber(user.property?.unitNumber || '');
     setEditBlock(user.property?.block || '');
     setEditHouseId(user.house?.id || '');
+    setEditHouseError('');
     setEditEmail(user.email);
     setEditPhone(user.phone || '');
   };
 
   const handleSaveEditedTenant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingUser && !editUnitNumber) {
+      setEditHouseError('Selecciona o crea una vivienda');
+      return;
+    }
     if (!editingUser || !editFullName || !editUnitNumber || !editEmail) return;
 
     if (!isValidEmail(editEmail)) {
@@ -936,6 +948,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <HouseCombobox
                   id="access-management-campo-5"
+                  required
+                  invalid={!!houseError}
                   houses={houses}
                   value={houseId}
                   allowCreate
@@ -945,8 +959,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                     setHouseId(id);
                     setUnitNumber(h ? h.unitNumber : '');
                     setBlock(h?.block || '');
+                    setHouseError('');
                   }}
                 />
+                {houseError && <p className="text-red-400 text-xs mt-1" role="alert">{houseError}</p>}
               </div>
 
               <div>
@@ -1040,6 +1056,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 </label>
                 <HouseCombobox
                   id="access-management-campo-10"
+                  required
+                  invalid={!!editHouseError}
                   houses={houses}
                   value={editHouseId}
                   allowCreate
@@ -1049,8 +1067,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                     setEditHouseId(id);
                     setEditUnitNumber(h ? h.unitNumber : '');
                     setEditBlock(h?.block || '');
+                    setEditHouseError('');
                   }}
                 />
+                {editHouseError && <p className="text-red-400 text-xs mt-1" role="alert">{editHouseError}</p>}
               </div>
 
               <div>

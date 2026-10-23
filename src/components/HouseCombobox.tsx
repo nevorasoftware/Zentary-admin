@@ -3,13 +3,15 @@ import { useToast } from './Toast';
 import { adminApi } from '../services/adminApi';
 
 const blockLabel = (b: string) => b.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-export const houseLabel = (h: any) => `${h.block ? `${blockLabel(h.block)} - ` : ''}Casa ${h.unitNumber}`;
+export const houseLabel = (h: any) => `${h.block ? `${blockLabel(h.block)} - ` : ''}${h.prefixId ? '' : 'Casa '}${h.unitNumber}`;
 
 interface HouseComboboxProps {
   houses: any[];
   value: string;
   onChange: (houseId: string, house?: any) => void;
   id?: string;
+  required?: boolean;
+  invalid?: boolean;
   placeholder?: string;
   // Permite crear una vivienda (prefijo + número) desde el selector
   allowCreate?: boolean;
@@ -22,6 +24,8 @@ export const HouseCombobox: React.FC<HouseComboboxProps> = ({
   value,
   onChange,
   id,
+  required,
+  invalid,
   placeholder = 'Buscar por número, bloque o residente...',
   allowCreate,
   onCreated,
@@ -34,6 +38,7 @@ export const HouseCombobox: React.FC<HouseComboboxProps> = ({
   const [prefixes, setPrefixes] = useState<any[]>([]);
   const [newPrefixId, setNewPrefixId] = useState('');
   const [newNumber, setNewNumber] = useState('');
+  const [newBlock, setNewBlock] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -71,13 +76,17 @@ export const HouseCombobox: React.FC<HouseComboboxProps> = ({
     setSaving(true);
     try {
       const res = await adminApi.createHouse(
-        prefixes.length > 0 ? { prefixId: newPrefixId, number: newNumber.trim() } : { unitNumber: newNumber.trim() },
+        {
+          ...(prefixes.length > 0 ? { prefixId: newPrefixId, number: newNumber.trim() } : { unitNumber: newNumber.trim() }),
+          ...(newBlock.trim() ? { block: newBlock.trim() } : {}),
+        },
       );
       if (res.success && res.house) {
         onCreated?.(res.house);
         onChange(res.house.id, res.house);
         setCreating(false);
         setNewNumber('');
+        setNewBlock('');
         toast.success('Vivienda creada.');
       } else {
         toast.error(res.message || 'No se pudo crear la vivienda.');
@@ -94,6 +103,8 @@ export const HouseCombobox: React.FC<HouseComboboxProps> = ({
       <input id={id}
         type="text"
         role="combobox"
+        aria-required={required || undefined}
+        aria-invalid={invalid || undefined}
         aria-expanded={houseListOpen}
         aria-autocomplete="list"
         aria-controls="quick-entry-house-listbox"
@@ -200,8 +211,28 @@ export const HouseCombobox: React.FC<HouseComboboxProps> = ({
                 aria-label="Número de la vivienda"
                 value={newNumber}
                 onChange={(e) => setNewNumber(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCreate();
+                  }
+                }}
                 placeholder="Número"
                 className="w-28 bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
+              />
+              <input
+                type="text"
+                aria-label="Bloque de la vivienda (opcional)"
+                value={newBlock}
+                onChange={(e) => setNewBlock(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCreate();
+                  }
+                }}
+                placeholder="Bloque (opcional)"
+                className="w-36 bg-slate-900 border border-slate-700 text-white rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-blue-500"
               />
               <button
                 type="button"
