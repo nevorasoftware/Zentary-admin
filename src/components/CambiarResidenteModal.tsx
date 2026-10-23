@@ -21,19 +21,33 @@ interface Props {
   onDone: () => void;
 }
 
+// Bajas pendientes (el nuevo ya se registró pero la baja falló), por residente anterior.
+// Permite reintentar solo la baja si el modal se cierra y se vuelve a abrir.
+interface BajaPendiente {
+  newUserId: string;
+  password: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  reason: string;
+  error: string;
+}
+const bajasPendientes = new Map<string, BajaPendiente>();
+
 // Cambio de residente: 1) registra al nuevo en la vivienda, 2) da de baja al anterior.
 export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, residents, onClose, onDone }) => {
   const toast = useToast();
   const confirm = useConfirm();
   const [previousId, setPreviousId] = useState(residents[0]?.id || '');
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [reason, setReason] = useState('');
+  const pendiente = bajasPendientes.get(residents[0]?.id || '');
+  const [fullName, setFullName] = useState(pendiente?.fullName || '');
+  const [email, setEmail] = useState(pendiente?.email || '');
+  const [phone, setPhone] = useState(pendiente?.phone || '');
+  const [reason, setReason] = useState(pendiente?.reason || '');
   const [saving, setSaving] = useState(false);
   // Si el paso 1 ya se hizo, se guarda el nuevo usuario para reintentar solo la baja
-  const [newUser, setNewUser] = useState<{ id: string; password: string } | null>(null);
-  const [releaseError, setReleaseError] = useState('');
+  const [newUser, setNewUser] = useState<{ id: string; password: string } | null>(pendiente ? { id: pendiente.newUserId, password: pendiente.password } : null);
+  const [releaseError, setReleaseError] = useState(pendiente?.error || '');
   const [finished, setFinished] = useState(false);
 
   const previous = residents.find((r) => r.id === previousId);
@@ -45,6 +59,11 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
       reason: reason.trim() || undefined,
     });
     if (!res.success) throw new Error(res.message || 'No se pudo dar de baja al residente anterior.');
+    bajasPendientes.delete(previousId);
+  };
+
+  const guardarPendiente = (newUserId: string, password: string, error: string) => {
+    bajasPendientes.set(previousId, { newUserId, password, fullName, email, phone, reason, error });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,7 +106,9 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
         toast.success('Residente cambiado.');
         onDone();
       } catch (err: any) {
-        setReleaseError(err.message || 'No se pudo dar de baja al residente anterior.');
+        const msg = err.message || 'No se pudo dar de baja al residente anterior.';
+        guardarPendiente(info.id, info.password, msg);
+        setReleaseError(msg);
       }
     } catch (err: any) {
       toast.error(err.message || 'No se pudo registrar al nuevo residente.');
@@ -106,7 +127,9 @@ export const CambiarResidenteModal: React.FC<Props> = ({ houseId, houseLabel, re
       toast.success('Residente cambiado.');
       onDone();
     } catch (err: any) {
-      setReleaseError(err.message || 'No se pudo dar de baja al residente anterior.');
+      const msg = err.message || 'No se pudo dar de baja al residente anterior.';
+      guardarPendiente(newUser.id, newUser.password, msg);
+      setReleaseError(msg);
     } finally {
       setSaving(false);
     }

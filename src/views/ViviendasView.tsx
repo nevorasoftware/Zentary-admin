@@ -42,7 +42,8 @@ export const ViviendasView: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      // Con datos ya cargados se refresca en silencio, para no desmontar los modales abiertos
+      if (houses.length === 0) setLoading(true);
       setLoadError('');
       const [housesRes, prefixesRes] = await Promise.all([adminApi.getHouses(), adminApi.getHousePrefixes()]);
       if (housesRes.success && housesRes.houses) {
