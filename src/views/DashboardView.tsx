@@ -6,6 +6,9 @@ interface DashboardViewProps {
   onNavigate: (view: any) => void;
 }
 
+// Recepción de Paquetes oculta hasta definir el flujo (issue #7); poner en true para reactivarla
+const PAQUETES_HABILITADO = false;
+
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const [statsData, setStatsData] = React.useState({
     totalUsers: 0,
@@ -67,7 +70,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     { title: 'Paquetes en Garita', value: `${statsData.pendingParcels}`, change: 'Pendientes de retiro', hasError: errors.stats, icon: Package, color: 'from-amber-600 to-orange-600' },
     { title: 'PQRS Abiertas', value: `${statsData.openPqrs}`, change: '', hasError: errors.stats, icon: MessageSquare, color: 'from-purple-600 to-pink-600' },
     { title: 'Cobros Recaudados', value: statsData.totalPayments, change: `${Math.round(statsData.collectionRate)}% recolectado`, hasError: errors.summary, icon: DollarSign, color: 'from-blue-500 to-cyan-500' },
-  ];
+  ].filter((item) => item.title !== 'Paquetes en Garita' || PAQUETES_HABILITADO);
 
   return (
     <div className="space-y-8">
@@ -102,7 +105,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-5">
+      <div className={`grid grid-cols-1 md:grid-cols-3 ${PAQUETES_HABILITADO ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-5`}>
         {stats.map((item, idx) => {
           const Icon = item.icon;
           return (
@@ -239,18 +242,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </div>
             </button>
 
-            <button
-              onClick={() => onNavigate('parcels')}
-              className="max-sm:min-h-11 w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
-            >
-              <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">
-                <Package className="w-5 h-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">Registrar Paquete en Garita</p>
-                <p className="text-xs text-slate-400">DHL, FedEx, UPS, Cargo Express</p>
-              </div>
-            </button>
+            {PAQUETES_HABILITADO && (
+              <button
+                onClick={() => onNavigate('parcels')}
+                className="max-sm:min-h-11 w-full text-left p-4 rounded-2xl bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 transition-all flex items-center gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold">
+                  <Package className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Registrar Paquete en Garita</p>
+                  <p className="text-xs text-slate-400">DHL, FedEx, UPS, Cargo Express</p>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>

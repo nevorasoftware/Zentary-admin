@@ -51,6 +51,9 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
+// Recepción de Paquetes oculta hasta definir el flujo (issue #7); poner en true para reactivarla
+const PAQUETES_HABILITADO = false;
+
 export const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   onSelectView,
@@ -62,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenEditProfile,
   onLogout,
 }) => {
-  const menuItems: MenuItem[] = [
+  const menuItems = ([
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users },
     { id: 'amenities', label: 'Amenidades', icon: Building2 },
@@ -73,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'payments', label: 'Gestión de Pagos', icon: CreditCard },
     { id: 'viviendas', label: 'Viviendas', icon: Home },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
-  ];
+  ] as MenuItem[]).filter((item) => item.id !== 'parcels' || PAQUETES_HABILITADO);
 
   // Escape cierra el menú lateral en móvil
   useEffect(() => {
