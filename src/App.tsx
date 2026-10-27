@@ -14,7 +14,7 @@ import ViviendasView from './views/ViviendasView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 import { limpiarBajasPendientes } from './components/CambiarResidenteModal';
-import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
+import { adminApi, PANEL_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
 
 // Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
 const isTokenExpired = (token: string): boolean => {
@@ -84,14 +84,21 @@ export default function App() {
     setCurrentView(view);
   };
 
+  // El guardia solo usa la garita: el resto de endpoints del panel le responden 403
+  const isGuard = adminUser?.role === 'GUARD';
+
   useEffect(() => {
-    if (adminToken) {
+    if (isGuard && currentView !== 'visits') navigateTo('visits');
+  }, [isGuard, currentView]);
+
+  useEffect(() => {
+    if (adminToken && !isGuard) {
       fetchCommunityConfig();
     }
   }, [adminToken]);
 
   useEffect(() => {
-    if (!adminToken) return;
+    if (!adminToken || isGuard) return;
     adminApi.getDashboardStats().then((res) => {
       if (res.success) {
         setOpenPqrsCount(res.stats.openPqrs);
@@ -107,7 +114,7 @@ export default function App() {
   }, [adminToken]);
 
   useEffect(() => {
-    if (adminUser && !ADMIN_ROLES.includes(adminUser.role)) {
+    if (adminUser && !PANEL_ROLES.includes(adminUser.role)) {
       handleLogout();
     }
   }, [adminUser]);

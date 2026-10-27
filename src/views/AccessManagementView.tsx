@@ -17,6 +17,7 @@ import {
   Edit3,
   AlertCircle,
   CheckCircle2,
+  ShieldCheck,
 } from 'lucide-react';
 import { ResidentUser, adminApi, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
@@ -62,6 +63,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showGuardModal, setShowGuardModal] = useState(false);
+  const [isSavingGuard, setIsSavingGuard] = useState(false);
   const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   // Tenant Edit Modal States
@@ -345,6 +348,46 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEmail('');
     setPhone('');
     setShowAddModal(false);
+  };
+
+  const handleRegisterGuard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fullName.trim() || !email.trim()) return;
+    if (!isValidEmail(email)) {
+      showToast('⚠️ Por favor ingresa un correo electrónico válido (ej. correo@ejemplo.com).', 'error');
+      return;
+    }
+    const finalPhone = phone.trim() !== '' ? formatPhoneElSalvador(phone) : '';
+    setIsSavingGuard(true);
+    try {
+      const data = await adminApi.registerGuard({ fullName: fullName.trim(), email: email.trim(), phone: finalPhone });
+      if (!data.success) {
+        showToast(`⚠️ ${data.message || 'Error al registrar el guardia.'}`, 'error');
+        return;
+      }
+      showToast(`Guardia ${fullName} registrado exitosamente.`, 'success');
+      fetchUsersFromBackend();
+      setWhatsAppStatus({ state: 'IDLE' });
+      setEmailStatus({ state: 'IDLE' });
+      setCreatedTenantInfo({
+        id: data.tenant?.id,
+        fullName: fullName.trim(),
+        email: email.trim(),
+        phone: finalPhone,
+        unitNumber: 'Garita',
+        genericPassword: data.credentialsInfo?.genericPassword || '',
+        whatsappLink: data.credentialsInfo?.whatsappLink,
+        mailtoLink: data.credentialsInfo?.mailtoLink,
+      });
+      setFullName('');
+      setEmail('');
+      setPhone('');
+      setShowGuardModal(false);
+    } catch (err: any) {
+      showToast(`⚠️ ${err?.message || 'No se pudo conectar con el servidor. Intenta nuevamente.'}`, 'error');
+    } finally {
+      setIsSavingGuard(false);
+    }
   };
 
   const handleOpenEditModal = (user: ExtendedUser) => {
@@ -662,6 +705,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           >
             <UserPlus className="w-5 h-5" /> Registrar Nuevo Inquilino
           </button>
+
+          <button
+            onClick={() => setShowGuardModal(true)}
+            className="max-sm:min-h-11 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-sm border border-slate-700 flex items-center gap-2 transition-all shadow-md whitespace-nowrap"
+          >
+            <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
+            <span>Registrar guardia</span>
+          </button>
         </div>
       </div>
 
@@ -731,7 +782,12 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                         className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-800"
                       />
                       <div>
-                        <p className="font-semibold text-white">{user.fullName}</p>
+                        <p className="font-semibold text-white">
+                          {user.fullName}
+                          {user.role === 'GUARD' && (
+                            <span className="ml-2 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 text-[10px] font-bold uppercase tracking-wider">Guardia</span>
+                          )}
+                        </p>
                         <p className="text-xs text-slate-400">{user.email}</p>
                       </div>
                     </div>
@@ -1027,6 +1083,73 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md"
                 >
                   Registrar Inquilino y Continuar al Envío
+                </button>
+              </div>
+            </form>
+          </div>
+        </ModalShell>
+      )}
+
+      {/* Modal: Registrar Guardia */}
+      {showGuardModal && (
+        <ModalShell onClose={() => setShowGuardModal(false)} labelledBy="access-management-guardia-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <h3 id="access-management-guardia-titulo" className="text-lg font-bold text-white flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-400" />
+                Registrar Guardia
+              </h3>
+              <button aria-label="Cerrar" onClick={() => setShowGuardModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleRegisterGuard} className="space-y-4">
+              <div>
+                <label htmlFor="access-management-guardia-nombre" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Nombre Completo *</label>
+                <input
+                  id="access-management-guardia-nombre"
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="access-management-guardia-correo" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Correo Electrónico *</label>
+                <input
+                  id="access-management-guardia-correo"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="access-management-guardia-telefono" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Teléfono</label>
+                <input
+                  id="access-management-guardia-telefono"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
+                />
+              </div>
+              <p className="text-xs text-slate-400">
+                Se generará una contraseña inicial temporal. El guardia solo tendrá acceso a la garita y deberá cambiarla al ingresar.
+              </p>
+              <div className="flex items-center justify-end gap-3 pt-3">
+                <button type="button" onClick={() => setShowGuardModal(false)} className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingGuard}
+                  className="max-sm:min-h-11 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-md"
+                >
+                  {isSavingGuard ? 'Registrando...' : 'Registrar Guardia y Continuar al Envío'}
                 </button>
               </div>
             </form>
