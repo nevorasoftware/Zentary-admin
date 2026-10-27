@@ -350,6 +350,13 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setShowAddModal(false);
   };
 
+  const cerrarGuardModal = () => {
+    setShowGuardModal(false);
+    setFullName('');
+    setEmail('');
+    setPhone('');
+  };
+
   const handleRegisterGuard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !email.trim()) return;
@@ -610,14 +617,15 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   };
 
   const handleResendCredentialsForUser = (user: ExtendedUser) => {
-    if (!user.property?.unitNumber) {
+    const unitNumber = user.role === 'GUARD' ? 'Garita' : user.property?.unitNumber;
+    if (!unitNumber) {
       showToast('⚠️ El residente no tiene una unidad registrada. Edita el usuario e indica su unidad antes de reenviar credenciales.', 'error');
       return;
     }
     const cleanPhone = (user.phone || '').replace(/[^\d]/g, '');
 
     const messageText = `Hola ${user.fullName}, recordatorio de accesos para ${communityName}.\n\n` +
-      `📌 Unidad: ${user.property.unitNumber}\n` +
+      `📌 Unidad: ${unitNumber}\n` +
       `📧 Correo: ${user.email}\n\n` +
       `Al iniciar sesión en Zentary, se te pedirá cambiar tu clave.`;
 
@@ -635,7 +643,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
       fullName: user.fullName,
       email: user.email,
       phone: user.phone || '',
-      unitNumber: user.property.unitNumber,
+      unitNumber: unitNumber,
       // La contraseña solo se muestra después de que el backend la restablece (envío por correo)
       genericPassword: '',
       whatsappLink,
@@ -833,8 +841,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-3 py-1 md:px-6 md:py-4">
                     <button
                       onClick={() => handleResendCredentialsForUser(user)}
-                      disabled={!user.property?.unitNumber}
-                      title={!user.property?.unitNumber ? 'Sin unidad: edita el usuario e indica su unidad para reenviar credenciales' : undefined}
+                      disabled={user.role !== 'GUARD' && !user.property?.unitNumber}
+                      title={user.role !== 'GUARD' && !user.property?.unitNumber ? 'Sin unidad: edita el usuario e indica su unidad para reenviar credenciales' : undefined}
                       className="max-sm:min-h-11 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <RotateCcw className="w-3.5 h-3.5" /> Reenviar Credenciales
@@ -844,16 +852,16 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                   <td className="px-3 py-1 md:px-6 md:py-4 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {/* Editar Inquilino Button */}
-                      <button aria-label="Editar información del inquilino"
+                      {user.role !== 'GUARD' && <button aria-label="Editar información del inquilino"
                         onClick={() => handleOpenEditModal(user)}
                         className="max-sm:min-h-11 max-sm:min-w-11 p-2 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 transition-all"
                         title="Editar información del inquilino"
                       >
                         <Edit3 className="w-4 h-4" />
-                      </button>
+                      </button>}
 
                       {/* Cambiar Residente Button */}
-                      {user.house?.id && user.isActive && (
+                      {user.role !== 'GUARD' && user.house?.id && user.isActive && (
                         <button
                           onClick={() => setChangingUser(user)}
                           className="max-sm:min-h-11 px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 border border-slate-700 text-xs font-bold transition-all"
@@ -1092,14 +1100,14 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
       {/* Modal: Registrar Guardia */}
       {showGuardModal && (
-        <ModalShell onClose={() => setShowGuardModal(false)} labelledBy="access-management-guardia-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <ModalShell onClose={cerrarGuardModal} labelledBy="access-management-guardia-titulo" className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="glass-card max-w-lg w-full p-6 rounded-3xl border border-slate-700 space-y-5">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <h3 id="access-management-guardia-titulo" className="text-lg font-bold text-white flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-400" />
                 Registrar Guardia
               </h3>
-              <button aria-label="Cerrar" onClick={() => setShowGuardModal(false)} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
+              <button aria-label="Cerrar" onClick={cerrarGuardModal} className="max-sm:min-h-11 max-sm:min-w-11 text-slate-400 hover:text-white">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1141,7 +1149,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 Se generará una contraseña inicial temporal. El guardia solo tendrá acceso a la garita y deberá cambiarla al ingresar.
               </p>
               <div className="flex items-center justify-end gap-3 pt-3">
-                <button type="button" onClick={() => setShowGuardModal(false)} className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
+                <button type="button" onClick={cerrarGuardModal} className="max-sm:min-h-11 px-4 py-2 text-xs font-semibold text-slate-400 hover:text-white">
                   Cancelar
                 </button>
                 <button

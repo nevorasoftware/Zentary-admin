@@ -95,7 +95,7 @@ export default function App() {
     if (adminToken && !isGuard) {
       fetchCommunityConfig();
     }
-  }, [adminToken]);
+  }, [adminToken, isGuard]);
 
   useEffect(() => {
     if (!adminToken || isGuard) return;
@@ -105,7 +105,7 @@ export default function App() {
         setPendingParcelsCount(res.stats.pendingParcels);
       }
     }).catch(() => {});
-  }, [adminToken, currentView]);
+  }, [adminToken, currentView, isGuard]);
 
   useEffect(() => {
     if (adminToken && isTokenExpired(adminToken)) {
@@ -170,7 +170,7 @@ export default function App() {
   }
 
   const getViewMetadata = () => {
-    switch (currentView) {
+    switch (isGuard ? 'visits' : currentView) {
       case 'dashboard':
         return {
           title: 'Panel Principal',
@@ -232,7 +232,7 @@ export default function App() {
   const metadata = getViewMetadata();
 
   const renderViewContent = () => {
-    switch (currentView) {
+    switch (isGuard ? 'visits' : currentView) {
       case 'dashboard':
         return <DashboardView onNavigate={(view) => navigateTo(view)} />;
       case 'access':

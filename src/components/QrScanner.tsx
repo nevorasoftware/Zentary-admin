@@ -63,8 +63,9 @@ const QrScanner: React.FC<QrScannerProps> = ({ onDecode, onError }) => {
         }
         tick();
       } catch {
+        const cancelado = stopped;
         stop();
-        onErrorRef.current('Cámara no disponible; escribe el código');
+        if (!cancelado) onErrorRef.current('Cámara no disponible; escribe el código');
       }
     };
 
