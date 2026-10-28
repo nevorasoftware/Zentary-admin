@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Building2, Edit3, Check, Menu } from 'lucide-react';
+import { Building2, Edit3, Check, Menu, Plus } from 'lucide-react';
 import { getAdminToken, API_BASE_URL, getTenantHeaders, getSelectedTenantId, TENANT_STORAGE_KEY } from '../services/adminApi';
+import NuevaResidencialModal from './NuevaResidencialModal';
 
 interface HeaderProps {
   title: string;
@@ -31,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
   const [tempName, setTempName] = useState(communityName);
   const [nameError, setNameError] = useState<string | null>(null);
   const [tenants, setTenants] = useState<{ id: string; name: string }[]>([]);
+  const [isNewTenantOpen, setIsNewTenantOpen] = useState(false);
   const isSuperAdmin = adminUser?.role === 'SUPER_ADMIN';
 
   // El super administrador elige la residencial con la que trabaja (o todas)
@@ -54,6 +56,11 @@ export const Header: React.FC<HeaderProps> = ({
       // almacenamiento no disponible
     }
     window.location.reload();
+  };
+
+  // Tras crear una residencial se trabaja de inmediato con ella
+  const handleTenantCreated = (tenantId: string) => {
+    handleTenantChange(tenantId);
   };
 
   const handleSaveName = async () => {
@@ -167,6 +174,18 @@ export const Header: React.FC<HeaderProps> = ({
             ))}
           </select>
         )}
+        {isSuperAdmin && (
+          <button
+            type="button"
+            onClick={() => setIsNewTenantOpen(true)}
+            className="max-sm:min-h-11 max-sm:min-w-11 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 text-xs md:text-sm text-slate-200 hover:text-white hover:border-blue-500 transition-all"
+            aria-label="Nueva residencial"
+            title="Nueva residencial"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="hidden md:inline">Nueva residencial</span>
+          </button>
+        )}
 
         <div className="hidden md:block h-8 w-px bg-slate-800" />
 
@@ -184,6 +203,9 @@ export const Header: React.FC<HeaderProps> = ({
           <img src={avatar} alt="Admin Avatar" className="w-8 h-8 rounded-full object-cover" />
         </button>
       </div>
+      {isNewTenantOpen && (
+        <NuevaResidencialModal onClose={() => setIsNewTenantOpen(false)} onCreated={handleTenantCreated} />
+      )}
     </header>
   );
 };
