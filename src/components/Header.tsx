@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
               ) : (
                 <div className="flex items-center gap-1.5">
                   <span className="truncate max-w-[150px] md:max-w-none">{communityName}</span>
-                  <button
+                  {adminUser?.role !== 'GUARD' && <button
                     onClick={() => {
                       setTempName(communityName);
                       setNameError(null);
@@ -150,7 +150,7 @@ export const Header: React.FC<HeaderProps> = ({
                     aria-label="Editar nombre de la residencial"
                   >
                     <Edit3 className="w-3 h-3" />
-                  </button>
+                  </button>}
                 </div>
               )}
             </div>
