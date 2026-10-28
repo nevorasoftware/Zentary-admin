@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Home, Plus, Search, Pencil, Download, Upload } from 'lucide-react';
+import { Home, Plus, Search, Pencil, Download, Upload, UserCog } from 'lucide-react';
 import { adminApi, HouseImportRow, HouseImportTotals } from '../services/adminApi';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import ModalShell from '../components/ModalShell';
+import CambiarResidenteModal from '../components/CambiarResidenteModal';
 
 const LABEL = 'block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1';
 const INPUT = 'w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500';
@@ -24,6 +25,8 @@ export const ViviendasView: React.FC = () => {
   const [formNumber, setFormNumber] = useState('');
   const [formBlock, setFormBlock] = useState('');
   const [saving, setSaving] = useState(false);
+  // Cambio de residente
+  const [changingHouse, setChangingHouse] = useState<any | null>(null);
 
   // Importar / exportar CSV
   const [exporting, setExporting] = useState(false);
@@ -39,7 +42,8 @@ export const ViviendasView: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      // Con datos ya cargados se refresca en silencio, para no desmontar los modales abiertos
+      if (houses.length === 0) setLoading(true);
       setLoadError('');
       const [housesRes, prefixesRes] = await Promise.all([adminApi.getHouses(), adminApi.getHousePrefixes()]);
       if (housesRes.success && housesRes.houses) {
@@ -308,6 +312,17 @@ export const ViviendasView: React.FC = () => {
                     {h.residents?.length > 0 ? h.residents.map((r: any) => r.fullName).join(', ') : '—'}
                   </td>
                   <td className="px-6 py-3 text-right">
+                    {(h.residents || []).some((r: any) => r.role === 'RESIDENT' && r.isActive) && (
+                      <button
+                        type="button"
+                        onClick={() => setChangingHouse(h)}
+                        aria-label={`Cambiar residente de la vivienda ${h.unitNumber}`}
+                        title="Cambiar residente"
+                        className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+                      >
+                        <UserCog className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => openEdit(h)}
@@ -323,6 +338,16 @@ export const ViviendasView: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      {changingHouse && (
+        <CambiarResidenteModal
+          houseId={changingHouse.id}
+          houseLabel={`${changingHouse.unitNumber}${changingHouse.block ? ` (${changingHouse.block})` : ''}`}
+          residents={(changingHouse.residents || []).filter((r: any) => r.role === 'RESIDENT' && r.isActive)}
+          onClose={() => setChangingHouse(null)}
+          onDone={fetchData}
+        />
+      )}
 
       {isModalOpen && (
         <ModalShell onClose={() => setIsModalOpen(false)} labelledBy="viviendas-modal-titulo" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
