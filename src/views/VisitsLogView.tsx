@@ -21,6 +21,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { adminApi, ParkingStatus, ParkingReservationItem } from '../services/adminApi';
+import QrScanner from '../components/QrScanner';
 import ModalShell from '../components/ModalShell';
 import { HouseCombobox } from '../components/HouseCombobox';
 import { useToast } from '../components/Toast';
@@ -83,6 +84,7 @@ export const VisitsLogView: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [scannedResult, setScannedResult] = useState<any | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
   const [confirmingEntry, setConfirmingEntry] = useState(false);
 
   // Quick Entry Modal State
@@ -226,16 +228,20 @@ export const VisitsLogView: React.FC = () => {
   }, [activeTab, searchFilter]);
 
   // Handle Scanning or Submitting QR Token
-  const handleScanSubmit = async (e?: React.FormEvent) => {
+  const handleScanSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!qrInput.trim()) return;
+    return verifyToken(qrInput);
+  };
+
+  const verifyToken = async (token: string) => {
+    if (!token.trim()) return;
 
     try {
       setScanning(true);
       setScanError(null);
       setScannedResult(null);
 
-      const res = await adminApi.scanQRToken(qrInput.trim());
+      const res = await adminApi.scanQRToken(token.trim());
 
       if (res.success && res.valid && res.visit) {
         setScannedResult(res.visit);
@@ -500,6 +506,13 @@ export const VisitsLogView: React.FC = () => {
               className="bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 font-mono w-full md:w-72"
             />
             <button
+              type="button"
+              onClick={() => { setScanError(null); setCameraOpen((v) => !v); }}
+              className="max-sm:min-h-11 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs whitespace-nowrap transition-all"
+            >
+              {cameraOpen ? 'Cerrar cámara' : 'Escanear con cámara'}
+            </button>
+            <button
               type="submit"
               disabled={scanning || !qrInput.trim()}
               className="max-sm:min-h-11 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs whitespace-nowrap shadow-lg shadow-emerald-600/30 transition-all"
@@ -508,6 +521,13 @@ export const VisitsLogView: React.FC = () => {
             </button>
           </form>
         </div>
+
+        {cameraOpen && (
+          <QrScanner
+            onDecode={(text) => { setCameraOpen(false); verifyToken(text); }}
+            onError={(msg) => { setCameraOpen(false); setScanError(msg); }}
+          />
+        )}
 
         {/* Scan Error Feedback */}
         {scanError && (
@@ -567,6 +587,7 @@ export const VisitsLogView: React.FC = () => {
                 <span className="text-slate-400 block">Estadía Autorizada:</span>
                 <span className="font-bold text-white text-sm">{scannedResult.maxDurationHours || 4} Horas</span>
                 <span className="text-slate-400 block mt-0.5">Garita: {currentGate}</span>
+                {renderParkingBadge(scannedResult.id)}
               </div>
             </div>
 

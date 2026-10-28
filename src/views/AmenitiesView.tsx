@@ -70,6 +70,10 @@ interface Reservation {
   };
 }
 
+// YYYY-MM-DD con los componentes locales (toISOString desplaza el día según la zona horaria)
+const toLocalIsoDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 export const AmenitiesView: React.FC = () => {
   const toast = useToast();
   const confirm = useConfirm();
@@ -148,8 +152,8 @@ export const AmenitiesView: React.FC = () => {
       const weekEnd = new Date(currentWeekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
 
-      const startStr = currentWeekStart.toISOString().split('T')[0];
-      const endStr = weekEnd.toISOString().split('T')[0];
+      const startStr = toLocalIsoDate(currentWeekStart);
+      const endStr = toLocalIsoDate(weekEnd);
 
       let url = `${API_BASE_URL}/amenities/admin/reservations?startDate=${startStr}&endDate=${endStr}`;
       if (selectedAmenityFilter !== 'ALL') {
@@ -252,8 +256,8 @@ export const AmenitiesView: React.FC = () => {
     const startMins = parseInt(startTime.split(':')[0], 10) * 60 + parseInt(startTime.split(':')[1], 10);
     const endMins = parseInt(endTime.split(':')[0], 10) * 60 + parseInt(endTime.split(':')[1], 10);
 
-    if (endMins <= startMins) {
-      setFormError('La hora de fin debe ser posterior a la hora de inicio.');
+    if (endMins === startMins) {
+      setFormError('La hora de fin no puede ser igual a la hora de inicio.');
       return;
     }
 
@@ -570,7 +574,7 @@ export const AmenitiesView: React.FC = () => {
           {/* Weekly Calendar Grid */}
           <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
             {weekDates.map((dateObj, idx) => {
-              const dayIsoStr = dateObj.toISOString().split('T')[0];
+              const dayIsoStr = toLocalIsoDate(dateObj);
               const dayName = ALL_DAYS[idx];
               const dayNumber = dateObj.getDate();
 

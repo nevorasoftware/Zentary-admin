@@ -200,6 +200,8 @@ export interface PaymentGatewayInfo {
 }
 
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
+// Roles que pueden entrar al panel: los guardias solo ven la garita
+export const PANEL_ROLES = [...ADMIN_ROLES, 'GUARD'];
 
 export const getAdminToken = (): string => {
   if (typeof localStorage !== 'undefined') {
@@ -278,6 +280,13 @@ class AdminApiService {
 
   async registerTenant(data: { fullName: string; email: string; phone?: string; houseId: string }) {
     return this.request('/admin/tenants', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async registerGuard(data: { fullName: string; email: string; phone?: string }) {
+    return this.request('/admin/guards', {
       method: 'POST',
       body: JSON.stringify(data),
     });
