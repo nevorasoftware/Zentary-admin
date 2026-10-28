@@ -131,6 +131,27 @@ export interface TenantInfo {
   timezone?: string;
 }
 
+export interface HouseImportTotals {
+  filas: number;
+  creadas: number;
+  actualizadas: number;
+  sinCambios: number;
+  errores: number;
+  viviendasCreadas: number;
+  usuariosCreados: number;
+}
+
+export interface HouseImportRow {
+  fila: number;
+  codigo: string;
+  vivienda: 'creada' | 'actualizada' | 'sin_cambios' | 'error';
+  usuario: 'creado' | 'actualizado' | 'sin_cambios' | 'ninguno' | 'error';
+  mensaje: string;
+  usuarioId?: string;
+  correo?: string;
+  nombre?: string;
+}
+
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
 
 export const getAdminToken = (): string => {
@@ -449,6 +470,48 @@ class AdminApiService {
     return this.request(`/houses/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
+    });
+  }
+
+  // Importación / exportación CSV de viviendas y residentes
+  async exportHousesCsv(): Promise<Blob> {
+    const token = this.getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/houses/export`, {
+      headers: { ...getTenantHeaders(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    });
+    if (response.status === 401) handleUnauthorized();
+    if (!response.ok) {
+      let message = 'No se pudo exportar el archivo.';
+      try { message = (await response.json()).message || message; } catch { /* respuesta sin JSON */ }
+      throw new Error(message);
+    }
+    return response.blob();
+  }
+
+  async importHousesCsv(csv: string, dryRun: boolean, fileName?: string): Promise<{ success: boolean; message?: string; dryRun?: boolean; totals?: HouseImportTotals; rows?: HouseImportRow[] }> {
+    const token = this.getAuthToken();
+    const query = new URLSearchParams();
+    if (dryRun) query.set('dryRun', '1');
+    if (fileName) query.set('fileName', fileName);
+    const response = await fetch(`${API_BASE_URL}/houses/import?${query.toString()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/csv; charset=utf-8', ...getTenantHeaders(), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: csv,
+    });
+    if (response.status === 401) handleUnauthorized();
+    // El 413 y los errores de proxy pueden no traer JSON válido
+    let data: any = null;
+    try { data = await response.json(); } catch { /* respuesta sin JSON */ }
+    if (!response.ok || !data) {
+      return { success: false, message: data?.message || (response.status === 413 ? 'El archivo supera el máximo de 2 MB.' : 'No se pudo procesar el archivo.') };
+    }
+    return data;
+  }
+
+  async resendCredentials(userId: string, unitNumber?: string): Promise<{ success: boolean; message?: string }> {
+    return this.request('/admin/tenants/resend-credentials', {
+      method: 'POST',
+      body: JSON.stringify({ userId, unitNumber }),
     });
   }
 
