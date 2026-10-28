@@ -14,7 +14,7 @@ import ViviendasView from './views/ViviendasView';
 import LoginView from './views/LoginView';
 import EditProfileModal from './components/EditProfileModal';
 import { limpiarBajasPendientes } from './components/CambiarResidenteModal';
-import { adminApi, ADMIN_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
+import { adminApi, PANEL_ROLES, handleUnauthorized, API_BASE_URL, getTenantHeaders } from './services/adminApi';
 
 // Indica si el JWT guardado ya venció (lee `exp` del payload, sin verificar firma)
 const isTokenExpired = (token: string): boolean => {
@@ -88,21 +88,28 @@ export default function App() {
     setCurrentView(view);
   };
 
-  useEffect(() => {
-    if (adminToken) {
-      fetchCommunityConfig();
-    }
-  }, [adminToken]);
+  // El guardia solo usa la garita: el resto de endpoints del panel le responden 403
+  const isGuard = adminUser?.role === 'GUARD';
 
   useEffect(() => {
-    if (!adminToken) return;
+    if (isGuard && currentView !== 'visits') navigateTo('visits');
+  }, [isGuard, currentView]);
+
+  useEffect(() => {
+    if (adminToken && !isGuard) {
+      fetchCommunityConfig();
+    }
+  }, [adminToken, isGuard]);
+
+  useEffect(() => {
+    if (!adminToken || isGuard) return;
     adminApi.getDashboardStats().then((res) => {
       if (res.success) {
         setOpenPqrsCount(res.stats.openPqrs);
         setPendingParcelsCount(res.stats.pendingParcels);
       }
     }).catch(() => {});
-  }, [adminToken, currentView]);
+  }, [adminToken, currentView, isGuard]);
 
   useEffect(() => {
     if (adminToken && isTokenExpired(adminToken)) {
@@ -111,7 +118,7 @@ export default function App() {
   }, [adminToken]);
 
   useEffect(() => {
-    if (adminUser && !ADMIN_ROLES.includes(adminUser.role)) {
+    if (adminUser && !PANEL_ROLES.includes(adminUser.role)) {
       handleLogout();
     }
   }, [adminUser]);
@@ -167,7 +174,7 @@ export default function App() {
   }
 
   const getViewMetadata = () => {
-    switch (currentView) {
+    switch (isGuard ? 'visits' : currentView) {
       case 'dashboard':
         return {
           title: 'Panel Principal',
@@ -229,7 +236,7 @@ export default function App() {
   const metadata = getViewMetadata();
 
   const renderViewContent = () => {
-    switch (currentView) {
+    switch (isGuard ? 'visits' : currentView) {
       case 'dashboard':
         return <DashboardView onNavigate={(view) => navigateTo(view)} />;
       case 'access':

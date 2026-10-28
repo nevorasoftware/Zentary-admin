@@ -46,6 +46,7 @@ interface SidebarProps {
     fullName: string;
     email: string;
     avatarUrl?: string;
+    role?: string;
   } | null;
   onOpenEditProfile?: () => void;
   onLogout?: () => void;
@@ -65,7 +66,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenEditProfile,
   onLogout,
 }) => {
-  const menuItems = ([
+  const allMenuItems: MenuItem[] = ([
     { id: 'dashboard', label: 'Panel Principal', icon: LayoutDashboard },
     { id: 'access', label: 'Control de Usuarios y Accesos', icon: Users },
     { id: 'amenities', label: 'Amenidades', icon: Building2 },
@@ -77,6 +78,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'viviendas', label: 'Viviendas', icon: Home },
     { id: 'configuracion', label: 'Configuración', icon: Settings },
   ] as MenuItem[]).filter((item) => item.id !== 'parcels' || PAQUETES_HABILITADO);
+  // El guardia solo ve la garita
+  const menuItems = adminUser?.role === 'GUARD' ? allMenuItems.filter((i) => i.id === 'visits') : allMenuItems;
 
   // Escape cierra el menú lateral en móvil
   useEffect(() => {
