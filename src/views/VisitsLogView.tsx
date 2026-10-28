@@ -20,7 +20,7 @@ import {
   Radio,
   Eye,
 } from 'lucide-react';
-import { adminApi } from '../services/adminApi';
+import { adminApi, ParkingStatus, ParkingReservationItem } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
 import { HouseCombobox } from '../components/HouseCombobox';
 import { useToast } from '../components/Toast';
@@ -68,6 +68,8 @@ export const VisitsLogView: React.FC = () => {
   const [activeVisits, setActiveVisits] = useState<ActiveVisitItem[]>([]);
   const [expectedVisits, setExpectedVisits] = useState<ExpectedVisitItem[]>([]);
   const [historyVisits, setHistoryVisits] = useState<any[]>([]);
+  // Parqueos de visita: null si el backend aún no los soporta o no hay zonas
+  const [parkingStatus, setParkingStatus] = useState<ParkingStatus | null>(null);
 
   // Loading and Filtering
   const [loading, setLoading] = useState(false);
@@ -111,6 +113,7 @@ export const VisitsLogView: React.FC = () => {
 
   // Fetch Garita real-time data
   const fetchGaritaData = async () => {
+    fetchParkingStatus();
     try {
       setLoading(true);
       setLoadError('');
@@ -128,6 +131,32 @@ export const VisitsLogView: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fetch parking status (degrada en silencio si el backend no tiene el endpoint)
+  const fetchParkingStatus = async () => {
+    try {
+      const res = await adminApi.getParkingStatus();
+      setParkingStatus(res.success && res.zones ? res : null);
+    } catch (err) {
+      setParkingStatus(null);
+    }
+  };
+
+  const parkingByVisit = (visitId: string): ParkingReservationItem | undefined =>
+    parkingStatus?.reservations?.find((r) => r.visitId === visitId);
+
+  const renderParkingBadge = (visitId: string) => {
+    const r = parkingByVisit(visitId);
+    if (!r) return null;
+    return (
+      <p className="text-blue-400">
+        Parqueo: <strong>{r.zoneName || 'Zona'}</strong>
+        {r.status === 'OCUPADO'
+          ? ' (ocupado)'
+          : ` (reservado hasta ${new Date(r.holdUntil).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })})`}
+      </p>
+    );
   };
 
   // Fetch history data
@@ -232,6 +261,7 @@ export const VisitsLogView: React.FC = () => {
 
       if (res.success) {
         showToast(`✅ Ingreso registrado para ${scannedResult?.visitorName}`);
+        if (res.parkingWarning) toast.info(res.parkingWarning);
         setScannedResult(null);
         fetchGaritaData();
       } else {
@@ -295,6 +325,7 @@ export const VisitsLogView: React.FC = () => {
 
       if (res.success) {
         showToast(`✅ Ingreso directo registrado para ${quickForm.visitorName}`);
+        if (res.parkingWarning) toast.info(res.parkingWarning);
         setIsQuickEntryOpen(false);
         setQuickForm({
           visitorName: '',
@@ -589,6 +620,32 @@ export const VisitsLogView: React.FC = () => {
       {/* TAB 1: GARITA OPERATIVA & ESTADO DE PERMANENCIA */}
       {activeTab === 'monitor' && (
         <div className="space-y-6">
+          {/* Parqueos de visita: estado por zona */}
+          {parkingStatus && parkingStatus.zones.some((z) => z.isActive) && (
+            <section aria-labelledby="visits-log-parqueos-titulo" className="glass-card p-6 rounded-3xl border border-slate-800 space-y-4">
+              <h3 id="visits-log-parqueos-titulo" className="text-base font-bold text-white flex items-center gap-2">
+                <Car className="w-5 h-5 text-blue-400" />
+                Parqueos
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {parkingStatus.zones.filter((z) => z.isActive).map((zone) => (
+                  <div key={zone.id} className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-white text-sm">{zone.name}</span>
+                      <span className={zone.free === 0 ? 'font-extrabold text-rose-400' : 'font-extrabold text-emerald-400'}>
+                        {zone.free} {zone.free === 1 ? 'libre' : 'libres'} de {zone.capacity}
+                      </span>
+                    </div>
+                    <p className="text-slate-400">
+                      Ocupados: <strong className="text-slate-200">{zone.occupied}</strong> · Reservados: <strong className="text-slate-200">{zone.reserved}</strong>
+                      {zone.upcoming > 0 && <> · Próximos: <strong className="text-slate-200">{zone.upcoming}</strong></>}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Active Visitors Inside List */}
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -692,6 +749,7 @@ export const VisitsLogView: React.FC = () => {
                           <span>Residente:</span>
                           <span className="font-semibold text-white">{item.residentName}</span>
                         </div>
+                        {renderParkingBadge(item.id)}
                       </div>
 
                       {/* Progress Bar of Time Used */}
@@ -750,6 +808,7 @@ export const VisitsLogView: React.FC = () => {
                     {exp.vehiclePlate && (
                       <p className="text-emerald-400 font-mono">Placa: {exp.vehiclePlate}</p>
                     )}
+                    {renderParkingBadge(exp.id)}
                   </div>
                 ))}
               </div>

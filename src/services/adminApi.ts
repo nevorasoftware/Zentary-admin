@@ -152,6 +152,44 @@ export interface HouseImportRow {
   nombre?: string;
 }
 
+export interface ParkingZoneItem {
+  id: string;
+  name: string;
+  capacity: number;
+  isActive: boolean;
+  sortOrder: number;
+}
+
+export interface ParkingReservationItem {
+  id: string;
+  visitId: string;
+  zoneId: string;
+  zoneName: string | null;
+  status: 'RESERVADO' | 'OCUPADO' | string;
+  holdFrom: string;
+  holdUntil: string;
+  occupiedAt?: string | null;
+  plate?: string | null;
+}
+
+export interface ParkingZoneStatus {
+  id: string;
+  name: string;
+  capacity: number;
+  isActive: boolean;
+  occupied: number;
+  reserved: number;
+  upcoming: number;
+  free: number;
+}
+
+export interface ParkingStatus {
+  success: boolean;
+  holdMinutes: number;
+  zones: ParkingZoneStatus[];
+  reservations: ParkingReservationItem[];
+}
+
 export const ADMIN_ROLES = ['SUPER_ADMIN', 'RESIDENTIAL_ADMIN', 'ADMIN'];
 
 export const getAdminToken = (): string => {
@@ -437,7 +475,7 @@ class AdminApiService {
     });
   }
 
-  async confirmEntry(visitId: string, data?: { gateName?: string; vehiclePlate?: string; notes?: string }): Promise<{ success: boolean; message?: string; visit?: any }> {
+  async confirmEntry(visitId: string, data?: { gateName?: string; vehiclePlate?: string; notes?: string }): Promise<{ success: boolean; message?: string; visit?: any; parkingWarning?: string }> {
     return this.request(`/visits/${visitId}/confirm-entry`, {
       method: 'POST',
       body: JSON.stringify(data || {}),
@@ -462,7 +500,7 @@ class AdminApiService {
     notes?: string;
     gateName?: string;
     maxDurationHours?: number;
-  }): Promise<{ success: boolean; message?: string; visit?: any }> {
+  }): Promise<{ success: boolean; message?: string; visit?: any; parkingWarning?: string }> {
     return this.request('/visits/quick-entry', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -550,6 +588,40 @@ class AdminApiService {
 
   async deleteHousePrefix(id: string): Promise<{ success: boolean; message?: string; deactivated?: boolean }> {
     return this.request(`/house-prefixes/${id}`, { method: 'DELETE' });
+  }
+
+  // Parqueos de visita
+  async getParkingZones(): Promise<{ success: boolean; message?: string; zones: ParkingZoneItem[]; holdMinutes: number }> {
+    return this.request('/parking/zones');
+  }
+
+  async getParkingStatus(): Promise<ParkingStatus> {
+    return this.request('/parking/status');
+  }
+
+  async createParkingZone(data: { name: string; capacity: number }): Promise<{ success: boolean; message?: string; zone?: ParkingZoneItem }> {
+    return this.request('/parking/zones', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateParkingZone(id: string, data: Partial<Pick<ParkingZoneItem, 'name' | 'capacity' | 'isActive'>>): Promise<{ success: boolean; message?: string; zone?: ParkingZoneItem }> {
+    return this.request(`/parking/zones/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteParkingZone(id: string): Promise<{ success: boolean; message?: string; deactivated?: boolean; deleted?: boolean }> {
+    return this.request(`/parking/zones/${id}`, { method: 'DELETE' });
+  }
+
+  async updateParkingConfig(holdMinutes: number): Promise<{ success: boolean; message?: string; holdMinutes?: number }> {
+    return this.request('/parking/config', {
+      method: 'PUT',
+      body: JSON.stringify({ holdMinutes }),
+    });
   }
 }
 
