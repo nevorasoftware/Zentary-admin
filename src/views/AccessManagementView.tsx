@@ -18,8 +18,9 @@ import {
   AlertCircle,
   CheckCircle2,
 } from 'lucide-react';
-import { ResidentUser, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
+import { ResidentUser, adminApi, getAdminToken, handleUnauthorized, API_BASE_URL, getTenantHeaders } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { HouseCombobox } from '../components/HouseCombobox';
 
 interface ExtendedUser extends ResidentUser {
   mustChangePassword?: boolean;
@@ -53,6 +54,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [fullName, setFullName] = useState('');
   const [unitNumber, setUnitNumber] = useState('');
   const [block, setBlock] = useState('');
+  const [houseId, setHouseId] = useState('');
+  const [houseError, setHouseError] = useState('');
+  const [editHouseError, setEditHouseError] = useState('');
+  const [houses, setHouses] = useState<any[]>([]);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -63,6 +68,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
   const [editFullName, setEditFullName] = useState('');
   const [editUnitNumber, setEditUnitNumber] = useState('');
   const [editBlock, setEditBlock] = useState('');
+  const [editHouseId, setEditHouseId] = useState('');
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
 
@@ -127,9 +133,19 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     }
   };
 
+  const fetchHouses = async () => {
+    try {
+      const res = await adminApi.getHouses();
+      if (res.success && res.houses) setHouses(res.houses);
+    } catch (err) {
+      console.warn('Error loading houses:', err);
+    }
+  };
+
   React.useEffect(() => {
     fetchUsersFromBackend();
     fetchCommunityConfigFromBackend();
+    fetchHouses();
   }, []);
 
   const handleSaveCommunityDetails = async (e: React.FormEvent) => {
@@ -234,6 +250,10 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
 
   const handleRegisterTenant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!unitNumber) {
+      setHouseError('Selecciona o crea una vivienda');
+      return;
+    }
     if (!fullName || !unitNumber || !email) return;
 
     if (!isValidEmail(email)) {
@@ -261,6 +281,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           fullName,
           unitNumber,
           block: finalBlock,
+          ...(houseId ? { houseId } : {}),
           email,
           phone: finalPhone,
           communityName,
@@ -317,6 +338,8 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setFullName('');
     setUnitNumber('');
     setBlock('');
+    setHouseId('');
+    setHouseError('');
     setEmail('');
     setPhone('');
     setShowAddModal(false);
@@ -327,12 +350,18 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
     setEditFullName(user.fullName);
     setEditUnitNumber(user.property?.unitNumber || '');
     setEditBlock(user.property?.block || '');
+    setEditHouseId(user.house?.id || '');
+    setEditHouseError('');
     setEditEmail(user.email);
     setEditPhone(user.phone || '');
   };
 
   const handleSaveEditedTenant = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingUser && !editUnitNumber) {
+      setEditHouseError('Selecciona o crea una vivienda');
+      return;
+    }
     if (!editingUser || !editFullName || !editUnitNumber || !editEmail) return;
 
     if (!isValidEmail(editEmail)) {
@@ -354,6 +383,7 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
           phone: editPhone,
           unitNumber: editUnitNumber,
           block: editBlock,
+          ...(editHouseId ? { houseId: editHouseId } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -912,32 +942,27 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="access-management-campo-5" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Número de Unidad *
-                  </label>
-                  <input id="access-management-campo-5"
-                    type="text"
-                    placeholder="Ej. 101-A"
-                    value={unitNumber}
-                    onChange={(e) => setUnitNumber(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="access-management-campo-6" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Bloque / Manzana / Torre
-                  </label>
-                  <input id="access-management-campo-6"
-                    type="text"
-                    placeholder="Ej. Torre A"
-                    value={block}
-                    onChange={(e) => setBlock(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
+              <div>
+                <label htmlFor="access-management-campo-5" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Número de Unidad *
+                </label>
+                <HouseCombobox
+                  id="access-management-campo-5"
+                  required
+                  invalid={!!houseError}
+                  houses={houses}
+                  value={houseId}
+                  allowCreate
+                  onCreated={(h) => setHouses((prev) => [...prev, h])}
+                  onChange={(id, picked) => {
+                    const h = picked || houses.find((x) => x.id === id);
+                    setHouseId(id);
+                    setUnitNumber(h ? h.unitNumber : '');
+                    setBlock(h?.block || '');
+                    setHouseError('');
+                  }}
+                />
+                {houseError && <p className="text-red-400 text-xs mt-1" role="alert">{houseError}</p>}
               </div>
 
               <div>
@@ -1025,30 +1050,27 @@ export const AccessManagementView: React.FC<AccessManagementViewProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="access-management-campo-10" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Número de Unidad *
-                  </label>
-                  <input id="access-management-campo-10"
-                    type="text"
-                    value={editUnitNumber}
-                    onChange={(e) => setEditUnitNumber(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="access-management-campo-11" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
-                    Bloque / Manzana / Torre
-                  </label>
-                  <input id="access-management-campo-11"
-                    type="text"
-                    value={editBlock}
-                    onChange={(e) => setEditBlock(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-700 text-sm text-slate-100 rounded-xl px-4 py-2.5 focus:outline-none focus:border-blue-500"
-                  />
-                </div>
+              <div>
+                <label htmlFor="access-management-campo-10" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">
+                  Número de Unidad *
+                </label>
+                <HouseCombobox
+                  id="access-management-campo-10"
+                  required
+                  invalid={!!editHouseError}
+                  houses={houses}
+                  value={editHouseId}
+                  allowCreate
+                  onCreated={(h) => setHouses((prev) => [...prev, h])}
+                  onChange={(id, picked) => {
+                    const h = picked || houses.find((x) => x.id === id);
+                    setEditHouseId(id);
+                    setEditUnitNumber(h ? h.unitNumber : '');
+                    setEditBlock(h?.block || '');
+                    setEditHouseError('');
+                  }}
+                />
+                {editHouseError && <p className="text-red-400 text-xs mt-1" role="alert">{editHouseError}</p>}
               </div>
 
               <div>

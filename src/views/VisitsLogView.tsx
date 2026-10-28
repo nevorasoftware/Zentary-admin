@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { adminApi } from '../services/adminApi';
 import ModalShell from '../components/ModalShell';
+import { HouseCombobox } from '../components/HouseCombobox';
 import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 
@@ -96,9 +97,6 @@ export const VisitsLogView: React.FC = () => {
   });
   const [availableHouses, setAvailableHouses] = useState<any[]>([]);
   const [housesError, setHousesError] = useState('');
-  const [houseSearch, setHouseSearch] = useState('');
-  const [houseListOpen, setHouseListOpen] = useState(false);
-  const [houseActiveIndex, setHouseActiveIndex] = useState(0);
   const [quickSubmitting, setQuickSubmitting] = useState(false);
 
   // Success Feedback Toast
@@ -264,8 +262,6 @@ export const VisitsLogView: React.FC = () => {
     }
   };
 
-  const blockLabel = (b: string) => b.toLowerCase().replace(/(^|\s)\S/g, (c) => c.toUpperCase());
-  const houseLabel = (h: any) => `${h.block ? `${blockLabel(h.block)} - ` : ''}Casa ${h.unitNumber}`;
   const historyStatusLabel = (status: string) => {
     const labels: Record<string, string> = {
       INGRESADA: 'Dentro',
@@ -276,18 +272,6 @@ export const VisitsLogView: React.FC = () => {
     if (labels[status]) return labels[status];
     const text = (status || '').replace(/_/g, ' ').toLowerCase();
     return text.charAt(0).toUpperCase() + text.slice(1);
-  };
-  const selectedHouse = availableHouses.find((h) => h.id === quickForm.houseId);
-  const filteredHouses = availableHouses.filter((h) => {
-    const q = houseSearch.trim().toLowerCase();
-    if (!q) return true;
-    const residents = (h.residents || []).map((r: any) => r.fullName || '').join(' ');
-    return `${houseLabel(h)} ${residents}`.toLowerCase().includes(q);
-  });
-  const selectHouse = (h: any) => {
-    setQuickForm({ ...quickForm, houseId: h.id });
-    setHouseSearch('');
-    setHouseListOpen(false);
   };
 
   // Submit Quick Entry (Direct Gate Check-in)
@@ -910,87 +894,12 @@ export const VisitsLogView: React.FC = () => {
 
                 <div className="space-y-1">
                   <label htmlFor="visits-log-campo-2" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1">Vivienda Destino *:</label>
-                  <div className="relative">
-                    <input id="visits-log-campo-2"
-                      type="text"
-                      role="combobox"
-                      aria-expanded={houseListOpen}
-                      aria-autocomplete="list"
-                      aria-controls="quick-entry-house-listbox"
-                      aria-activedescendant={
-                        houseListOpen && filteredHouses[houseActiveIndex]
-                          ? `quick-entry-house-${filteredHouses[houseActiveIndex].id}`
-                          : undefined
-                      }
-                      value={houseListOpen ? houseSearch : selectedHouse ? houseLabel(selectedHouse) : ''}
-                      placeholder="Buscar por número, bloque o residente..."
-                      onFocus={() => {
-                        setHouseSearch('');
-                        setHouseActiveIndex(0);
-                        setHouseListOpen(true);
-                      }}
-                      onBlur={() => setHouseListOpen(false)}
-                      onChange={(e) => {
-                        setHouseSearch(e.target.value);
-                        setHouseActiveIndex(0);
-                        setHouseListOpen(true);
-                        if (quickForm.houseId) setQuickForm({ ...quickForm, houseId: '' });
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'ArrowDown') {
-                          e.preventDefault();
-                          setHouseListOpen(true);
-                          setHouseActiveIndex((i) => Math.min(i + 1, filteredHouses.length - 1));
-                        } else if (e.key === 'ArrowUp') {
-                          e.preventDefault();
-                          setHouseActiveIndex((i) => Math.max(i - 1, 0));
-                        } else if (e.key === 'Enter' && houseListOpen) {
-                          e.preventDefault();
-                          if (filteredHouses[houseActiveIndex]) selectHouse(filteredHouses[houseActiveIndex]);
-                        } else if (e.key === 'Escape' && houseListOpen) {
-                          e.stopPropagation();
-                          setHouseListOpen(false);
-                        }
-                      }}
-                      className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500"
-                    />
-                    {houseListOpen && (
-                      <ul
-                        id="quick-entry-house-listbox"
-                        role="listbox"
-                        className="absolute z-20 mt-1 w-full max-h-48 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-lg"
-                      >
-                        {filteredHouses.length === 0 ? (
-                          <li className="px-3 py-2 text-slate-400">No se encontraron viviendas.</li>
-                        ) : (
-                          filteredHouses.map((h, i) => (
-                            <li
-                              key={h.id}
-                              id={`quick-entry-house-${h.id}`}
-                              ref={(el) => {
-                                if (el && i === houseActiveIndex) el.scrollIntoView({ block: 'nearest' });
-                              }}
-                              role="option"
-                              aria-selected={h.id === quickForm.houseId}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                selectHouse(h);
-                              }}
-                              onMouseEnter={() => setHouseActiveIndex(i)}
-                              className={`px-3 py-2 cursor-pointer text-white ${
-                                i === houseActiveIndex ? 'bg-blue-600/30' : ''
-                              }`}
-                            >
-                              {houseLabel(h)}
-                              {h.residents?.length > 0 && (
-                                <span className="text-slate-400"> · {h.residents[0].fullName}</span>
-                              )}
-                            </li>
-                          ))
-                        )}
-                      </ul>
-                    )}
-                  </div>
+                  <HouseCombobox
+                    id="visits-log-campo-2"
+                    houses={availableHouses}
+                    value={quickForm.houseId}
+                    onChange={(houseId) => setQuickForm({ ...quickForm, houseId })}
+                  />
                   {housesError ? (
                     <p className="text-red-400 text-xs">{housesError}</p>
                   ) : availableHouses.length === 0 ? (
