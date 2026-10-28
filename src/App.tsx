@@ -26,6 +26,9 @@ const isTokenExpired = (token: string): boolean => {
   }
 };
 
+// Recepción de Paquetes oculta hasta definir el flujo (issue #7); poner en true para reactivarla
+const PAQUETES_HABILITADO = false;
+
 // Rutas por hash (#/usuarios): funcionan igual con `vite preview` y con un servidor estático
 const VIEW_ROUTES: Record<AdminViewType, string> = {
   dashboard: '/',
@@ -44,6 +47,7 @@ const VIEW_ROUTES: Record<AdminViewType, string> = {
 const getViewFromHash = (): AdminViewType => {
   const route = window.location.hash.replace(/^#/, '') || '/';
   const found = (Object.keys(VIEW_ROUTES) as AdminViewType[]).find((v) => VIEW_ROUTES[v] === route);
+  if (found === 'parcels' && !PAQUETES_HABILITADO) return 'dashboard';
   return found || 'dashboard';
 };
 
