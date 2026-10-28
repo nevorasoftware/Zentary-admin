@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Building2, Edit3, Check, Menu, Plus } from 'lucide-react';
 import { getAdminToken, API_BASE_URL, getTenantHeaders, getSelectedTenantId, TENANT_STORAGE_KEY } from '../services/adminApi';
 import NuevaResidencialModal from './NuevaResidencialModal';
@@ -203,8 +204,10 @@ export const Header: React.FC<HeaderProps> = ({
           <img src={avatar} alt="Admin Avatar" className="w-8 h-8 rounded-full object-cover" />
         </button>
       </div>
-      {isNewTenantOpen && (
-        <NuevaResidencialModal onClose={() => setIsNewTenantOpen(false)} onCreated={handleTenantCreated} />
+      {/* Portal: el backdrop-blur del header recorta los elementos fixed */}
+      {isNewTenantOpen && createPortal(
+        <NuevaResidencialModal onClose={() => setIsNewTenantOpen(false)} onCreated={handleTenantCreated} />,
+        document.body
       )}
     </header>
   );
