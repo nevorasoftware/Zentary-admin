@@ -54,7 +54,14 @@ export const PaymentsView: React.FC = () => {
   const [showBillingModal, setShowBillingModal] = useState(false);
   const [concept, setConcept] = useState('');
   const [amount, setAmount] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  // Fecha límite en DD/MM/AAAA; por defecto, el último día del mes en curso.
+  const defaultDueDate = () => {
+    const d = new Date();
+    const last = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+    return `${String(last.getDate()).padStart(2, '0')}/${String(last.getMonth() + 1).padStart(2, '0')}/${last.getFullYear()}`;
+  };
+  const [dueDate, setDueDate] = useState(defaultDueDate);
+  const [dueDateError, setDueDateError] = useState('');
   const [targetResidentId, setTargetResidentId] = useState('');
   const [graceDays, setGraceDays] = useState('3');
   const [billingNotes, setBillingNotes] = useState('');
@@ -140,7 +147,7 @@ export const PaymentsView: React.FC = () => {
     try {
       const res = await adminApi.getUsers('RESIDENT');
       if (res.success && Array.isArray(res.users)) {
-        setResidents(res.users);
+        setResidents(res.users.filter((u) => u.isActive !== false));
       }
     } catch (err) {
       console.warn('⚠️ Error al cargar residentes.');
@@ -155,7 +162,17 @@ export const PaymentsView: React.FC = () => {
 
   const handleCreateBilling = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!concept || !amount || !dueDate || !targetResidentId) return;
+    if (!concept || !amount || !targetResidentId) return;
+
+    // Convierte DD/MM/AAAA a AAAA-MM-DD y valida que sea una fecha real.
+    const m = dueDate.trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const parsed = m ? new Date(Date.UTC(+m[3], +m[2] - 1, +m[1])) : null;
+    if (!m || !parsed || parsed.getUTCDate() !== +m[1] || parsed.getUTCMonth() !== +m[2] - 1) {
+      setDueDateError('Ingresa una fecha válida (DD/MM/AAAA).');
+      return;
+    }
+    setDueDateError('');
+    const dueDateIso = `${m[3]}-${m[2]}-${m[1]}`;
 
     if (!(parseFloat(amount) > 0)) {
       toast.error('El monto debe ser mayor a cero.');
@@ -174,7 +191,7 @@ export const PaymentsView: React.FC = () => {
       const res = await adminApi.createBillingCharge({
         concept,
         amount: parseFloat(amount),
-        dueDate,
+        dueDate: dueDateIso,
         targetResidentId: targetResidentId === 'ALL' ? undefined : targetResidentId,
         graceDays: parseInt(graceDays, 10) || 3,
         notes: billingNotes,
@@ -184,7 +201,7 @@ export const PaymentsView: React.FC = () => {
         toast.success((res as any).message || 'Cobro emitido correctamente.');
         setConcept('');
         setAmount('');
-        setDueDate('');
+        setDueDate(defaultDueDate());
         setBillingNotes('');
         setTargetResidentId('');
         setShowBillingModal(false);
@@ -690,12 +707,19 @@ export const PaymentsView: React.FC = () => {
                   Fecha Límite de Pago
                 </label>
                 <input id="payments-campo-5"
-                  type="date"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={10}
+                  placeholder="DD/MM/AAAA"
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  required
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-blue-500"
+                  onChange={(e) => {
+                    setDueDate(e.target.value);
+                    setDueDateError('');
+                  }}
+                  aria-invalid={!!dueDateError}
+                  className={`w-full bg-slate-950 border rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none ${dueDateError ? 'border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
                 />
+                {dueDateError && <p className="text-xs text-red-400 mt-1">{dueDateError}</p>}
               </div>
 
               <div>
