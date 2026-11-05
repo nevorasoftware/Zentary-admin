@@ -224,7 +224,7 @@ export const PaymentsView: React.FC = () => {
 
     try {
       setIsApplyingLateFees(true);
-      const res = await adminApi.applyLateFees({ lateFeePercent: 5.0, defaultGraceDays: 3 });
+      const res = await adminApi.applyLateFees();
       if (res.success) {
         setLateFeeFeedback(`✓ Control de mora aplicado a ${res.processedCount} cobros ($${res.totalLateFeesApplied} USD en recargos).`);
         setTimeout(() => setLateFeeFeedback(null), 5000);

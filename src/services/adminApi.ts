@@ -129,6 +129,7 @@ export interface TenantInfo {
   whatsapp?: string | null;
   country?: string;
   timezone?: string;
+  settings?: { defaultGraceDays: number; defaultLateFeePercent: number } | null;
 }
 
 export interface HouseImportTotals {
@@ -312,6 +313,13 @@ class AdminApiService {
 
   async updateCurrentTenant(data: Partial<Omit<TenantInfo, 'id' | 'name'>>): Promise<{ success: boolean; message?: string; tenant: TenantInfo }> {
     return this.request('/tenants/current', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async updateTenantSettings(data: { defaultGraceDays?: number; defaultLateFeePercent?: number }): Promise<{ success: boolean; message?: string }> {
+    return this.request('/tenants/current/settings', {
       method: 'PUT',
       body: JSON.stringify(data),
     });
