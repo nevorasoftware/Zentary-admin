@@ -5,6 +5,7 @@ import { useToast } from '../components/Toast';
 import { useConfirm } from '../components/ConfirmDialog';
 import { ParkingZonesSection } from '../components/ParkingZonesSection';
 import { MoraSection } from '../components/MoraSection';
+import { DocumentosResidencial } from '../components/DocumentosResidencial';
 import { TenantFormFields, TenantFormValues, EMPTY_TENANT_FORM, tenantToForm } from '../components/TenantFormFields';
 
 const HOUSE_TYPE_OPTIONS = [
@@ -272,6 +273,7 @@ export const ConfiguracionView: React.FC = () => {
       <MoraSection />
       <PrefijosSection />
       <ParkingZonesSection />
+      <DocumentosResidencial />
     </div>
   );
 };

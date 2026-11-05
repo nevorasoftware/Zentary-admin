@@ -153,6 +153,13 @@ export interface HouseImportRow {
   nombre?: string;
 }
 
+export interface TenantDocumentItem {
+  id: string;
+  title: string;
+  url: string;
+  createdAt: string;
+}
+
 export interface ParkingZoneItem {
   id: string;
   name: string;
@@ -361,6 +368,24 @@ class AdminApiService {
 
   async deleteAnnouncement(id: string) {
     return this.request(`/announcements/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Documentos del residencial (normas)
+  async getDocuments(): Promise<{ success: boolean; documents: TenantDocumentItem[] }> {
+    return this.request('/documents');
+  }
+
+  async createDocument(data: { title: string; url: string }) {
+    return this.request('/documents', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteDocument(id: string) {
+    return this.request(`/documents/${id}`, {
       method: 'DELETE',
     });
   }
