@@ -118,7 +118,7 @@ export const PaymentsView: React.FC = () => {
           transactionId: p.externalTransactionId || undefined,
           receiptUrl: p.receiptUrl || undefined,
           notes: p.notes || undefined,
-          confirmedAt: p.confirmedAt ? new Date(p.confirmedAt).toLocaleDateString() : undefined,
+          confirmedAt: p.confirmedAt ? new Date(p.confirmedAt).toLocaleDateString('es-ES') : undefined,
         }));
         setPayments(formatted);
       } else {

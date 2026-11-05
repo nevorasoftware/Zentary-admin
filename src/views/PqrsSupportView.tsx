@@ -377,7 +377,7 @@ export const PqrsSupportView: React.FC = () => {
             {activeTicket.messages && activeTicket.messages.length > 0 ? (
               activeTicket.messages.map((m, idx) => {
                 const senderName = m.sender?.fullName || (m.isStaff ? 'Administración Zentary' : activeTicket.resident?.fullName || 'Residente');
-                const formattedTime = new Date(m.createdAt).toLocaleString([], {
+                const formattedTime = new Date(m.createdAt).toLocaleString('es-ES', {
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
